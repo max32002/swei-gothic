@@ -22,7 +22,7 @@ class Rule(Rule.Rule):
         SLASH_IN_LINE_ACCURACY = 0.005
 
         # 愈長的曲線變直線，更醜。
-        SKIP_TOO_LONG_LINE_MERGE = 180
+        SKIP_TOO_LONG_LINE_MERGE = 110
 
 
         # clone
@@ -110,9 +110,21 @@ class Rule(Rule.Rule):
 
                 
                 # 太長會出問題，例如：的，絢 字。
+                # PS: to dot+1, distance in +0
                 if format_dict_array[(idx+0)%nodes_length]['distance'] >= SKIP_TOO_LONG_LINE_MERGE:
                     fail_code = 400
                     is_match_pattern = False
+
+                # 連續曲線變直線會怪怪：for case.26158:爬.
+                if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                    if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
+                        if format_dict_array[(idx+3)%nodes_length]['t'] == 'c':
+                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+2)%nodes_length]['x_direction']:
+                                if format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+3)%nodes_length]['x_direction']:
+                                    if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']:
+                                        if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+3)%nodes_length]['y_direction']:
+                                            fail_code = 500
+                                            is_match_pattern = False
 
                 if not is_match_pattern:
                     #print(idx,"debug fail_code #6:", fail_code)
@@ -120,7 +132,12 @@ class Rule(Rule.Rule):
 
                 if is_match_pattern:
                     #print("match rule #6")
-                    #print(idx,"debug rule6:",format_dict_array[idx]['code'])
+
+                    #if True:
+                    if False:
+                        print("-" * 20)
+                        for debug_idx in range(6):
+                            print(debug_idx-2,": values for rule6:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                     # use default
                     new_x = format_dict_array[(idx+1)%nodes_length]['x']
@@ -135,11 +152,12 @@ class Rule(Rule.Rule):
                         #new_x = format_dict_array[(idx+1)%nodes_length]['x']
                         new_y = format_dict_array[(idx+0)%nodes_length]['y']
 
-                    format_dict_array[(idx+1)%nodes_length]['t']= 'l'
-                    old_code_string = " %d %d l 1\n" % (new_x, new_y)
                     format_dict_array[(idx+1)%nodes_length]['x']=new_x
                     format_dict_array[(idx+1)%nodes_length]['y']=new_y
-                    format_dict_array[(idx+1)%nodes_length]['code'] = old_code_string
+                    format_dict_array[(idx+1)%nodes_length]['t']= 'l'
+                    new_code_string = " %d %d l 1\n" % (new_x, new_y)
+                    format_dict_array[(idx+1)%nodes_length]['code'] = new_code_string
+                    #print("new +1 code string:", new_code_string)
 
                     redo_travel=True
                     resume_idx = idx

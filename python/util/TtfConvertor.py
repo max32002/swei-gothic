@@ -74,8 +74,6 @@ class Convertor():
                     break
 
                 dot_dict = {}
-                #print("add to code:", x_line)
-                dot_dict['code'] = x_line
 
                 # type
                 t=''
@@ -93,15 +91,24 @@ class Convertor():
                 y1=default_int
                 x2=default_int
                 y2=default_int
+
+                # need format code to "ROUND int"
+                new_code = ""
                 if ' ' in x_line:
                     x_line_array = x_line.split(' ')
                     if t=='m':
                         x=int(float(x_line_array[0]))
                         y=int(float(x_line_array[1]))
 
+                        x_line_array[0]=str(x)
+                        x_line_array[1]=str(y)
+
                     if t=='l':
                         x=int(float(x_line_array[1]))
                         y=int(float(x_line_array[2]))
+
+                        x_line_array[1]=str(x)
+                        x_line_array[2]=str(y)
 
                     if t=='c':
                         if len(x_line_array) >=7:
@@ -111,6 +118,19 @@ class Convertor():
                             y1=int(float(x_line_array[2]))
                             x2=int(float(x_line_array[3]))
                             y2=int(float(x_line_array[4]))
+
+                            x_line_array[1]=str(x1)
+                            x_line_array[2]=str(y1)
+                            x_line_array[3]=str(x2)
+                            x_line_array[4]=str(y2)
+                            x_line_array[5]=str(x)
+                            x_line_array[6]=str(y)
+
+                    #print("add to code:", x_line)
+                    #dot_dict['code'] = x_line
+                    new_code = ' '.join(x_line_array)
+                dot_dict['code'] = new_code
+
 
                 dot_dict['x']=x
                 dot_dict['y']=y
@@ -189,19 +209,23 @@ class Convertor():
         if not encoding_string is None:
             if ' ' in encoding_string:
                 encoding_string_array = encoding_string.split(' ')
-                unicode_int = encoding_string_array[self.config.UNICODE_FIELD-1]
-                filename = "U_%s.bmp" % (unicode_int)
-                bmp_path = os.path.join(self.config.BMP_PATH, filename)
-                #print("bmp:", bmp_path, filename_input)
-                if os.path.exists(bmp_path):
-                    #PIL
-                    bmp_image = Image.open(bmp_path)
-                    
-                    #OpenCV
-                    #bmp_image = cv2.imread(bmp_path)
-                else:
-                    print("exported image not exist:", bmp_path)
-                    pass
+                unicode_string = encoding_string_array[self.config.UNICODE_FIELD-1]
+                unicode_int = -1
+                if len(unicode_string) > 0:
+                    unicode_int = int(unicode_string)
+                if unicode_int > 0:
+                    filename = "U_%s.bmp" % (unicode_int)
+                    bmp_path = os.path.join(self.config.BMP_PATH, filename)
+                    #print("bmp:", bmp_path, filename_input)
+                    if os.path.exists(bmp_path):
+                        #PIL
+                        bmp_image = Image.open(bmp_path)
+                        
+                        #OpenCV
+                        #bmp_image = cv2.imread(bmp_path)
+                    else:
+                        print("exported image not exist:", bmp_path)
+                        pass
         
 
         self.sp.assign_config(self.config)

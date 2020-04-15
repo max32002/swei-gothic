@@ -247,7 +247,7 @@ class Rule(Rule.Rule):
                             # for case: .31710 的 火🔥，下面解法：火會從曲線變直線。
                             tmp_center_x = int((x0+x1)/2)
                             if format_dict_array[(idx+0)%nodes_length]['x_direction']>0:
-                                if int(old_code_array[1]) > tmp_center_x:
+                                if int(float(old_code_array[1])) > tmp_center_x:
                                     old_code_array[1] = str(int(old_code_array[1]) + x1_offset)
                             if format_dict_array[(idx+0)%nodes_length]['x_direction']<0:
                                 if int(old_code_array[1]) < tmp_center_x:

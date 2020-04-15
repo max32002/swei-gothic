@@ -408,11 +408,11 @@ class Rule():
         old_code = format_dict_array[nodes_length-1]['code']
         old_code_array = old_code.split(' ')
         if ' c ' in old_code:
-            last_x = int(old_code_array[5])
-            last_y = int(old_code_array[6])
+            last_x = int(float(old_code_array[5]))
+            last_y = int(float(old_code_array[6]))
         else:
-            last_x = int(old_code_array[1])
-            last_y = int(old_code_array[2])
+            last_x = int(float(old_code_array[1]))
+            last_y = int(float(old_code_array[2]))
 
         #print("original x,y:", spline_x,"-",spline_y,", transformed last x,y=",last_x,"-",last_y)
         if not(spline_x==last_x and spline_y==last_y):
@@ -451,15 +451,15 @@ class Rule():
             old_code_string = format_dict_array[idx]['code']
             old_code_array = old_code_string.split(' ')
             if format_dict_array[idx]['t']=='c':
-                format_dict_array[idx]['x1']=int(old_code_array[1])
-                format_dict_array[idx]['y1']=int(old_code_array[2])
-                format_dict_array[idx]['x2']=int(old_code_array[3])
-                format_dict_array[idx]['y2']=int(old_code_array[4])
-                format_dict_array[idx]['x']=int(old_code_array[5])
-                format_dict_array[idx]['y']=int(old_code_array[6])
+                format_dict_array[idx]['x1']=int(float(old_code_array[1]))
+                format_dict_array[idx]['y1']=int(float(old_code_array[2]))
+                format_dict_array[idx]['x2']=int(float(old_code_array[3]))
+                format_dict_array[idx]['y2']=int(float(old_code_array[4]))
+                format_dict_array[idx]['x']=int(float(old_code_array[5]))
+                format_dict_array[idx]['y']=int(float(old_code_array[6]))
             else:
-                format_dict_array[idx]['x']=int(old_code_array[1])
-                format_dict_array[idx]['y']=int(old_code_array[2])
+                format_dict_array[idx]['x']=int(float(old_code_array[1]))
+                format_dict_array[idx]['y']=int(float(old_code_array[2]))
 
             current_x = format_dict_array[idx]['x']
             current_y = format_dict_array[idx]['y']
@@ -561,8 +561,8 @@ class Rule():
         if format_dict_array[(idx+1)%nodes_length]['t']=="c":
             # 內縮，造成奇怪的曲線。
 
-            old_code_array[3] = str(int(old_code_array[3])-previous_x_offset)
-            old_code_array[4] = str(int(old_code_array[4])-previous_y_offset)
+            old_code_array[3] = str(int(float(old_code_array[3]))-previous_x_offset)
+            old_code_array[4] = str(int(float(old_code_array[4]))-previous_y_offset)
 
             old_code_array[5] = str(previous_x)
             old_code_array[6] = str(previous_y)
@@ -593,8 +593,8 @@ class Rule():
             #extend_offset_y = int(old_code_array[2])+ int(y2_offset/1)
             
             # soft offset
-            extend_offset_x = int(old_code_array[1])+ int(x2_offset/2)
-            extend_offset_y = int(old_code_array[2])+ int(y2_offset/2)
+            extend_offset_x = int(float(old_code_array[1]))+ int(x2_offset/2)
+            extend_offset_y = int(float(old_code_array[2]))+ int(y2_offset/2)
 
             #if True:
             if False:
@@ -727,8 +727,8 @@ class Rule():
             #extend_offset_y = int(old_code_array[2])+ int(y2_offset/1)
             
             # soft offset
-            extend_offset_x = int(old_code_array[1])+ int(x2_offset/2)
-            extend_offset_y = int(old_code_array[2])+ int(y2_offset/2)
+            extend_offset_x = int(float(old_code_array[1]))+ int(x2_offset/2)
+            extend_offset_y = int(float(old_code_array[2]))+ int(y2_offset/2)
 
             #if True:
             if False:
@@ -768,8 +768,8 @@ class Rule():
             if before_distance > 5 and after_distance > 5:
                 diff_percent = after_distance / before_distance
 
-            extend_offset_x = int(old_code_array[3])
-            extend_offset_y = int(old_code_array[4])
+            extend_offset_x = int(float(old_code_array[3]))
+            extend_offset_y = int(float(old_code_array[4]))
 
             before_extend_distance = spline_util.get_distance(extend_offset_x,extend_offset_y,orig_x3,orig_y3)
             after_extend_distance = int(before_extend_distance * diff_percent)

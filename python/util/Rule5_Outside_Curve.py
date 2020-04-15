@@ -202,10 +202,10 @@ class Rule(Rule.Rule):
                     #print("old_code_string:",old_code_string)
                     old_code_array = old_code_string.split(' ')
                     if format_dict_array[(idx+0)%nodes_length]['t']=='c':
-                        old_code_array[1] = str(int(old_code_array[1])+offset_x)
-                        old_code_array[2] = str(int(old_code_array[2])+offset_y)
-                        old_code_array[3] = str(int(old_code_array[3])+offset_x)
-                        old_code_array[4] = str(int(old_code_array[4])+offset_y)
+                        old_code_array[1] = str(int(float(old_code_array[1]))+offset_x)
+                        old_code_array[2] = str(int(float(old_code_array[2]))+offset_y)
+                        old_code_array[3] = str(int(float(old_code_array[3]))+offset_x)
+                        old_code_array[4] = str(int(float(old_code_array[4]))+offset_y)
                         old_code_array[5] = str(extend_x)
                         old_code_array[6] = str(extend_y)
                     else:
@@ -234,14 +234,16 @@ class Rule(Rule.Rule):
                 #+0 : values for rule5:  548 428 516 414 501 441 c 1 -( 215 )
                 #+1 : values for rule5:  495 471 448 555 396 629 c 1 -( 190 )
                 #+2 : values for rule5:  437 694 464 745 488 796 c 1 -( 52 )
-                LONG_EDGE_DISTANCE=120
+                LONG_EDGE_DISTANCE=110
                 
                 # PS: >= 0.01 很可怕，ex:「叔」系列。
-                DISTANCE_IN_LINE_ACCURACY = 0.004
+                DISTANCE_IN_LINE_ACCURACY = 0.001
 
                 idx_previuos = (idx+nodes_length-1)%nodes_length
                 # converted by our others rule.
                 #if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+
+                is_match_convert_l_direction = False
                 if format_dict_array[(idx+0)%nodes_length]['t'] == 'c':
                     # converted by our others rule.
                     #if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
@@ -259,7 +261,6 @@ class Rule(Rule.Rule):
                                 # for 「㚢」
                                 if True:
                                 #if format_dict_array[idx_previuos]['distance'] <= self.config.STROKE_WIDTH_MAX:
-                                    is_match_direction = False
 
                                     # go left-top
                                     if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
@@ -268,7 +269,7 @@ class Rule(Rule.Rule):
                                             if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
                                                 if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
                                                     #print("mom I am here.")
-                                                    is_match_direction = True
+                                                    is_match_convert_l_direction = True
 
                                     if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
                                         if format_dict_array[(idx+0)%nodes_length]['y_direction'] < 0:
@@ -276,48 +277,53 @@ class Rule(Rule.Rule):
                                             if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
                                                 if format_dict_array[(idx+1)%nodes_length]['y_direction'] < 0:
                                                     #print("mom I am here.")
-                                                    is_match_direction = True
+                                                    is_match_convert_l_direction = True
 
-                                    if is_match_direction:
-                                        if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
-                                            x1=format_dict_array[(idx+0)%nodes_length]['x']
-                                            y1=format_dict_array[(idx+0)%nodes_length]['y']
-                                            x2=format_dict_array[(idx+1)%nodes_length]['x']
-                                            y2=format_dict_array[(idx+1)%nodes_length]['y']
-                                            x2_1 = format_dict_array[(idx+1)%nodes_length]['x1']
-                                            y2_1 = format_dict_array[(idx+1)%nodes_length]['y1']
-                                            x2_2 = format_dict_array[(idx+1)%nodes_length]['x2']
-                                            y2_2 = format_dict_array[(idx+1)%nodes_length]['y2']
-                                            if spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_1,y2_1,accuracy=DISTANCE_IN_LINE_ACCURACY) and spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_2,y2_2,accuracy=DISTANCE_IN_LINE_ACCURACY):
-                                                #print("convert c to l#1!")
-                                                format_dict_array[(idx+1)%nodes_length]['x']=x2
-                                                format_dict_array[(idx+1)%nodes_length]['y']=y2
-                                                format_dict_array[(idx+1)%nodes_length]['t']='l'
-                                                new_code = ' %d %d l 1\n' % (x2, y2)
-                                                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
+                
+                # only thoses style need to convert c to l.
+                if not(self.config.STYLE in ["DemiLight","Medium","Regular"]):
+                    is_match_convert_l_direction = False
 
-                                                # [IMPORTANT] if change code, must triger check_first_point=True
-                                                check_first_point=True
+                if is_match_convert_l_direction:
+                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                        x1=format_dict_array[(idx+0)%nodes_length]['x']
+                        y1=format_dict_array[(idx+0)%nodes_length]['y']
+                        x2=format_dict_array[(idx+1)%nodes_length]['x']
+                        y2=format_dict_array[(idx+1)%nodes_length]['y']
+                        x2_1 = format_dict_array[(idx+1)%nodes_length]['x1']
+                        y2_1 = format_dict_array[(idx+1)%nodes_length]['y1']
+                        x2_2 = format_dict_array[(idx+1)%nodes_length]['x2']
+                        y2_2 = format_dict_array[(idx+1)%nodes_length]['y2']
+                        if spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_1,y2_1,accuracy=DISTANCE_IN_LINE_ACCURACY) and spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_2,y2_2,accuracy=DISTANCE_IN_LINE_ACCURACY):
+                            #print("convert c to l#1!")
+                            format_dict_array[(idx+1)%nodes_length]['x']=x2
+                            format_dict_array[(idx+1)%nodes_length]['y']=y2
+                            format_dict_array[(idx+1)%nodes_length]['t']='l'
+                            new_code = ' %d %d l 1\n' % (x2, y2)
+                            format_dict_array[(idx+1)%nodes_length]['code'] = new_code
 
-                                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':                                                    
-                                            x1=format_dict_array[(idx+1)%nodes_length]['x']
-                                            y1=format_dict_array[(idx+1)%nodes_length]['y']
-                                            x2=format_dict_array[(idx+2)%nodes_length]['x']
-                                            y2=format_dict_array[(idx+2)%nodes_length]['y']
-                                            x2_1 = format_dict_array[(idx+2)%nodes_length]['x1']
-                                            y2_1 = format_dict_array[(idx+2)%nodes_length]['y1']
-                                            x2_2 = format_dict_array[(idx+2)%nodes_length]['x2']
-                                            y2_2 = format_dict_array[(idx+2)%nodes_length]['y2']
-                                            if spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_1,y2_1,accuracy=DISTANCE_IN_LINE_ACCURACY) and spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_2,y2_2,accuracy=DISTANCE_IN_LINE_ACCURACY):
-                                                #print("convert c to l#2!")
-                                                format_dict_array[(idx+2)%nodes_length]['x']=x2
-                                                format_dict_array[(idx+2)%nodes_length]['y']=y2
-                                                format_dict_array[(idx+2)%nodes_length]['t']='l'
-                                                new_code = ' %d %d l 1\n' % (x2, y2)
-                                                format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+                            # [IMPORTANT] if change code, must triger check_first_point=True
+                            check_first_point=True
 
-                                                # [IMPORTANT] if change code, must triger check_first_point=True
-                                                check_first_point=True
+                    if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':                                                    
+                        x1=format_dict_array[(idx+1)%nodes_length]['x']
+                        y1=format_dict_array[(idx+1)%nodes_length]['y']
+                        x2=format_dict_array[(idx+2)%nodes_length]['x']
+                        y2=format_dict_array[(idx+2)%nodes_length]['y']
+                        x2_1 = format_dict_array[(idx+2)%nodes_length]['x1']
+                        y2_1 = format_dict_array[(idx+2)%nodes_length]['y1']
+                        x2_2 = format_dict_array[(idx+2)%nodes_length]['x2']
+                        y2_2 = format_dict_array[(idx+2)%nodes_length]['y2']
+                        if spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_1,y2_1,accuracy=DISTANCE_IN_LINE_ACCURACY) and spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_2,y2_2,accuracy=DISTANCE_IN_LINE_ACCURACY):
+                            #print("convert c to l#2!")
+                            format_dict_array[(idx+2)%nodes_length]['x']=x2
+                            format_dict_array[(idx+2)%nodes_length]['y']=y2
+                            format_dict_array[(idx+2)%nodes_length]['t']='l'
+                            new_code = ' %d %d l 1\n' % (x2, y2)
+                            format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+
+                            # [IMPORTANT] if change code, must triger check_first_point=True
+                            check_first_point=True
 
 
                 # match llc(姚) or cll(源)
@@ -336,26 +342,7 @@ class Rule(Rule.Rule):
                 # [IMPORTANT] 這條線以下，不要增追加可能的 case.
                 # =============================================
 
-                # 排除 16 號Rule.
-                # 這個，應該有其他更好&更簡單的解法，暫時沒去想。
-                if is_match_pattern:
-                    # if match rule no#16, pleas do nothing.
-                    rule_no=16
-                    fail_code=-1
-                    match_rule_16, fail_code=self.rule_test(format_dict_array,idx,rule_no,inside_stroke_dict)
-                    if match_rule_16:
-                        is_match_pattern = False
-
-                    idx_next=(idx - 1 + nodes_length) % nodes_length
-                    match_rule_16, fail_code=self.rule_test(format_dict_array,idx_next,rule_no,inside_stroke_dict)
-                    if match_rule_16:
-                        is_match_pattern = False
-
-                    idx_previuos=(idx + 1) % nodes_length
-                    match_rule_16, fail_code=self.rule_test(format_dict_array,idx_previuos,rule_no,inside_stroke_dict)
-                    if match_rule_16:
-                        is_match_pattern = False
-
+ 
                 # compare distance, muse large than our "large round"
                 if is_match_pattern:
                     fail_code = 200

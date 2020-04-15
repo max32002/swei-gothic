@@ -285,16 +285,18 @@ class Spline():
         # format code block
         # ==================================================
 
-        # format code.
-        # start to travel nodes for [RULE #6]
-        # format curve coner as l conver
-        #print("start Rule # 6...")
-        idx=-1
-        redo_travel=False   # Disable
-        redo_travel=True    # Enable
-        while redo_travel:
-            redo_travel,idx=ru6.apply(spline_dict, idx)
-        ru6 = None
+        if self.config.PROCESS_MODE in ["GOTHIC"]:
+            if self.config.STYLE in ["DemiLight","Medium","Regular"]:
+                # format code.
+                # start to travel nodes for [RULE #6]
+                # format curve coner as l conver
+                #print("start Rule # 6...")
+                idx=-1
+                redo_travel=False   # Disable
+                redo_travel=True    # Enable
+                while redo_travel:
+                    redo_travel,idx=ru6.apply(spline_dict, idx)
+                ru6 = None
 
 
         # start to travel nodes for [RULE #10]

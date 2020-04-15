@@ -1,3 +1,9 @@
+# 2020/04/13 ver 1.016
+* 修正異體字問題，使用aalt lookup
+
+# 2020/04/13 ver 1.015
+* 使用 TrueType Font
+
 # 2020/04/13 ver 1.014
 * 增加常用異體字的支援。（manually 'aalt' lookup)
 
