@@ -595,4 +595,4 @@ class Spline():
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
             ru99 = None
 
-            return spline_dict
+        return spline_dict
