@@ -54,19 +54,19 @@ class Rule(Rule.Rule):
 
                 is_match_pattern = False
 
-                #print("-"*20)
-                #print(idx,"debug rule1:",format_dict_array[idx]['code'])
-                #print((idx+0)%nodes_length,"debug rule1+x,+y:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'])
+                is_debug_mode = False
+                #is_debug_mode = True
 
-                #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in [[622,361]]):
-                    #continue
+                if is_debug_mode:
+                    debug_coordinate_list = [[427,708]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
 
-                #if True:
-                if False:
                     print("="*30)
                     print("index:", idx)
-                    for debug_idx in range(6):
+                    for debug_idx in range(8):
                         print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
 
                 if format_dict_array[(idx+1)%nodes_length]['match_stroke_width']:
                     is_match_pattern = True
@@ -273,11 +273,11 @@ class Rule(Rule.Rule):
                     #print("match rule #1")
                     #print(idx,"debug rule1:",format_dict_array[idx]['code'])
                     
-                    if False:
-                    #if format_dict_array[idx]['y']==261 and format_dict_array[idx]['x']==860:
+                    if is_debug_mode:
+                    #if False:
                         print("#"*40)
-                        for debug_idx in range(6):
-                            print(debug_idx-2,"values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
+                        for debug_idx in range(8):
+                            print(idx,debug_idx-2,"values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
 
                     center_x,center_y = self.apply_round_transform(format_dict_array,idx)
 
@@ -295,6 +295,15 @@ class Rule(Rule.Rule):
                     # keep the new begin point [FIX]
                     # 加了，會造成其他的誤判，因為「點」共用。例如「甾」的右上角。
                     #skip_coordinate.append([new_x1,new_y1])
+
+                    # due to add new dot.
+                    nodes_length = len(format_dict_array)
+                    if is_debug_mode:
+                    #if False:
+                        print("after modify")
+                        print("#"*40)
+                        for debug_idx in range(8):
+                            print(idx,debug_idx-2,"values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
 
                     redo_travel=True
                     check_first_point = True

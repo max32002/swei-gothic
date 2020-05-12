@@ -42,7 +42,6 @@ class Convertor():
 
         stroke_index = 0
 
-
         for x_line in myfile:
             if code_encoding_string == x_line[:code_encoding_string_length]:
                 encoding_string = x_line[code_encoding_string_length:]
@@ -102,13 +101,18 @@ class Convertor():
 
                         x_line_array[0]=str(x)
                         x_line_array[1]=str(y)
+                        new_code = "%d %d m 1\n" % (x,y)
 
                     if t=='l':
                         x=int(float(x_line_array[1]))
                         y=int(float(x_line_array[2]))
+                        l_type = x_line_array[4].strip()
+                        if ',' in l_type:
+                            l_type = l_type.split(',')[0]
 
                         x_line_array[1]=str(x)
                         x_line_array[2]=str(y)
+                        new_code = " %d %d l %s\n" % (x,y,l_type)
 
                     if t=='c':
                         if len(x_line_array) >=7:
@@ -126,9 +130,16 @@ class Convertor():
                             x_line_array[5]=str(x)
                             x_line_array[6]=str(y)
 
+                            c_type = x_line_array[7].strip()
+                            if ',' in c_type:
+                                c_type = c_type.split(',')[0]
+
+                            new_code = " %d %d %d %d %d %d c %s\n" % (x1,y1,x2,y2,x,y,c_type)
+
                     #print("add to code:", x_line)
                     #dot_dict['code'] = x_line
-                    new_code = ' '.join(x_line_array)
+                    # keep extra infomation cause more error.
+                    #new_code = ' '.join(x_line_array)
                 dot_dict['code'] = new_code
 
 
@@ -278,7 +289,7 @@ class Convertor():
                 convert_count+=1
                 #print("convert list:", name)
             #break
-            if idx % 100 == 0:
+            if idx % 1000 == 0:
                 print("Processing:", idx)
 
         return idx

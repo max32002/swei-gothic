@@ -419,11 +419,13 @@ class Rule():
             #print("not match!")
             #print("m old_code_string:", spline_code)
             
-            # try to keep more information in spline.
             old_code_array = spline_code.split(' ')
             old_code_array[0] = str(last_x)
             old_code_array[1] = str(last_y)
-            new_code = ' '.join(old_code_array)
+            
+            # keep extra infomation cause more error.
+            #new_code = ' '.join(old_code_array)
+            new_code = "%d %d m 1\n" % (last_x, last_y)
 
             spline_x = last_x
             spline_y = last_y
@@ -810,7 +812,6 @@ class Rule():
             format_dict_array[(idx+3)%nodes_length]['y2']=extend_offset_y
 
 
-
             new_code = ' '.join(old_code_array)
             format_dict_array[(idx+3)%nodes_length]['code'] = new_code
             #print("before code:", old_code_string)
@@ -850,7 +851,9 @@ class Rule():
         '''
         
         # update #1
+        #print("self.config.PROCESS_MODE:", self.config.PROCESS_MODE)
         if self.config.PROCESS_MODE in ["GOTHIC"]:
+            #print("self.config.PROCESS_MODE in [GOTHIC]")
             format_dict_array[(idx+1)%nodes_length]['x']= new_x1
             format_dict_array[(idx+1)%nodes_length]['y']= new_y1
 
@@ -865,28 +868,34 @@ class Rule():
                 old_code_array[1] = str(new_x1)
                 old_code_array[2] = str(new_y1)
             new_code = ' '.join(old_code_array)
-            format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-
+            target_index = (idx+1)%nodes_length
+            format_dict_array[target_index]['code'] = new_code
+            #print("+1 idx:%d, code:%s" % (target_index, new_code))
 
             # update #2
-            new_code = ' %d %d %d %d %d %d c 1\n' % (new_x1, new_y1, x1, y1, center_x, center_y)
+            #new_code = ' %d %d %d %d %d %d c 1\n' % (new_x1, new_y1, x1, y1, center_x, center_y)
+            new_code = ' %d %d %d %d %d %d c 1\n' % (x1, y1, x1, y1, center_x, center_y)
             dot_dict={}
             dot_dict['x']=center_x
             dot_dict['y']=center_y
             dot_dict['t']='c'
 
             # extra attrib for curve.
-            dot_dict['x1']=new_x1
-            dot_dict['y1']=new_y1
+            #dot_dict['x1']=new_x1
+            #dot_dict['y1']=new_y1
+            dot_dict['x1']=x1
+            dot_dict['y1']=y1
             dot_dict['x2']=x1
             dot_dict['y2']=y1
 
             dot_dict['code']=new_code
-            format_dict_array[(idx+2)%nodes_length]=dot_dict
-            #print("rule16 new_code:", new_code)
+            target_index = (idx+2)%nodes_length
+            format_dict_array[target_index]=dot_dict
+            #print("+2 idx:%d, code:%s" % (target_index, new_code))
 
 
         if self.config.PROCESS_MODE in ["HALFMOON"]:
+            #print("self.config.PROCESS_MODE in [HALFMOON]")
             # move to left
             center_x = x1
             center_y = y1
@@ -903,13 +912,16 @@ class Rule():
 
 
         # append new #3
-        new_code = ' %d %d %d %d %d %d c 1\n' % (center_x, center_y, x2, y2, new_x2, new_y2)
+        #new_code = ' %d %d %d %d %d %d c 1\n' % (center_x, center_y, x2, y2, new_x2, new_y2)
+        new_code = ' %d %d %d %d %d %d c 1\n' % (x2, y2, x2, y2, new_x2, new_y2)
         dot_dict={}
         dot_dict['x']=new_x2
         dot_dict['y']=new_y2
         dot_dict['t']='c'
         dot_dict['code']=new_code
-        format_dict_array.insert((idx+3)%nodes_length,dot_dict)
+        target_index = (idx+3)%nodes_length
+        format_dict_array.insert(target_index,dot_dict)
+        #print("+3 idx:%d, code:%s" % (target_index, new_code))
 
         return center_x,center_y
 
