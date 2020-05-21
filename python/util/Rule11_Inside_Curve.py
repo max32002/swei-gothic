@@ -148,7 +148,7 @@ class Rule(Rule.Rule):
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
                     if not is_apply_large_corner:
-                        round_offset = self.config.ROUND_OFFSET
+                        round_offset = self.config.INSIDE_ROUND_OFFSET
 
                     format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx)
 

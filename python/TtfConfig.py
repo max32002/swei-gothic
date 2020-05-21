@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "1.024"
+    VERSION = "1.028"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
 
@@ -32,6 +32,7 @@ class TtfConfig():
 
     # for Regular
     OUTSIDE_ROUND_OFFSET = 55
+    INSIDE_ROUND_OFFSET = int(OUTSIDE_ROUND_OFFSET * 0.3)
 
     # some inside block not able to fill 2 curve coner, use small one.
     INSIDE_SMALL_ROUND_OFFSET=15

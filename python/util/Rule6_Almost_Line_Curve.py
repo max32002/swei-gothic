@@ -19,10 +19,10 @@ class Rule(Rule.Rule):
 
         # transform c to l for splash line.
         #大於等於 0.01 很醜！ex: 「㚞」的大，在 0.02變超細。
-        SLASH_IN_LINE_ACCURACY = 0.005
+        SLASH_IN_LINE_ACCURACY = 0.003
 
         # 愈長的曲線變直線，更醜。
-        SKIP_TOO_LONG_LINE_MERGE = 110
+        SKIP_TOO_LONG_LINE_MERGE = 90
 
 
         # clone
@@ -116,15 +116,29 @@ class Rule(Rule.Rule):
                     is_match_pattern = False
 
                 # 連續曲線變直線會怪怪：for case.26158:爬.
+                # 連續曲線變直線會怪怪：for case:飹.
                 if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                     if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
                         if format_dict_array[(idx+3)%nodes_length]['t'] == 'c':
-                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+2)%nodes_length]['x_direction']:
-                                if format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+3)%nodes_length]['x_direction']:
-                                    if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']:
-                                        if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+3)%nodes_length]['y_direction']:
+                            if (format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+2)%nodes_length]['x_direction']) or format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                                if (format_dict_array[(idx+2)%nodes_length]['x_direction'] == format_dict_array[(idx+3)%nodes_length]['x_direction']) or format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                                    if (format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']) or format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                                        if (format_dict_array[(idx+2)%nodes_length]['y_direction'] == format_dict_array[(idx+3)%nodes_length]['y_direction']) or format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
                                             fail_code = 500
                                             is_match_pattern = False
+
+                # 連續曲線變直線會怪怪：for case.26158:爬.
+                # 連續曲線變直線會怪怪：for case:飹.
+                if format_dict_array[(idx-1+nodes_length)%nodes_length]['t'] == 'c':
+                    if format_dict_array[(idx+0)%nodes_length]['t'] == 'c':
+                        if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                            if (format_dict_array[(idx-1+nodes_length)%nodes_length]['x_direction'] == format_dict_array[(idx+0)%nodes_length]['x_direction']) or format_dict_array[(idx-1+nodes_length)%nodes_length]['x_equal_fuzzy']:
+                                if (format_dict_array[(idx+0)%nodes_length]['x_direction'] == format_dict_array[(idx+1)%nodes_length]['x_direction']) or format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                                    if (format_dict_array[(idx-1+nodes_length)%nodes_length]['y_direction'] == format_dict_array[(idx+0)%nodes_length]['y_direction']) or format_dict_array[(idx-1+nodes_length)%nodes_length]['y_equal_fuzzy']:
+                                        if (format_dict_array[(idx+0)%nodes_length]['y_direction'] == format_dict_array[(idx+1)%nodes_length]['y_direction']) or format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                                            fail_code = 510
+                                            is_match_pattern = False
+
 
                 if not is_match_pattern:
                     #print(idx,"debug fail_code #6:", fail_code)

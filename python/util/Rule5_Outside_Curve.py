@@ -57,6 +57,19 @@ class Rule(Rule.Rule):
 
                 is_match_pattern = False
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[646,771]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
                 x0 = format_dict_array[(idx+0)%nodes_length]['x']
                 y0 = format_dict_array[(idx+0)%nodes_length]['y']
                 x1 = format_dict_array[(idx+1)%nodes_length]['x']
@@ -326,7 +339,7 @@ class Rule(Rule.Rule):
                             check_first_point=True
 
 
-                # match llc(姚) or cll(源)
+                # match llc(姚) or cll(源), common = ?l?
                 if format_dict_array[(idx+1)%nodes_length]['t'] == 'l':
                     fail_code = 100
                     is_match_pattern = True
@@ -336,6 +349,10 @@ class Rule(Rule.Rule):
                     fail_code = 110
                     if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
                         if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = True
+
+                        # [同時增加處理case] for 飹的卯，在先套用 rule#1,2,3 後是  ccl,
+                        if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
                             is_match_pattern = True
 
                 # =============================================
@@ -477,23 +494,23 @@ class Rule(Rule.Rule):
                             #is_apply_small_corner = True
                             #pass
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code #5:", fail_code)
-                    pass
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,"debug fail_code #5:", fail_code)
 
                 if is_match_pattern:
                     #print("match rule #5:",idx)
 
-                    #if True:
+                    #if is_debug_mode:
                     if False:
                         print("-" * 20)
                         for debug_idx in range(6):
-                            print(debug_idx-2,": values for rule5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+                            print(debug_idx-2,": values for rule #5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
                     if not is_apply_large_corner:
-                        round_offset = self.config.ROUND_OFFSET
+                        round_offset = self.config.INSIDE_ROUND_OFFSET
 
                     format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx)
 

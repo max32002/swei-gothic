@@ -265,19 +265,19 @@ class Rule(Rule.Rule):
                     if inside_stroke_flag1 or inside_stroke_flag2:
                         is_match_pattern = True
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code1:", fail_code)
-                    pass
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,"debug fail_code #1:", fail_code)
 
                 if is_match_pattern:
                     #print("match rule #1")
                     #print(idx,"debug rule1:",format_dict_array[idx]['code'])
                     
-                    if is_debug_mode:
-                    #if False:
+                    #if is_debug_mode:
+                    if False:
                         print("#"*40)
                         for debug_idx in range(8):
-                            print(idx,debug_idx-2,"values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
+                            print(idx,debug_idx-2,"values for rule #1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
 
                     center_x,center_y = self.apply_round_transform(format_dict_array,idx)
 
