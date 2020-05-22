@@ -158,11 +158,14 @@ class Rule(Rule.Rule):
                     format_dict_array[(idx+3)%nodes_length]=dot_dict
 
                     # cache transformed nodes.
-                    skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
+                    # 加了，會造成其他的誤判，因為「點」共用。
+                    # don't add below line, will cuase others rule fail!
+                    #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
+
                     # we generated nodes
-                    skip_coordinate.append([center_x,center_y])
+                    #skip_coordinate.append([center_x,center_y])
                     # next_x,y is used for next rule!
-                    #skip_coordinate.append([new_x2,new_y2])
+                    skip_coordinate.append([new_x2,new_y2])
 
                     redo_travel=True
                     #resume_idx = -1

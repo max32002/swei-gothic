@@ -38,27 +38,11 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
-                if [format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']] in skip_coordinate:
-                    continue
-
-                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
-                if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
-                    continue
-
-                # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
-                if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
-                    continue
-
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
-                    continue
-
-                is_match_pattern = False
-
                 is_debug_mode = False
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[427,708]]
+                    debug_coordinate_list = [[816,413]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -66,6 +50,35 @@ class Rule(Rule.Rule):
                     print("index:", idx)
                     for debug_idx in range(8):
                         print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
+                if [format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip dot +1:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
+                        pass
+                    continue
+
+                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
+                if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip dot +2:",[format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']])
+                        pass
+                    continue
+
+                # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
+                if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip dot +3:",[format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']])
+                        pass
+                    continue
+
+                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip dot +0:",[format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']])
+                        pass
+                    continue
+
+
+                is_match_pattern = False
 
 
                 if format_dict_array[(idx+1)%nodes_length]['match_stroke_width']:
@@ -220,14 +233,23 @@ class Rule(Rule.Rule):
                     is_match_pattern = False
                     if format_dict_array[(idx+0)%nodes_length]['x_direction'] == -1 * format_dict_array[(idx+2)%nodes_length]['x_direction']:
                         is_match_pattern = True
+                        fail_code = 410
 
                         # 不可以都同方向。
                         if format_dict_array[(idx+0)%nodes_length]['y_direction'] == -1:
                             if format_dict_array[(idx+2)%nodes_length]['y_direction'] == -1:
                                 is_match_pattern = False
+                                fail_code = 420
+
                         if format_dict_array[(idx+0)%nodes_length]['y_direction'] == 1:
                             if format_dict_array[(idx+2)%nodes_length]['y_direction'] == 1:
                                 is_match_pattern = False
+                                fail_code = 430
+
+                        # 在同方向情況下，有例外。
+                        if is_match_pattern == False:
+                            if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy'] and format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                                is_match_pattern = True
 
                 # check from bmp file.
                 if is_match_pattern:
@@ -267,7 +289,9 @@ class Rule(Rule.Rule):
 
                 if is_debug_mode:
                     if not is_match_pattern:
-                        print(idx,"debug fail_code #1:", fail_code)
+                        print(idx,": debug fail_code #1:", fail_code)
+                    else:
+                        print(idx,": match rule #1")
 
                 if is_match_pattern:
                     #print("match rule #1")

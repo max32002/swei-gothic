@@ -25,6 +25,8 @@ class Rule(Rule.Rule):
         #print("format nodes_length:", nodes_length)
         #print("resume_idx:", resume_idx)
 
+        #print("travel rule#13.")
+
         rule_need_lines = 4
         fail_code = -1
         if nodes_length >= rule_need_lines:
@@ -33,11 +35,15 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
                     continue
 
                 # [IMPORTANT]:
                 # dead lock will appear, if redo this rule on same point.
+                # new point added at +3.
                 if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
                     continue
 
@@ -45,8 +51,18 @@ class Rule(Rule.Rule):
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
                     continue
 
-                if [format_dict_array[(idx+4)%nodes_length]['x'],format_dict_array[(idx+4)%nodes_length]['y']] in skip_coordinate:
-                    continue
+
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[555,674]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
 
                 is_match_pattern = False
 
@@ -73,7 +89,7 @@ class Rule(Rule.Rule):
                     for debug_idx in range(6):
                         print(debug_idx-2,": values for rule13:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
-                # for case .31439 「弟」第2點。
+                # for case .31439 綈的「弟」第2點。
                 #0 : values for rule13:  555 674 l 1 -( 208 )
                 #1 : values for rule13:  763 674 l 1 -( 45 )
                 #2 : values for rule13:  720 689 l 1 -( 132 )
@@ -169,12 +185,12 @@ class Rule(Rule.Rule):
                     next_recenter_y = int((next_y + y2)/2)
 
                     # update 1
-                    format_dict_array[(idx+1)%nodes_length]['x']= previous_x
-                    format_dict_array[(idx+1)%nodes_length]['y']= previous_y
+                    format_dict_array[(idx+2)%nodes_length]['x']= previous_x
+                    format_dict_array[(idx+2)%nodes_length]['y']= previous_y
 
                     old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
                     old_code_array = old_code_string.split(' ')
-                    if format_dict_array[(idx+1)%nodes_length]['t']=="c":
+                    if format_dict_array[(idx+2)%nodes_length]['t']=="c":
                         # [TODO]: move x1,y1 maybe..
 
                         old_code_array[5] = str(previous_x)
@@ -212,6 +228,22 @@ class Rule(Rule.Rule):
                     # we generated nodes
                     #skip_coordinate.append([previous_x,previous_x])
                     skip_coordinate.append([next_x,next_y])
+                    # 說明：[next_x,next_y]會是共用的點
+
+                    # 由於"點共用"，for skip_coordinate，所以要增加新的點, 
+                    mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,-1 * (self.config.ROUND_OFFSET+3))
+                    if idx > (idx+3)%nodes_length:
+                        idx +=1
+                    nodes_length = len(format_dict_array)
+                    new_code = ' %d %d l 1\n' % (mouth_next_x_deep, mouth_next_y_deep)
+
+                    dot_dict={}
+                    dot_dict['x']=mouth_next_x_deep
+                    dot_dict['y']=mouth_next_y_deep
+                    dot_dict['t']='.'
+                    dot_dict['code']=new_code
+
+                    format_dict_array.insert((idx+4)%nodes_length,dot_dict)
 
                     redo_travel=True
 

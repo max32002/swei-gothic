@@ -333,8 +333,11 @@ class Spline():
 
     # run both in clockwise and counter clockwise.
     def trace_common(self, stroke_dict, key, bmp_image, y_offset, inside_stroke_dict, skip_coordinate):
-        DEBUG_CRASH_RULE = False
-        #DEBUG_CRASH_RULE = True
+        DEBUG_CRASH_RULE = False    # online
+        #DEBUG_CRASH_RULE = True    # debug
+
+        DISABLE_ALL_RULE = False    # online
+        #DISABLE_ALL_RULE = True    # debug specific rule.
 
         from . import Rule1_Row
         ru1=Rule1_Row.Rule()
@@ -385,6 +388,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru16.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru16 = None
@@ -398,6 +404,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru12.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru12 = None
@@ -409,6 +418,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru13 = None
@@ -420,6 +432,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru8.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
         ru8 = None
@@ -433,6 +448,9 @@ class Spline():
             idx=-1
             redo_travel=False   # Disable
             redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
             while redo_travel:
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru2.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru2 = None
@@ -444,6 +462,9 @@ class Spline():
             idx=-1
             redo_travel=False   # Disable
             redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
             while redo_travel:
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru1.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru1 = None
@@ -455,6 +476,9 @@ class Spline():
             idx=-1
             redo_travel=False   # Disable
             redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
             while redo_travel:
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru3.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru3 = None
@@ -466,6 +490,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx,skip_coordinate=ru7.apply(spline_dict, idx,skip_coordinate)
         ru7 = None
@@ -538,8 +565,11 @@ class Spline():
         return spline_dict
 
     def trace_black_block(self, stroke_dict, key, bmp_image, y_offset):
-        DEBUG_CRASH_RULE = False
-        #DEBUG_CRASH_RULE = True
+        DEBUG_CRASH_RULE = False    # online
+        #DEBUG_CRASH_RULE = True    # debug
+
+        DISABLE_ALL_RULE = False    # online
+        #DISABLE_ALL_RULE = True    # debug specific rule.
 
         from . import Rule5_Outside_Curve
         ru5=Rule5_Outside_Curve.Rule()
@@ -578,6 +608,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru5.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru5 = None
@@ -591,6 +624,9 @@ class Spline():
             idx=-1
             redo_travel=False   # Disable
             redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
             while redo_travel:
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
             ru99 = None

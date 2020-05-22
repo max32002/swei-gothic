@@ -14,7 +14,7 @@ class Rule(Rule.Rule):
     def apply(self, spline_dict, resume_idx):
         redo_travel=False
 
-        TOO_CLOSE_DISTANCE = 13
+        TOO_CLOSE_DISTANCE = 20
 
         # clone
         format_dict_array=[]
@@ -31,6 +31,13 @@ class Rule(Rule.Rule):
 
         rule_need_lines = 7
         fail_code = -1
+
+        x0=0
+        y0=0
+        x1=0
+        y1=0
+        last_idx=-1
+
         #print("nodes_length:", nodes_length)
         if nodes_length >= rule_need_lines:
             for idx in range(nodes_length):
@@ -46,6 +53,7 @@ class Rule(Rule.Rule):
                 y0 = format_dict_array[idx]['y']
                 x1 = self.config.DEFAULT_COORDINATE_VALUE
                 y1 = self.config.DEFAULT_COORDINATE_VALUE
+                last_idx = idx
 
                 # each time need reset once.
                 new_format_dict_array = []
@@ -75,6 +83,7 @@ class Rule(Rule.Rule):
                         #print(idx,": match too close rule9:",format_dict_array[idx]['code'])
                         #print(idx,": match too close rule to idx:",idx_j_formated,format_dict_array[idx_j_formated]['code'])
                         is_match_pattern = True
+                        last_idx = idx
                         break
 
                 
@@ -115,6 +124,76 @@ class Rule(Rule.Rule):
                             break
 
                 #print("orig dict array length (after):", len(format_dict_array))
+
+                # fine tune #1: align vertical x.
+                orig_length = len(format_dict_array)
+
+                if format_dict_array[(last_idx+1)%orig_length]['x'] == x1:
+                    old_code_string = format_dict_array[(last_idx+0)%orig_length]['code']
+                    #print("old_code_string:", old_code_string)
+                    #print("x0:", x0)
+                    old_code_array = old_code_string.split(' ')
+                    if format_dict_array[(last_idx+0)%orig_length]['t']=="c":
+                        # PS: modify curve, may cause path not close.
+                        old_code_array[5] = str(x1)
+                    else:
+                        # l
+                        old_code_array[1] = str(x1)
+                    new_code = ' '.join(old_code_array)
+                    # only need update code, let formater to re-compute.
+                    format_dict_array[(last_idx+0)%orig_length]['x'] = x1
+                    format_dict_array[(last_idx+0)%orig_length]['code'] = new_code
+                    #print("new_code:", new_code)
+
+                if format_dict_array[(last_idx+1)%orig_length]['y'] == y1:
+                    old_code_string = format_dict_array[(last_idx+0)%orig_length]['code']
+                    old_code_array = old_code_string.split(' ')
+                    if format_dict_array[(last_idx+0)%orig_length]['t']=="c":
+                        # PS: modify curve, may cause path not close.
+                        old_code_array[6] = str(y1)
+                    else:
+                        # l
+                        old_code_array[2] = str(y1)
+                    new_code = ' '.join(old_code_array)
+                    # only need update code, let formater to re-compute.
+                    format_dict_array[(last_idx+0)%orig_length]['y'] = y1
+                    format_dict_array[(last_idx+0)%orig_length]['code'] = new_code
+                    #print("new_code:", new_code)
+
+                # fine tune #2: align vertical x.
+                if new_format_dict_array[0]['x'] == x0:
+                    old_code_string = new_format_dict_array[-1]['code']
+                    #print("old_code_string:", old_code_string)
+                    #print("x0:", x0)
+                    old_code_array = old_code_string.split(' ')
+                    if new_format_dict_array[-1]['t']=="c":
+                        # PS: modify curve, may cause path not close.
+                        old_code_array[5] = str(x0)
+                    else:
+                        # l
+                        old_code_array[1] = str(x0)
+                    new_code = ' '.join(old_code_array)
+                    # only need update code, let formater to re-compute.
+                    new_format_dict_array[-1]['x'] = x0
+                    new_format_dict_array[-1]['code'] = new_code
+                    #print("new_code:", new_code)
+
+                if new_format_dict_array[0]['y'] == y0:
+                    old_code_string = new_format_dict_array[-1]['code']
+                    #print("old_code_string:", old_code_string)
+                    #print("x0:", x0)
+                    old_code_array = old_code_string.split(' ')
+                    if new_format_dict_array[-1]['t']=="c":
+                        # PS: modify curve, may cause path not close.
+                        old_code_array[6] = str(y0)
+                    else:
+                        # l
+                        old_code_array[2] = str(y0)
+                    new_code = ' '.join(old_code_array)
+                    # only need update code, let formater to re-compute.
+                    new_format_dict_array[-1]['y'] = y0
+                    new_format_dict_array[-1]['code'] = new_code
+                    #print("new_code:", new_code)
 
                 # add header for spline
                 #print("full new spline:", new_format_dict_array)
