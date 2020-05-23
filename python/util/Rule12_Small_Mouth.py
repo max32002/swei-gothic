@@ -139,11 +139,20 @@ class Rule(Rule.Rule):
 
                 # stroke in while area. @_@;
                 if is_match_pattern:
+                    fail_code = 400
                     is_match_pattern = False
                     inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.ROUND_OFFSET, inside_stroke_dict)
                     if inside_stroke_flag:
                         #print("match is_apply_large_corner:",x1,y1)
                         is_match_pattern = True
+
+                # 避開 饞 字最上方的頭。
+                if is_match_pattern:
+                    fail_code = 500
+                    if format_dict_array[(idx+0)%nodes_length]['x_direction'] == 1:
+                        if format_dict_array[(idx+2)%nodes_length]['x_direction'] == 1:
+                            if format_dict_array[(idx+1)%nodes_length]['y_direction'] == -1:
+                                is_match_pattern = False
 
                 if not is_match_pattern:
                     #print(idx,"debug fail_code #12:", fail_code)
@@ -206,30 +215,6 @@ class Rule(Rule.Rule):
                     # strong version
                     #new_code = ' %d %d %d %d %d %d c 1\n' % (x1, y1, x1, y1, next_x, next_y)
 
-
-
-                    # 由於"點共用"，for skip_coordinate，所以要移動既有的點, 
-                    mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,+1 * 4)
-
-                    # update 2
-                    format_dict_array[(idx+2)%nodes_length]['x']= mouth_next_x_deep
-                    format_dict_array[(idx+2)%nodes_length]['y']= mouth_next_y_deep
-
-                    old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
-                    old_code_array = old_code_string.split(' ')
-                    if format_dict_array[(idx+2)%nodes_length]['t']=="c":
-                        # [TODO]: move x1,y1 maybe..
-
-                        old_code_array[5] = str(mouth_next_x_deep)
-                        old_code_array[6] = str(mouth_next_y_deep)
-                    else:
-                        # l
-                        old_code_array[1] = str(mouth_next_x_deep)
-                        old_code_array[2] = str(mouth_next_y_deep)
-                    new_code = ' '.join(old_code_array)
-                    # only need update code, let formater to re-compute.
-                    format_dict_array[(idx+2)%nodes_length]['code'] = new_code
-
                     # "soft" curve to end point. 
                     new_code = ' %d %d %d %d %d %d c 1\n' % (previous_recenter_x, previous_recenter_y, next_recenter_x, next_recenter_y, next_x, next_y)
 
@@ -250,6 +235,23 @@ class Rule(Rule.Rule):
                     #skip_coordinate.append([previous_x,previous_x])
                     skip_coordinate.append([next_x,next_y])
 
+
+                    # update 2
+                    # 由於"點共用"，for skip_coordinate，所以要移動既有的點, 
+                    mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,+1 * 2)
+
+                    if idx > (idx+2)%nodes_length:
+                        idx +=1
+                    nodes_length = len(format_dict_array)
+                    new_code = ' %d %d l 1\n' % (mouth_next_x_deep, mouth_next_y_deep)
+
+                    dot_dict={}
+                    dot_dict['x']=mouth_next_x_deep
+                    dot_dict['y']=mouth_next_y_deep
+                    dot_dict['t']='.'
+                    dot_dict['code']=new_code
+
+                    format_dict_array.insert((idx+3)%nodes_length,dot_dict)
 
 
                     redo_travel=True

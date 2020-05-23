@@ -254,7 +254,7 @@ class Spline():
 
         idx=-1
         redo_split=False   # Disable
-        redo_split=True    # Enable
+        #redo_split=True    # Enable
         while redo_split:
             idx+=1
             redo_split=self.split_spline(stroke_dict)
