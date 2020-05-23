@@ -153,6 +153,11 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+2)%nodes_length]['x_direction'] == 1:
                             if format_dict_array[(idx+1)%nodes_length]['y_direction'] == -1:
                                 is_match_pattern = False
+                                # 但是相同情況，是套在「礻」的頭上。
+                                if format_dict_array[(idx+0)%nodes_length]['distance'] >= format_dict_array[(idx+1)%nodes_length]['distance']:
+                                    if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
+                                        if format_dict_array[(idx+0)%nodes_length]['distance'] >= format_dict_array[(idx-1+nodes_length)%nodes_length]['distance']:
+                                            is_match_pattern = True
 
                 if not is_match_pattern:
                     #print(idx,"debug fail_code #12:", fail_code)

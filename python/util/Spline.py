@@ -254,7 +254,7 @@ class Spline():
 
         idx=-1
         redo_split=False   # Disable
-        #redo_split=True    # Enable
+        redo_split=True    # Enable
         while redo_split:
             idx+=1
             redo_split=self.split_spline(stroke_dict)
@@ -377,6 +377,19 @@ class Spline():
         ru16.assign_config(self.config)
         ru16.assign_bmp(bmp_image, y_offset=y_offset)
 
+        # PS: must apply this rule after all.
+        from . import Rule21_Fix_Arrow
+        ru21=Rule21_Fix_Arrow.Rule()
+        ru21.assign_config(self.config)
+        ru21.assign_bmp(bmp_image, y_offset=y_offset)
+
+
+        # PS: must apply this rule after all.
+        from . import Rule22_Fix_Left_Top_Hold
+        ru22=Rule22_Fix_Left_Top_Hold.Rule()
+        ru22.assign_config(self.config)
+        ru22.assign_bmp(bmp_image, y_offset=y_offset)
+
         # start process here.
         spline_dict = stroke_dict[key]
 
@@ -425,22 +438,21 @@ class Spline():
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru13 = None
 
-        # start to travel nodes for [RULE #8]
-        # 這是無內縮的版本，由於 rule#1 會強制內縮，造成內凹。
-        if DEBUG_CRASH_RULE:
-            print("start Rule # 8...")
-        idx=-1
-        redo_travel=False   # Disable
-        redo_travel=True    # Enable
-        if DISABLE_ALL_RULE:
-            redo_travel=False
-            pass
-        while redo_travel:
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru8.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
-        ru8 = None
-
         if self.config.PROCESS_MODE in ["GOTHIC"]:
-        #if True:            
+            # start to travel nodes for [RULE #8]
+            # 這是無內縮的版本，由於 rule#1 會強制內縮，造成內凹。
+            if DEBUG_CRASH_RULE:
+                print("start Rule # 8...")
+            idx=-1
+            redo_travel=False   # Disable
+            redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
+            while redo_travel:
+                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru8.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+            ru8 = None
+
             # start to travel nodes for [RULE #2]
             # PS: for casle.31912 繫，的「山」太小，Rule#1 先跑會變成橫的先成立。
             if DEBUG_CRASH_RULE:
@@ -483,6 +495,34 @@ class Spline():
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru3.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru3 = None
 
+            # start to travel nodes for [RULE #21]
+            # 
+            if DEBUG_CRASH_RULE:
+                print("start Rule # 21...")
+            idx=-1
+            redo_travel=False   # Disable
+            redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
+            while redo_travel:
+                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru21.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+            ru21 = None
+
+            # start to travel nodes for [RULE #22]
+            # 
+            if DEBUG_CRASH_RULE:
+                print("start Rule # 22...")
+            idx=-1
+            redo_travel=False   # Disable
+            redo_travel=True    # Enable
+            if DISABLE_ALL_RULE:
+                redo_travel=False
+                pass
+            while redo_travel:
+                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru22.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+            ru22 = None
+
         # start to travel nodes for [RULE #7]
         # 
         if DEBUG_CRASH_RULE:
@@ -497,10 +537,15 @@ class Spline():
             redo_travel,idx,skip_coordinate=ru7.apply(spline_dict, idx,skip_coordinate)
         ru7 = None
 
+
+
         return inside_stroke_dict, skip_coordinate
 
 
     def trace_white_block(self, stroke_dict, key, bmp_image, y_offset):
+        DISABLE_ALL_RULE = False    # online
+        #DISABLE_ALL_RULE = True    # debug specific rule.
+
         from . import Rule11_Inside_Curve
         ru11=Rule11_Inside_Curve.Rule()
         ru11.assign_config(self.config)
@@ -536,6 +581,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru15.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
         ru15 = None
@@ -546,6 +594,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru11.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
         ru11 = None
@@ -558,6 +609,9 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru99 = None

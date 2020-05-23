@@ -4,6 +4,18 @@
 # distance between two points
 from math import hypot
 
+def slide_percent(x1,y1,x2,y2,x3,y3):
+    percent = -1
+    distance_offset=100.0
+    previous_x,previous_y=two_point_extend(x1,y1,x2,y2,-1 * distance_offset)
+    next_x,next_y=two_point_extend(x3,y3,x2,y2,-1 * distance_offset)
+    d3 = get_distance(previous_x,previous_y,next_x,next_y)
+    if d3 > 0:
+        percent = d3/distance_offset
+        if percent > 2.0:
+            percent = 2.0
+    return percent
+
 def two_point_extend(x1,y1,x2,y2,distance_offset):
     distance = get_distance(x1,y1,x2,y2)
     distance_percent = 1

@@ -130,7 +130,7 @@ class Convertor():
                             x_line_array[5]=str(x)
                             x_line_array[6]=str(y)
 
-                            c_type = x_line_array[7].strip()
+                            c_type = x_line_array[8].strip()
                             if ',' in c_type:
                                 c_type = c_type.split(',')[0]
 
