@@ -15,15 +15,15 @@ class Rule(Rule.Rule):
         redo_travel=False
         check_first_point = False
 
-        # default: 1.33
+        # default: 1.33(small,inside), 1.49(large,outside)
         SLIDE_1_PERCENT_MIN = 1.08
         SLIDE_1_PERCENT_MAX = 1.58
-        # default: 1.70
+        # default: 1.70(small,inside), 1.78(large,outside)
         SLIDE_2_PERCENT_MIN = 1.50
         SLIDE_2_PERCENT_MAX = 1.90
-        # default: 1.36
-        SLIDE_3_PERCENT_MIN = 1.08
-        SLIDE_3_PERCENT_MAX = 1.58
+        # default: 1.36(small,inside), 1.84(large,outside)
+        SLIDE_3_PERCENT_MIN = 1.25
+        SLIDE_3_PERCENT_MAX = 1.90
 
 
         # clone
@@ -48,26 +48,25 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[485,810]]
+                    debug_coordinate_list = [[755,142]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
                     print("="*30)
                     print("index:", idx)
-                    for debug_idx in range(8):
+                    for debug_idx in range(9):
                         print(debug_idx-2,": values for rule#21:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
-                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
+                # 要轉換的原來的角，不能就是我們產生出來的曲線結束點。
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
                     if is_debug_mode:
                         print("match skip dot +2:",[format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']])
                         pass
                     continue
 
-                # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
-                if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
+                if [format_dict_array[(idx+4)%nodes_length]['x'],format_dict_array[(idx+4)%nodes_length]['y']] in skip_coordinate:
                     if is_debug_mode:
-                        print("match skip dot +3:",[format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']])
+                        print("match skip dot +4:",[format_dict_array[(idx+4)%nodes_length]['x'],format_dict_array[(idx+4)%nodes_length]['y']])
                         pass
                     continue
 
@@ -83,12 +82,21 @@ class Rule(Rule.Rule):
                 # match: ?cccccc
                 # case: 繅 uni7E45
                 # 497 799 l 2,39,40
-                # 515 827 515 827 546 818 c 0,41,42
+                # 515 827 515 827 546 818 c 0,41,42 # +1, round curve generated point.
                 # 577 810 577 810 556 783 c 0,43,44
-                # 528 748 528 748 492 708 c 1,45,46 # +3, center point.
+                # 528 748 528 748 492 708 c 1,45,46 # +3, < center point.
                 # 548 658 548 658 563 635 c 0,31,32
-                # 581 607 581 607 553 595 c 0,33,34
+                # 581 607 581 607 553 595 c 0,33,34 # +5, round curve generated point.
                 # 524 584 524 584 507 612 c 1,35,-1
+
+                # case: 廵 uni5EF5 / 巡
+                #0 : 623 666 623 666 656 781 c 1
+                #1 : 665 812 665 812 699 804 c 1
+                #2 : 734 796 734 796 725 765 c 1
+                #3 : 699 681 693 673 606 467 c 1
+                #4 : 721 252 721 252 755 142 c 1
+                #5 : 764 111 764 111 730 97 c 1
+                #6 : 696 83 696 83 688 115 c 1
 
                 if is_match_pattern:
                     fail_code = 100
@@ -104,30 +112,36 @@ class Rule(Rule.Rule):
                 if is_match_pattern:
                     fail_code = 200
                     is_match_pattern = False
-                    if format_dict_array[(idx+0)%nodes_length]['x_direction'] == 1:
+                    # PS: x direction > 0, go right, use inside round curve.
+                    #     x direction < 0, go left, use outside round curve.
+                    x_direction = format_dict_array[(idx+0)%nodes_length]['x_direction']
+                    if x_direction != 0:
                         fail_code = 201
-                        if format_dict_array[(idx+1)%nodes_length]['x_direction'] == 1 or format_dict_array[(idx+1)%nodes_length]['x_direction'] == 0:
-                            fail_code = 211
-                            if format_dict_array[(idx+2)%nodes_length]['x_direction'] == -1:
-                                fail_code = 221
-                                if format_dict_array[(idx+3)%nodes_length]['x_direction'] == 1:
-                                    fail_code = 231
-                                    #if format_dict_array[(idx+4)%nodes_length]['x_direction'] == -1:
-                                    if format_dict_array[(idx+5)%nodes_length]['x_direction'] == -1:
-                                        fail_code = 241
-                                        if format_dict_array[(idx+6)%nodes_length]['x_direction'] == -1:
-                                            fail_code = 251
-                                            is_match_pattern = True
+                        #if format_dict_array[(idx+1)%nodes_length]['x_direction'] == 1 or format_dict_array[(idx+1)%nodes_length]['x_direction'] == 0:
+                        #fail_code = 211
+                        if format_dict_array[(idx+2)%nodes_length]['x_direction'] == -1:
+                            fail_code = 221
+                            if format_dict_array[(idx+3)%nodes_length]['x_direction'] == 1:
+                                fail_code = 231
+                                #if format_dict_array[(idx+4)%nodes_length]['x_direction'] == -1:
+                                if format_dict_array[(idx+5)%nodes_length]['x_direction'] == -1 * x_direction:
+                                    fail_code = 241
+                                    if format_dict_array[(idx+6)%nodes_length]['x_direction'] == -1:
+                                        fail_code = 251
+                                        is_match_pattern = True
 
 
                 if is_match_pattern:
                     fail_code = 300
                     is_match_pattern = False
-                    if format_dict_array[(idx+0)%nodes_length]['y_direction'] == 1:
-                        if format_dict_array[(idx+2)%nodes_length]['y_direction'] == -1:
-                            if format_dict_array[(idx+3)%nodes_length]['y_direction'] == -1:
-                                if format_dict_array[(idx+4)%nodes_length]['y_direction'] == -1:
-                                    if format_dict_array[(idx+6)%nodes_length]['y_direction'] == 1:
+                    y_direction = format_dict_array[(idx+0)%nodes_length]['y_direction']
+                    # PS: y_direction > 0, go right, use inside round curve.
+                    #     y_direction < 0, go left, use outside round curve.
+                    if y_direction != 0:
+                        if format_dict_array[(idx+2)%nodes_length]['y_direction'] == -1 * y_direction:
+                            if format_dict_array[(idx+3)%nodes_length]['y_direction'] == -1 * y_direction:
+                                if format_dict_array[(idx+4)%nodes_length]['y_direction'] == -1 * y_direction:
+                                    if format_dict_array[(idx+6)%nodes_length]['y_direction'] == 1 * y_direction:
                                         is_match_pattern = True
 
                 if is_match_pattern:
@@ -143,7 +157,10 @@ class Rule(Rule.Rule):
                     fail_code = 500
                     is_match_pattern = False
                     # must almost equal
-                    if abs(format_dict_array[(idx+2)%nodes_length]['distance'] - format_dict_array[(idx+3)%nodes_length]['distance']) < 15:
+                    # PS: 以「廵」為例，長邊 383 和 335，長度差 48,
+                    #     383 * 0.15 = 57
+                    #     335 * 0.17 = 56
+                    if abs(format_dict_array[(idx+2)%nodes_length]['distance'] - format_dict_array[(idx+3)%nodes_length]['distance']) < (format_dict_array[(idx+2)%nodes_length]['distance'] * 0.17):
                         fail_code = 501
                         if format_dict_array[(idx+2)%nodes_length]['distance'] > format_dict_array[(idx+0)%nodes_length]['distance']:
                             if format_dict_array[(idx+2)%nodes_length]['distance'] > format_dict_array[(idx+1)%nodes_length]['distance']:
@@ -197,7 +214,9 @@ class Rule(Rule.Rule):
                         is_apply_large_corner = True
 
                     # make coner curve
-                    round_offset = self.config.OUTSIDE_ROUND_OFFSET
+                    #round_offset = self.config.OUTSIDE_ROUND_OFFSET
+                    # due to angle too large.
+                    round_offset = self.config.ROUND_OFFSET
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 

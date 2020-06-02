@@ -15,6 +15,15 @@ class Rule(Rule.Rule):
     def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate):
         redo_travel=False
 
+        # 最大的角度值，超過就skip
+        ALMOST_LINE_RATE = 1.84
+
+        # default: 1.75
+        SLIDE_1_PERCENT_MIN = 0.8
+        SLIDE_1_PERCENT_MAX = ALMOST_LINE_RATE
+
+        MIN_DISTANCE = 12
+
         # clone
         format_dict_array=[]
         format_dict_array = spline_dict['dots'][1:]
@@ -36,7 +45,27 @@ class Rule(Rule.Rule):
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
                     continue
 
+                # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
+                # for case.3122 上面的點。
+                if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                    continue
+
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[228,679]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": #11 val:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
+
                 is_match_pattern = False
+
 
                 x0 = format_dict_array[(idx+0)%nodes_length]['x']
                 y0 = format_dict_array[(idx+0)%nodes_length]['y']
@@ -50,41 +79,28 @@ class Rule(Rule.Rule):
                     x0 = format_dict_array[(idx+0)%nodes_length]['x2']
                     y0 = format_dict_array[(idx+0)%nodes_length]['y2']
                 if format_dict_array[(idx+2)%nodes_length]['code']=='c':
-                    x2 = format_dict_array[(idx+0)%nodes_length]['x1']
-                    y2 = format_dict_array[(idx+0)%nodes_length]['y1']
-
-                # debug purpose:
-                #if not(x1==842 and y1==753):
-                #if not(x1==772 and y1==693):
-                #if not(x1==630 and y1==580):
-                #if not(x1==699 and y1==247):
-                #if False:
-                    #continue
-
-                #if not([x1,y1]==[535,647]) :
-                    #continue
+                    x2 = format_dict_array[(idx+2)%nodes_length]['x1']
+                    y2 = format_dict_array[(idx+2)%nodes_length]['y1']
 
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
 
-                #if format_dict_array[(idx+0)%nodes_length]['x']==806:
-                #if True:
-                if False:
-                    print("-" * 20)
-                    for debug_idx in range(6):
-                        print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
-
-                # match
+                # match ?l?
                 if format_dict_array[(idx+1)%nodes_length]['t'] == 'l':
                     fail_code = 100
+                    is_match_pattern = True
+
+                # match ??l
+                if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
+                    fail_code = 110
                     is_match_pattern = True
 
                 # compare distance, muse large than our "large round"
                 if is_match_pattern:
                     fail_code = 200
                     is_match_pattern = False
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] >= self.config.ROUND_OFFSET:
-                        if format_dict_array[(idx+1)%nodes_length]['distance'] >= self.config.ROUND_OFFSET:
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] >= MIN_DISTANCE:
+                        if format_dict_array[(idx+1)%nodes_length]['distance'] >= MIN_DISTANCE:
                             is_match_pattern = True
 
                 previous_x,previous_y=0,0
@@ -93,41 +109,49 @@ class Rule(Rule.Rule):
                 # skip small angle
                 if is_match_pattern:
                     fail_code = 300
-                    previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1,-1 * self.config.OUTSIDE_ROUND_OFFSET)
-                    next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1,-1 * self.config.OUTSIDE_ROUND_OFFSET)
-                    d3 = spline_util.get_distance(previous_x,previous_y,next_x,next_y)
-                    if d3 <= self.config.OUTSIDE_ROUND_OFFSET * 0.5:
-                        #print("match too small angel.")
-                        is_match_pattern = False
+                    is_match_pattern = False
 
-                    # skip almost line triangle
-                    if is_match_pattern:
-                        fail_code = 310
-                        if d3 >= self.config.OUTSIDE_ROUND_OFFSET * 1.5:
-                            is_match_pattern = False
+                    # PS: 使用結束 x,y，會造成更誤判，因為沒有另外儲存 rule#99 處理記錄，會造成重覆套用。
+                    #slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                    slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
 
-                # stroke in while area. @_@;
+                    if is_debug_mode:
+                            print("slide_percent 1:", slide_percent_1)
+                            print("data end:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                            print("data virtual:",x0,y0,x1,y1,x2,y2)
+                            print("SLIDE_1_PERCENT_MIN:", SLIDE_1_PERCENT_MIN)
+                            print("SLIDE_1_PERCENT_MAX:", SLIDE_1_PERCENT_MAX)
+        
+                    if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
+                        is_match_pattern = True
+
+                # check black stroke in white area. @_@;
                 is_apply_large_corner = False
                 if is_match_pattern:
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] >= self.config.OUTSIDE_ROUND_OFFSET:
-                        if format_dict_array[(idx+1)%nodes_length]['distance'] >= self.config.OUTSIDE_ROUND_OFFSET:
-                            inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_MIN, inside_stroke_dict)
-                            if inside_stroke_flag:
-                                is_apply_large_corner = True
-                                #print("match is_apply_large_corner:",x1,y1)
+                    inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_MIN, inside_stroke_dict)
+                    if inside_stroke_flag:
+                        is_apply_large_corner = True
+                        #print("match is_apply_large_corner:",x1,y1)
 
                 if not is_apply_large_corner:
                     if is_match_pattern:
                         fail_code = 400
                         is_match_pattern = False
-
-                        join_flag = self.join_line_check(x0,y0,x1,y1,x2,y2)
-                        #print("check1_flag:",join_flag)
+                        
+                        join_line_debug_mode = False      # online
+                        #join_line_debug_mode = True       # debug
+                        join_flag = self.join_line_check(x0,y0,x1,y1,x2,y2,debug_mode=join_line_debug_mode)
+                        join_flag_1 = join_flag
+                        join_flag_2 = None
                         if not join_flag:
                             join_flag = self.join_line_check(x2,y2,x1,y1,x0,y0)
-                            #print("check2_flag:",join_flag)
+                            join_flag_2 = join_flag
 
-                        #print("final join flag:", join_flag)
+                        if is_debug_mode:
+                            print("check1_flag:",join_flag_1, "data:", x0,y0,x1,y1,x2,y2)
+                            print("check2_flag:",join_flag_2, "data:", x2,y2,x1,y1,x0,y0)
+                            print("final join flag:", join_flag)
+                        
                         if not join_flag:
                             #print("match small coner")
                             #print(idx,"small rule5:",format_dict_array[idx]['code'])
@@ -135,9 +159,12 @@ class Rule(Rule.Rule):
                             #is_apply_small_corner = True
                             #pass
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code #5:", fail_code)
-                    pass
+
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,"debug fail_code #11:", fail_code)
+                    else:
+                        print("match rule #11:",idx)
 
                 if is_match_pattern:
                     #print("match rule #11")
@@ -147,6 +174,17 @@ class Rule(Rule.Rule):
 
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
+                    # large curve, use small angle.
+                    # start to resize round offset size.
+                    resize_round_angle = 1.30
+                    if slide_percent_1 >= resize_round_angle:
+                        slide_percent_diff = 2.0 - slide_percent_1
+                        slide_percent_total = 2.0 - slide_percent_diff
+                        slide_percent_diff_percent = slide_percent_diff/slide_percent_total
+                        round_offset_diff = self.config.OUTSIDE_ROUND_OFFSET - self.config.ROUND_OFFSET
+                        round_offset_diff_added = int(round_offset_diff * slide_percent_diff_percent)
+                        round_offset = self.config.ROUND_OFFSET + round_offset_diff_added
+
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 

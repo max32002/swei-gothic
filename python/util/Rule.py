@@ -199,43 +199,52 @@ class Rule():
 
 
     # purpose: check is join line.
-    def join_line_check(self,x0,y0,x1,y1,x2,y2):
-        inside_stroke_flag = False
+    #  return:  True, 是中間的交叉線。
+    #           False, 角落轉彎線。
+    #      PS:  使用原理是檢查white dot
+    def join_line_check(self,x0,y0,x1,y1,x2,y2, debug_mode=False):
+        is_join_line_flag = False
 
         if self.bmp_image is None:
             # 沒圖，假設是線條吧，呵呵
-            inside_stroke_flag = True
+            is_join_line_flag = True
         else:
             coner_offset = 10
 
-            #print("test coordinate:", x0,y0, "-" , x1,y1, "-", x2,y2)
+            if debug_mode:
+                print("test coordinate:", x0,y0, "-" , x1,y1, "-", x2,y2)
 
             # prepare the get-pixel environment.
             # get stroke width #1
             next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1, -1 * coner_offset)
-            #print("next_x,next_y:", next_x,next_y)
+            if debug_mode:
+                print("next_x,next_y:", next_x,next_y)
 
             # 取 stroke width 前，因 bmp 偏移，會造成誤判。需要往第3點偏移。
             next_offset_stroke_width_x = next_x-x1
             next_offset_stroke_width_y = next_y-y1
-            #print("offset_stroke_width_x,y:", next_offset_stroke_width_x, next_offset_stroke_width_y)
 
             stroke_width_lower = self.get_stroke_width(x0+next_offset_stroke_width_x,y0+next_offset_stroke_width_y,x1+next_offset_stroke_width_x,y1+next_offset_stroke_width_y)
-            #print("stroke_width test offset:", x0+next_offset_stroke_width_x,y0+next_offset_stroke_width_y,x1+next_offset_stroke_width_x,y1+next_offset_stroke_width_y)
-            #print("stroke_width_lower:", stroke_width_lower)
+            if debug_mode:
+                print("offset_stroke_width_x,y:", next_offset_stroke_width_x, next_offset_stroke_width_y)
+                print("stroke_width test offset:", x0+next_offset_stroke_width_x,y0+next_offset_stroke_width_y,x1+next_offset_stroke_width_x,y1+next_offset_stroke_width_y)
+                print("stroke_width_lower:", stroke_width_lower)
 
             # get stroke width #2
             previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1, -1 * coner_offset)
-            #print("previous_x,previous_y:", previous_x,previous_y)
+            if debug_mode:
+                print("previous_x,previous_y:", previous_x,previous_y)
 
             # 取 stroke width 前，因 bmp 偏移，會造成誤判。需要往第3點偏移。
             previous_offset_stroke_width_x = previous_x-x1
             previous_offset_stroke_width_y = previous_y-y1
-            #print("offset_stroke_width_x,y:", previous_offset_stroke_width_x, previous_offset_stroke_width_y)
+            if debug_mode:
+                print("offset_stroke_width_x,y:", previous_offset_stroke_width_x, previous_offset_stroke_width_y)
 
             stroke_width_upper = self.get_stroke_width(x2+previous_offset_stroke_width_x,y2+previous_offset_stroke_width_y,x1+previous_offset_stroke_width_x,y1+previous_offset_stroke_width_y)
-            #print("stroke_width test offset:", x2+previous_offset_stroke_width_x,y2+previous_offset_stroke_width_y,x1+previous_offset_stroke_width_x,y1+previous_offset_stroke_width_y)
-            #print("stroke_width_upper:", stroke_width_upper)
+            if debug_mode:
+                print("stroke_width test offset:", x2+previous_offset_stroke_width_x,y2+previous_offset_stroke_width_y,x1+previous_offset_stroke_width_x,y1+previous_offset_stroke_width_y)
+                print("stroke_width_upper:", stroke_width_upper)
             
             # for case: 「屰」線的上方有線，造成取stroke width 取出為最大值。
             if stroke_width_upper >= self.config.STROKE_WIDTH_AVERAGE:
@@ -261,15 +270,18 @@ class Rule():
             found_white_dot = False
 
             LOWER_STROKE_OFFSET_RATE = 1.2
-            stroke_test_end = int(stroke_width_lower)
+            stroke_test_end = int(stroke_width_lower * 0.95)
             stroke_test_begin = int(stroke_width_lower * LOWER_STROKE_OFFSET_RATE)
+            if debug_mode:
+                print("stroke_test_end:", stroke_test_end)
+                print("stroke_test_begin:", stroke_test_begin)
+                pass
 
             for idx in range(stroke_test_end,stroke_test_begin):
                 previous_extend_x,previous_extend_y = spline_util.two_point_extend(x0,y0,x1,y1, idx)
                 test_x = previous_extend_x - next_extend_x_offset
                 test_y = previous_extend_y - next_extend_y_offset
 
-                #print("test_x,y:", test_x, test_y)
                 bmp_x = self.ff_x_to_bmp_x(test_x)
                 bmp_y = self.ff_y_to_bmp_y(test_y)
 
@@ -281,20 +293,30 @@ class Rule():
                     bmp_y = top
                 if bmp_y >= bottom:
                     bmp_y = bottom
-                #print("bmp_x,y:",bmp_x,bmp_y)
+                if debug_mode:
+                    print("test_x,y:", test_x, test_y)
+                    print("bmp_x,y:",bmp_x,bmp_y)
+                    pass
                 data=self.bmp_image.getpixel((bmp_x, bmp_y))
-                #print("data:", data)
+                if debug_mode:
+                    print("data:", data)
+                    pass
                 if data >=128:
+                    if debug_mode:
+                        print("found white dot.")
+                        pass
                     found_white_dot = True
                     break
 
             if not found_white_dot:
-                inside_stroke_flag = True
+                # whole is black.
+                is_join_line_flag = True
 
-            #inside_stroke_flag = self.is_inside_stroke(bmp_x1, bmp_y1, bmp_x2, bmp_y2, bmp_x3, bmp_y3, bmp_x4, bmp_y4)
-            #print("inside_stroke_flag:",inside_stroke_flag)
+            # alternate solution, not used, now.
+            #is_join_line_flag = self.is_inside_stroke(bmp_x1, bmp_y1, bmp_x2, bmp_y2, bmp_x3, bmp_y3, bmp_x4, bmp_y4)
+            #print("is_join_line_flag:",is_join_line_flag)
 
-        return inside_stroke_flag
+        return is_join_line_flag
 
     def get_stroke_width(self,x0,y0,x1,y1):
         stroke_width=0

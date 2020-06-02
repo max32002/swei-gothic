@@ -317,7 +317,7 @@ class Spline():
         redo_travel=True    # Enable
         while redo_travel:
             redo_travel,idx=ru14.apply(spline_dict, idx)
-        ru10 = None
+        ru14 = None
 
         # start to travel nodes for [RULE #4]
         # format curve coner as l conver
@@ -420,7 +420,11 @@ class Spline():
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
+        redo_count=0
         while redo_travel:
+            redo_count+=1
+            if redo_count==100:
+                print("occure bug at rule#12!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru12.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru12 = None
 
@@ -434,7 +438,11 @@ class Spline():
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
+        redo_count=0
         while redo_travel:
+            redo_count+=1
+            if redo_count==100:
+                print("occure bug at rule#13!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru13 = None
 
@@ -449,7 +457,9 @@ class Spline():
             if DISABLE_ALL_RULE:
                 redo_travel=False
                 pass
+            redo_count=0
             while redo_travel:
+                redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru8.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru8 = None
 
@@ -463,7 +473,9 @@ class Spline():
             if DISABLE_ALL_RULE:
                 redo_travel=False
                 pass
+            redo_count=0
             while redo_travel:
+                redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru2.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru2 = None
 
@@ -477,7 +489,9 @@ class Spline():
             if DISABLE_ALL_RULE:
                 redo_travel=False
                 pass
+            redo_count=0
             while redo_travel:
+                redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru1.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru1 = None
 
@@ -491,7 +505,9 @@ class Spline():
             if DISABLE_ALL_RULE:
                 redo_travel=False
                 pass
+            redo_count=0
             while redo_travel:
+                redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru3.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru3 = None
 
@@ -505,7 +521,9 @@ class Spline():
             if DISABLE_ALL_RULE:
                 redo_travel=False
                 pass
+            redo_count=0
             while redo_travel:
+                redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru21.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru21 = None
 
@@ -519,7 +537,9 @@ class Spline():
             if DISABLE_ALL_RULE:
                 redo_travel=False
                 pass
+            redo_count=0
             while redo_travel:
+                redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru22.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru22 = None
 
@@ -533,7 +553,11 @@ class Spline():
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
+        redo_count=0
         while redo_travel:
+            redo_count+=1
+            if redo_count==100:
+                print("occure bug at rule#7!")
             redo_travel,idx,skip_coordinate=ru7.apply(spline_dict, idx,skip_coordinate)
         ru7 = None
 
@@ -550,11 +574,6 @@ class Spline():
         ru11=Rule11_Inside_Curve.Rule()
         ru11.assign_config(self.config)
         ru11.assign_bmp(bmp_image, y_offset=y_offset)
-
-        from . import Rule15_Inside_Small_Curve
-        ru15=Rule15_Inside_Small_Curve.Rule()
-        ru15.assign_config(self.config)
-        ru15.assign_bmp(bmp_image, y_offset=y_offset)
 
         from . import Rule99_Coner_Killer
         ru99=Rule99_Coner_Killer.Rule()
@@ -574,19 +593,6 @@ class Spline():
         #print("key:", key, 'code:', spline_dict['dots'][0])
         #if not key == 1:
             #return spline_dict
-
-        # start to travel nodes for [RULE #15]
-        # some inside block not able to fill 2 curve coner, use small one.
-        #print("start Rule # 15...")
-        idx=-1
-        redo_travel=False   # Disable
-        redo_travel=True    # Enable
-        if DISABLE_ALL_RULE:
-            redo_travel=False
-            pass
-        while redo_travel:
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru15.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
-        ru15 = None
 
         # start to travel nodes for [RULE #11]
         # check outside curve
@@ -613,7 +619,8 @@ class Spline():
             redo_travel=False
             pass
         while redo_travel:
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            black_mode = False
+            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, black_mode)
         ru99 = None
 
         return spline_dict
@@ -682,7 +689,8 @@ class Spline():
                 redo_travel=False
                 pass
             while redo_travel:
-                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+                black_mode = True
+                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, black_mode)
             ru99 = None
 
         return spline_dict

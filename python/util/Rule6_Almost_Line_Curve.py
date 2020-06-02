@@ -24,7 +24,6 @@ class Rule(Rule.Rule):
         # 愈長的曲線變直線，更醜。
         SKIP_TOO_LONG_LINE_MERGE = 90
 
-
         # clone
         format_dict_array=[]
         format_dict_array = spline_dict['dots'][1:]

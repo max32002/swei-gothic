@@ -51,8 +51,6 @@ class Rule(Rule.Rule):
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
                     continue
 
-
-
                 if is_debug_mode:
                     debug_coordinate_list = [[555,674]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
@@ -108,6 +106,13 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.STROKE_WIDTH_AVERAGE:
                             if format_dict_array[(idx+2)%nodes_length]['distance'] >= self.config.STROKE_WIDTH_MIN:
                                 is_match_pattern = True
+
+                # dot +1 angle skip small angle
+                # PS: disable this check will cause endless loop.
+                if is_match_pattern:
+                    fail_code = 210
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= 13:
+                        is_match_pattern = False
 
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0

@@ -16,6 +16,10 @@ class Rule(Rule.Rule):
         redo_travel=False
         check_first_point = False
 
+        # default: 1.33(small,inside), 1.49(large,outside)
+        SLIDE_1_PERCENT_MIN = 0.70
+        SLIDE_1_PERCENT_MAX = 1.89
+
         # clone
         format_dict_array=[]
         format_dict_array = spline_dict['dots'][1:]
@@ -61,7 +65,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[646,771]]
+                    debug_coordinate_list = [[843,704],[719,578],[821,714]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -76,19 +80,6 @@ class Rule(Rule.Rule):
                 y1 = format_dict_array[(idx+1)%nodes_length]['y']
                 x2 = format_dict_array[(idx+2)%nodes_length]['x']
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
-
-                # debug purpose:
-                #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']]==[530,836]):
-                #if not([x1,y1]==[325,528]):
-                    #continue
-                
-                #if format_dict_array[(idx+0)%nodes_length]['x']==806:
-                #if True:
-                if False:
-                    print("-" * 20)
-                    for debug_idx in range(6):
-                        print(debug_idx-2,": values for rule5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
-
 
                 # use more close coordinate.
                 #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
@@ -293,10 +284,6 @@ class Rule(Rule.Rule):
                                                     is_match_convert_l_direction = True
 
                 
-                # only thoses style need to convert c to l.
-                if not(self.config.STYLE in ["DemiLight","Medium","Regular"]):
-                    is_match_convert_l_direction = False
-
                 if is_match_convert_l_direction:
                     if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                         x1=format_dict_array[(idx+0)%nodes_length]['x']
@@ -390,27 +377,22 @@ class Rule(Rule.Rule):
                 next_x,next_y=0,0
 
                 # skip small angle
-                # for case:.3180 「㚓」裡的大，因角度太小，硬被畫白角，變很怪！
+                # for case:.3180 「㚓」裡的大，因角度太小，變成圓角，不好看！
+                slide_percent_1 = 0
                 if is_match_pattern:
                     fail_code = 300
-                    previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1,-1 * self.config.OUTSIDE_ROUND_OFFSET)
-                    next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1,-1 * self.config.OUTSIDE_ROUND_OFFSET)
-                    #print("test data:",x0,y0,x1,y1,x2,y2)
-                    #print("previous_x,previous_y:", previous_x,previous_y)
-                    #print("next_x,next_y:", next_x,next_y)
-                    d3 = spline_util.get_distance(previous_x,previous_y,next_x,next_y)
-                    threshold=(self.config.OUTSIDE_ROUND_OFFSET * 0.8)
-                    if d3 <= threshold:
-                        #print("match too small angel:", self.config.OUTSIDE_ROUND_OFFSET , '-', d3, '-' , threshold)
-                        is_match_pattern = False
+                    is_match_pattern = False
+                    # PS: 使用結束 x,y，會造成更誤判，因為沒有另外儲存 rule#5 處理記錄，會造成重覆套用。
+                    #slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                    slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
 
-                    # skip almost line triangle
-                    if is_match_pattern:
-                        fail_code = 310
-                        # PS: 1.7 or 1.8 will meet "甾"!
-                        if d3 >= self.config.OUTSIDE_ROUND_OFFSET * 1.8:
-                            #print("match too large angel.")
-                            is_match_pattern = False
+                    if is_debug_mode:
+                        print("slide_percent 1:", slide_percent_1)
+                        print("data end:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                        print("data virtual:",x0,y0,x1,y1,x2,y2)
+    
+                    if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:                    
+                        is_match_pattern = True
 
 
 
@@ -497,6 +479,9 @@ class Rule(Rule.Rule):
                 if is_debug_mode:
                     if not is_match_pattern:
                         print(idx,"debug fail_code #5:", fail_code)
+                    else:
+                        print("match rule #5:",idx)
+
 
                 if is_match_pattern:
                     #print("match rule #5:",idx)
@@ -509,6 +494,17 @@ class Rule(Rule.Rule):
 
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
+                    # large curve, use small angle.
+                    # start to resize round offset size.
+                    resize_round_angle = 1.30
+                    if slide_percent_1 >= resize_round_angle:
+                        slide_percent_diff = 2.0 - slide_percent_1
+                        slide_percent_total = 2.0 - slide_percent_diff
+                        slide_percent_diff_percent = slide_percent_diff/slide_percent_total
+                        round_offset_diff = self.config.OUTSIDE_ROUND_OFFSET - self.config.ROUND_OFFSET
+                        round_offset_diff_added = int(round_offset_diff * slide_percent_diff_percent)
+                        round_offset = self.config.ROUND_OFFSET + round_offset_diff_added
+
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 

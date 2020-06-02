@@ -109,7 +109,14 @@ class Rule(Rule.Rule):
                             is_match_pattern = True
 
 
-                # +1 angle skip small angle
+                # dot +1 angle skip small angle
+                # PS: disable this check will cause endless loop.
+                if is_match_pattern:
+                    fail_code = 210
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= 13:
+                        is_match_pattern = False
+
+                # dot +1 angle skip small angle
                 if is_match_pattern:
                     fail_code = 300
                     previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1,-1 * self.config.ROUND_OFFSET)
@@ -181,8 +188,12 @@ class Rule(Rule.Rule):
                     # 使用較短的邊。
                     if format_dict_array[(idx+0)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
                         previous_x,previous_y=x0,y0
+
+                    is_overwrite_next_dot = False
                     if format_dict_array[(idx+1)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
-                        next_x,next_y=x2,y2
+                        #next_x,next_y=x2,y2
+                        next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1,-1 * (format_dict_array[(idx+1)%nodes_length]['distance']-2))
+                        is_overwrite_next_dot = True
 
                     # stronge version
                     #previous_recenter_x,previous_recenter_y=x1,y1
@@ -243,20 +254,22 @@ class Rule(Rule.Rule):
 
                     # update 2
                     # 由於"點共用"，for skip_coordinate，所以要移動既有的點, 
-                    mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,+1 * 2)
+                    #if is_overwrite_next_dot:
+                    if False:
+                        mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,+1 * 2)
 
-                    if idx > (idx+2)%nodes_length:
-                        idx +=1
-                    nodes_length = len(format_dict_array)
-                    new_code = ' %d %d l 1\n' % (mouth_next_x_deep, mouth_next_y_deep)
+                        if idx > (idx+2)%nodes_length:
+                            idx +=1
+                        nodes_length = len(format_dict_array)
+                        new_code = ' %d %d l 1\n' % (mouth_next_x_deep, mouth_next_y_deep)
 
-                    dot_dict={}
-                    dot_dict['x']=mouth_next_x_deep
-                    dot_dict['y']=mouth_next_y_deep
-                    dot_dict['t']='.'
-                    dot_dict['code']=new_code
+                        dot_dict={}
+                        dot_dict['x']=mouth_next_x_deep
+                        dot_dict['y']=mouth_next_y_deep
+                        dot_dict['t']='.'
+                        dot_dict['code']=new_code
 
-                    format_dict_array.insert((idx+3)%nodes_length,dot_dict)
+                        format_dict_array.insert((idx+3)%nodes_length,dot_dict)
 
 
                     redo_travel=True
