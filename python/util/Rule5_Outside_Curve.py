@@ -83,7 +83,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[416,160]]
+                    debug_coordinate_list = [[261,28]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -405,12 +405,14 @@ class Rule(Rule.Rule):
                     fail_code = 100
                     is_match_pattern = True
 
-                # for ?cc 系列的「女」
+                # for ?c? 系列的「女」
+                # 比較特別的是 ccl(藪,uni85EA), 大多是 ccc, 有時是 lcc.
                 if not is_match_pattern:
                     if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                         fail_code = 110.210
-                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
-                            fail_code = 110.220
+                        #if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
+                        if True:
+                            #fail_code = 110.220
                             if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
                                 fail_code = 110.230
                                 if format_dict_array[(idx+1)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:

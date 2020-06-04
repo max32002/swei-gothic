@@ -217,11 +217,11 @@ class Convertor():
         encoding_string = None
         stroke_dict, encoding_string = self.load_to_memory(filename_input)
         
+        unicode_int = -1
         if not encoding_string is None:
             if ' ' in encoding_string:
                 encoding_string_array = encoding_string.split(' ')
                 unicode_string = encoding_string_array[self.config.UNICODE_FIELD-1]
-                unicode_int = -1
                 if len(unicode_string) > 0:
                     unicode_int = int(unicode_string)
                 if unicode_int > 0:
@@ -254,7 +254,7 @@ class Convertor():
                 print("code:", new_line)
         '''
 
-        stroke_dict = self.sp.trace(stroke_dict, bmp_image)
+        stroke_dict = self.sp.trace(stroke_dict, unicode_int, bmp_image)
 
         if not stroke_dict is None:
             #print("write to file:", filename_input)

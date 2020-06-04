@@ -86,7 +86,7 @@ class Spline():
         return data_top
 
 
-    def trace(self, stroke_dict, bmp_image):
+    def trace(self, stroke_dict, unicode_int, bmp_image):
         #print("trace")
         #print(stroke_dict)
 
@@ -136,7 +136,7 @@ class Spline():
         # for debug.
         #print("■"*60)
 
-        self.preprocess(stroke_dict)
+        self.preprocess(stroke_dict, unicode_int)
 
         for key in stroke_dict.keys():
             spline_dict = stroke_dict[key]
@@ -146,13 +146,13 @@ class Spline():
             if True:
                 clockwise = self.check_clockwise(spline_dict)
                 #print("clockwise:", clockwise)
-                self.normalize(stroke_dict, key, bmp_image, y_offset)
+                self.normalize(stroke_dict, key, unicode_int, bmp_image, y_offset)
                 
                 if clockwise:
-                    self.trace_black_block(stroke_dict, key, bmp_image, y_offset)
+                    self.trace_black_block(stroke_dict, key, unicode_int, bmp_image, y_offset)
                     pass
                 else:
-                    self.trace_white_block(stroke_dict, key, bmp_image, y_offset)
+                    self.trace_white_block(stroke_dict, key, unicode_int, bmp_image, y_offset)
                     pass
 
             stroke_dict[key] = spline_dict
@@ -209,7 +209,7 @@ class Spline():
         spline_dict["left"] = margin_left
         spline_dict["right"] = margin_right
 
-    def split_spline(self, stroke_dict):
+    def split_spline(self, stroke_dict, unicode_int):
         redo_split = False
         from . import Rule9_Split_Spline
 
@@ -249,7 +249,7 @@ class Spline():
 
         return redo_split
 
-    def preprocess(self, stroke_dict):
+    def preprocess(self, stroke_dict, unicode_int):
         MAX_SPLIT_CONNT = 100
 
         idx=-1
@@ -257,12 +257,12 @@ class Spline():
         redo_split=True    # Enable
         while redo_split:
             idx+=1
-            redo_split=self.split_spline(stroke_dict)
+            redo_split=self.split_spline(stroke_dict, unicode_int)
             if idx >= MAX_SPLIT_CONNT:
                 redo_split = False
 
 
-    def normalize(self, stroke_dict, key, bmp_image, y_offset):
+    def normalize(self, stroke_dict, key, unicode_int, bmp_image, y_offset):
         from . import Rule4_Curve_Coner
         ru4=Rule4_Curve_Coner.Rule()
         ru4.assign_config(self.config)
@@ -332,7 +332,7 @@ class Spline():
         return spline_dict
 
     # run both in clockwise and counter clockwise.
-    def trace_common(self, stroke_dict, key, bmp_image, y_offset, inside_stroke_dict, skip_coordinate):
+    def trace_common(self, stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate):
         DEBUG_CRASH_RULE = False    # online
         #DEBUG_CRASH_RULE = True    # debug
 
@@ -566,7 +566,7 @@ class Spline():
         return inside_stroke_dict, skip_coordinate
 
 
-    def trace_white_block(self, stroke_dict, key, bmp_image, y_offset):
+    def trace_white_block(self, stroke_dict, key, unicode_int, bmp_image, y_offset):
         DISABLE_ALL_RULE = False    # online
         #DISABLE_ALL_RULE = True    # debug specific rule.
 
@@ -607,7 +607,7 @@ class Spline():
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru11.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
         ru11 = None
 
-        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
+        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
 
         # start to travel nodes for [RULE #99]
         # kill all small coner.
@@ -625,7 +625,7 @@ class Spline():
 
         return spline_dict
 
-    def trace_black_block(self, stroke_dict, key, bmp_image, y_offset):
+    def trace_black_block(self, stroke_dict, key, unicode_int, bmp_image, y_offset):
         DEBUG_CRASH_RULE = False    # online
         #DEBUG_CRASH_RULE = True    # debug
 
@@ -660,7 +660,7 @@ class Spline():
         # transform code block
         # ==================================================
 
-        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
+        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
 
         # start to travel nodes for [RULE #5]
         # check outside curve

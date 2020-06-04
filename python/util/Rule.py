@@ -8,12 +8,32 @@ import numpy as np
 
 class Rule():
     config = None
+    unicode_int = -1
     bmp_image = None
     bmp_x_offset = 0
     bmp_y_offset = 0
 
     def __init__(self):
         pass
+
+    def assign_unicode(self, val):
+        self.unicode_int = val
+
+    # 0-24F
+    def is_Latin(self):
+        ret = False
+        if self.unicode_int > 0:
+            if self.unicode_int <= 591:
+                ret = True
+        return ret
+
+    # Hangul Syllables, U+AC00 - U+D7AF[3]
+    def is_Hangul(self):
+        ret = False
+        if self.unicode_int > 0:
+            if self.unicode_int >= 44032 and self.unicode_int <= 55215:
+                ret = True
+        return ret
 
     def assign_x_offset(self, offset):
         self.bmp_x_offset = offset
