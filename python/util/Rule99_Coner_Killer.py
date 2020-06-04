@@ -14,35 +14,42 @@ class Rule(Rule.Rule):
 
     def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate, black_mode):
         redo_travel=False
+        check_first_point = False
 
         MIN_DISTANCE = 12
         
-        # 最大的角度值，超過就skip
-        ALMOST_LINE_RATE = 1.84
+        # default: 1.6 (large 女), 1.72 (small 女), 1.79(下半扁女）
+        SLIDE_0_PERCENT_MIN = 1.40
+        SLIDE_0_PERCENT_MAX = 1.80
 
-        # default: 1.6 (large 女), 1.72 (small 女)
-        SLIDE_0_PERCENT_MIN = 1.49
-        SLIDE_0_PERCENT_MAX = 1.71
+        SLIDE_20_PERCENT_MIN = 1.52
+        SLIDE_20_PERCENT_MAX = 1.88
 
-        SLIDE_20_PERCENT_MIN = 1.61
-        SLIDE_20_PERCENT_MAX = 1.83
+        SLIDE_30_PERCENT_MIN = 1.59
+        SLIDE_30_PERCENT_MAX = 1.88
         
-        # default: 1.75 (large 女), 1.38 (small 女)
-        SLIDE_1_PERCENT_MIN = 1.64
-        SLIDE_1_PERCENT_MAX = ALMOST_LINE_RATE
+        # default: 1.65 - 1.75 (large 女), 1.38 (small 女), 1.07(下半扁女）
+        SLIDE_1_PERCENT_MIN = 1.54
+        SLIDE_1_PERCENT_MAX = 1.88
 
-        SLIDE_21_PERCENT_MIN = 1.27
-        SLIDE_21_PERCENT_MAX = 1.49
+        SLIDE_21_PERCENT_MIN = 1.18
+        SLIDE_21_PERCENT_MAX = 1.58
+
+        SLIDE_31_PERCENT_MIN = 0.87
+        SLIDE_31_PERCENT_MAX = 1.27
         
-        # default: 0.93 (large 女), 1.45 (small 女)
-        SLIDE_2_PERCENT_MIN = 0.92
-        SLIDE_2_PERCENT_MAX = 1.04
+        # default: 0.93 - 1.2 (large 女), 1.45 (small 女), 1.69(下半扁女）
+        SLIDE_2_PERCENT_MIN = 0.73
+        SLIDE_2_PERCENT_MAX = 1.38
 
-        SLIDE_22_PERCENT_MIN = 1.34
-        SLIDE_22_PERCENT_MAX = 1.56
+        SLIDE_22_PERCENT_MIN = 1.25
+        SLIDE_22_PERCENT_MAX = 1.65
+
+        SLIDE_32_PERCENT_MIN = 1.49
+        SLIDE_32_PERCENT_MAX = 1.88
 
         SLIDE_10_PERCENT_MIN = 0.80
-        SLIDE_10_PERCENT_MAX = ALMOST_LINE_RATE
+        SLIDE_10_PERCENT_MAX = 1.88
 
 
         # clone
@@ -77,7 +84,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[742,291]]
+                    debug_coordinate_list = [[524,13]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -175,6 +182,14 @@ class Rule(Rule.Rule):
                                                 if slide_percent_0 >= SLIDE_20_PERCENT_MIN and slide_percent_0 <= SLIDE_20_PERCENT_MAX:
                                                     is_match_pattern = True
 
+                                        # for 下半扁 女
+                                        if slide_percent_1 >= SLIDE_31_PERCENT_MIN and slide_percent_1 <= SLIDE_31_PERCENT_MAX:
+                                            fail_code = 290
+                                            if slide_percent_2 >= SLIDE_32_PERCENT_MIN and slide_percent_2 <= SLIDE_32_PERCENT_MAX:
+                                                fail_code = 291
+                                                if slide_percent_0 >= SLIDE_30_PERCENT_MIN and slide_percent_0 <= SLIDE_30_PERCENT_MAX:
+                                                    is_match_pattern = True
+
                 # compare distance, muse large than our "large round"
                 round_offset = self.config.ROUND_OFFSET
 
@@ -265,7 +280,6 @@ class Rule(Rule.Rule):
 
 
                     if need_check_join_line:
-                        
                         fail_code = 600
                         is_match_pattern = False
 
@@ -310,9 +324,12 @@ class Rule(Rule.Rule):
                     # cache transformed nodes.
                     # we generated nodes
                     # 因為只有作用在2個coordinate. 
-                    skip_coordinate.append([previous_x,previous_y])
+                    if self.config.PROCESS_MODE in ["HALFMOON"]:
+                        # 加了這行，會讓「口」的最後一個角，無法套到。
+                        skip_coordinate.append([previous_x,previous_y])
+                        pass
 
-
+                    check_first_point = True
                     redo_travel=True
 
                     # current version is not stable!, redo will cuase strange curves.
@@ -324,7 +341,7 @@ class Rule(Rule.Rule):
                     #resume_idx = -1
                     #break
 
-        if redo_travel:
+        if check_first_point:
             # check close path.
             self.reset_first_point(format_dict_array, spline_dict)
 

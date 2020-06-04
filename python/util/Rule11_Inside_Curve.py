@@ -14,6 +14,7 @@ class Rule(Rule.Rule):
 
     def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate):
         redo_travel=False
+        check_first_point = False
 
         # 最大的角度值，超過就skip
         ALMOST_LINE_RATE = 1.84
@@ -54,18 +55,19 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[228,679]]
+                    debug_coordinate_list = [[463,602]]
+                    #print("="*30)
+                    #print("current x,y:", [format_dict_array[idx]['x'],format_dict_array[idx]['y']])
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
-
-                    print("="*30)
-                    print("index:", idx)
-                    for debug_idx in range(8):
-                        print(debug_idx-2,": #11 val:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
-
+                        pass
+                    else:
+                        print("="*30)
+                        print("index:", idx)
+                        for debug_idx in range(8):
+                            print(debug_idx-2,": #11 val:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 is_match_pattern = False
-
 
                 x0 = format_dict_array[(idx+0)%nodes_length]['x']
                 y0 = format_dict_array[(idx+0)%nodes_length]['y']
@@ -193,8 +195,12 @@ class Rule(Rule.Rule):
                     # cache transformed nodes.
                     # we generated nodes
                     # 因為只有作用在2個coordinate. 
-                    skip_coordinate.append([previous_x,previous_y])
+                    if self.config.PROCESS_MODE in ["HALFMOON"]:
+                        # 加了這行，會讓「口」的最後一個角，無法套到。
+                        skip_coordinate.append([previous_x,previous_y])
+                        pass
 
+                    check_first_point = True
                     redo_travel=True
 
                     # current version is not stable!, redo will cuase strange curves.
@@ -206,7 +212,7 @@ class Rule(Rule.Rule):
                     #resume_idx = -1
                     #break
 
-        if redo_travel:
+        if check_first_point:
             # check close path.
             self.reset_first_point(format_dict_array, spline_dict)
 

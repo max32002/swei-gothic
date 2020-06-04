@@ -173,10 +173,14 @@ class Rule(Rule.Rule):
                     next_x,next_y=spline_util.two_point_extend(x3,y3,x2,y2,-1 * self.config.ROUND_OFFSET)
 
                     # 使用較短的邊。
-                    if format_dict_array[(idx+1)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
-                        previous_x,previous_y=x1,y1
-                    if format_dict_array[(idx+2)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
-                        next_x,next_y=x3,y3
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.ROUND_OFFSET:
+                        #previous_x,previous_y=x1,y1
+                        # 直接使用 x1,y1 需要改其程式，因為"點共用"
+                        previous_x,previous_y=spline_util.two_point_extend(x1,y1,x2,y2,-1 * (format_dict_array[(idx+1)%nodes_length]['distance']-2))
+                    if format_dict_array[(idx+2)%nodes_length]['distance'] <= self.config.ROUND_OFFSET:
+                        #next_x,next_y=x3,y3
+                        # 直接使用 x3,y3 需要改其程式，因為"點共用"
+                        next_x,next_y=spline_util.two_point_extend(x3,y3,x2,y2,-1 * (format_dict_array[(idx+2)%nodes_length]['distance']-2))
 
                     # stronge version
                     #previous_recenter_x,previous_recenter_y=x1,y1

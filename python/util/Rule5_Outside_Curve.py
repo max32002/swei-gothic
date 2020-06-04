@@ -17,8 +17,49 @@ class Rule(Rule.Rule):
         check_first_point = False
 
         # default: 1.33(small,inside), 1.49(large,outside)
-        SLIDE_1_PERCENT_MIN = 0.70
-        SLIDE_1_PERCENT_MAX = 1.89
+        SLIDE_10_PERCENT_MIN = 0.70
+        SLIDE_10_PERCENT_MAX = 1.89
+
+        # default: x.x (large 女), x.xx (small 女), 0.30 - 0.53(下半扁女）
+        #SLIDE_0_PERCENT_MIN = 2.0
+        #SLIDE_0_PERCENT_MAX = 1.80
+
+        #SLIDE_20_PERCENT_MIN = 2.0
+        #SLIDE_20_PERCENT_MAX = 1.88
+
+        SLIDE_30_PERCENT_MIN = 0.20
+        SLIDE_30_PERCENT_MAX = 0.80
+        
+        # default: x.x - x.x (large 女), x.x (small 女), 0.89-1.15(下半扁女）
+        #SLIDE_1_PERCENT_MIN = 2.0
+        #SLIDE_1_PERCENT_MAX = 1.88
+
+        #SLIDE_21_PERCENT_MIN = 2.0
+        #SLIDE_21_PERCENT_MAX = 1.58
+
+        SLIDE_31_PERCENT_MIN = 0.70
+        SLIDE_31_PERCENT_MAX = 1.35
+        
+        # default: x.x - x.x (large 女), x.x (small 女), 0.78-0.97(下半扁女）
+        #SLIDE_2_PERCENT_MIN = 2.0
+        #SLIDE_2_PERCENT_MAX = 1.38
+
+        #SLIDE_22_PERCENT_MIN = 2.0
+        #SLIDE_22_PERCENT_MAX = 1.65
+
+        SLIDE_32_PERCENT_MIN = 0.58
+        SLIDE_32_PERCENT_MAX = 1.17
+
+        # 戶 左上角。因為2邊都被套用 round curve. 
+        # default: 1.41
+        SLIDE_40_PERCENT_MIN = 1.88
+        SLIDE_40_PERCENT_MAX = 1.99
+
+        SLIDE_41_PERCENT_MIN = 1.21
+        SLIDE_41_PERCENT_MAX = 1.61
+
+        SLIDE_42_PERCENT_MIN = 1.88
+        SLIDE_42_PERCENT_MAX = 1.99
 
         # clone
         format_dict_array=[]
@@ -38,6 +79,19 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[416,160]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": values#5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
                 # 這個效果滿好玩的，「口」會變成二直，二圓。            
                 if self.config.PROCESS_MODE in ["HALFMOON"]:
                     idx_previuos = (idx -1 + nodes_length) % nodes_length
@@ -45,6 +99,9 @@ class Rule(Rule.Rule):
                         continue
 
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip dot +0:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
+                        pass
                     continue
 
                 # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
@@ -52,6 +109,9 @@ class Rule(Rule.Rule):
                 # PS: 由於 half-moon 不套用 #1,2,3
                 if self.config.PROCESS_MODE in ["GOTHIC"]:
                     if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                        if is_debug_mode:
+                            print("match skip dot +2:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
+                            pass
                         continue
 
                 # 因為我們程式會去移動下一個點，所以可能前二和後二的距離會是<10.
@@ -60,19 +120,6 @@ class Rule(Rule.Rule):
                     #continue
 
                 is_match_pattern = False
-
-                is_debug_mode = False
-                #is_debug_mode = True
-
-                if is_debug_mode:
-                    debug_coordinate_list = [[843,704],[719,578],[821,714]]
-                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
-                        continue
-
-                    print("="*30)
-                    print("index:", idx)
-                    for debug_idx in range(8):
-                        print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 x0 = format_dict_array[(idx+0)%nodes_length]['x']
                 y0 = format_dict_array[(idx+0)%nodes_length]['y']
@@ -136,12 +183,14 @@ class Rule(Rule.Rule):
 
                 # 成功的情況下，增加例外。
                 # PS: for case. 21324,
+                # white mode, 不處理。
                 if is_extend_lag:
                     inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
                     if not inside_stroke_flag:
                         is_extend_lag = False
 
                 # PS: 該「先長腳」還是等其他所有的判斷都成立，再長腳，應該是後者比較好。目前是使用問題較多的前者。
+                #print("is_extend_lag:", is_extend_lag)
                 if is_extend_lag:
                     extend_x,extend_y=spline_util.two_point_extend(format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'], -1 * self.config.OUTSIDE_ROUND_OFFSET)
 
@@ -164,11 +213,11 @@ class Rule(Rule.Rule):
                     #print("new distance #2:",new_distance)
                     format_dict_array[(idx+2)%nodes_length]['distance']=new_distance
 
-                # for .31725, 「殳」系列，左上角有奇怪的停頓點。
-                #-1 : values for rule5:  486 655 464 676 494 687 c 1 -( 108 )
-                #0 : values for rule5:  577 717 571 729 571 764 c 2 -( 43 )
-                #1 : values for rule5:  571 807 l 1 -( 257 )
-                #2 : values for rule5:  828 807 l 1 -( 80 )
+                # for .31725(uni7E0F)縏, 「殳」系列，左上角有奇怪的停頓點。
+                #-1 : val:  486 655 464 676 494 687 c 1 -( 108 )
+                # 0 : val:  577 717 571 729 571 764 c 2 -( 43 )
+                # 1 : val:  571 807 l 1 -( 257 )
+                # 2 : val:  828 807 l 1 -( 80 )
 
                 # 因為「縏」筆畫很擠，只設 90
                 NEED_TO_EXTEND_DISTANCE_SIBLING_MIN = 90
@@ -188,6 +237,31 @@ class Rule(Rule.Rule):
                                             # 好長哦，借一些來用用。
                                             if format_dict_array[(idx+0)%nodes_length]['y_direction'] == format_dict_array[idx_previuos]['y_direction']:
                                                 extend_lag_flag = True
+
+                # white mode, 不處理。
+                if extend_lag_flag:
+                    x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                    y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                    x1 = format_dict_array[(idx+1)%nodes_length]['x']
+                    y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                    x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                    y2 = format_dict_array[(idx+2)%nodes_length]['y']
+
+                    # use more close coordinate.
+                    #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
+                    if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                        x0 = format_dict_array[(idx+1)%nodes_length]['x2']
+                        y0 = format_dict_array[(idx+1)%nodes_length]['y2']
+                    if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                        x2 = format_dict_array[(idx+2)%nodes_length]['x1']
+                        y2 = format_dict_array[(idx+2)%nodes_length]['y1']
+                    #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
+
+                    inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
+                    #print("inside_stroke_flag:", inside_stroke_flag)
+                    if not inside_stroke_flag:
+                        extend_lag_flag = False
+
                 if extend_lag_flag:
                     # extend to new coordinate.
                     #print("match extend lag")
@@ -331,19 +405,68 @@ class Rule(Rule.Rule):
                     fail_code = 100
                     is_match_pattern = True
 
-                # [同時增加處理case] for 丸的尾巴，是  ccl,
-                if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
-                    fail_code = 110
-                    if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
-                        if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
-                            is_match_pattern = True
+                # for ?cc 系列的「女」
+                if not is_match_pattern:
+                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                        fail_code = 110.210
+                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
+                            fail_code = 110.220
+                            if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
+                                fail_code = 110.230
+                                if format_dict_array[(idx+1)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
+                                    fail_code = 110.240
 
-                        # [同時增加處理case] for 飹的卯，在先套用 rule#1,2,3 後是  ccl,
-                        if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
-                            is_match_pattern = True
+                                    slide_percent_0 = spline_util.slide_percent(format_dict_array[(idx-1+nodes_length)%nodes_length]['x'],format_dict_array[(idx-1+nodes_length)%nodes_length]['y'],format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
+                                    # PS: 使用 end x,y 可能會有「重覆套用」的問題。
+                                    #slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                                    slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
+                                    slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+
+                                    if is_debug_mode:
+                                    #if False:
+                                        print("slide_percent 0:", slide_percent_0)
+                                        print("data:",format_dict_array[(idx-1+nodes_length)%nodes_length]['x'],format_dict_array[(idx-1+nodes_length)%nodes_length]['y'],format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
+                                        print("slide_percent 1:", slide_percent_1)
+                                        print("data:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                                        print("slide_percent 2:", slide_percent_2)
+                                        print("data:",format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+
+                                    # for 下半扁 女
+                                    if slide_percent_1 >= SLIDE_31_PERCENT_MIN and slide_percent_1 <= SLIDE_31_PERCENT_MAX:
+                                        fail_code = 110.290
+                                        if slide_percent_2 >= SLIDE_32_PERCENT_MIN and slide_percent_2 <= SLIDE_32_PERCENT_MAX:
+                                            fail_code = 110.291
+                                            if slide_percent_0 >= SLIDE_30_PERCENT_MIN and slide_percent_0 <= SLIDE_30_PERCENT_MAX:
+                                                is_match_pattern = True
+
+                                    # for 左上戶
+                                    if format_dict_array[(idx+0)%nodes_length]['distance'] > 150:
+                                        if format_dict_array[(idx+1)%nodes_length]['distance'] > 150:
+                                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] > 0:
+                                                if format_dict_array[(idx+0)%nodes_length]['y_direction'] > 0:
+                                                    if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                                                        if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
+                                                            if slide_percent_1 >= SLIDE_41_PERCENT_MIN and slide_percent_1 <= SLIDE_41_PERCENT_MAX:
+                                                                fail_code = 110.290
+                                                                if slide_percent_2 >= SLIDE_42_PERCENT_MIN and slide_percent_2 <= SLIDE_42_PERCENT_MAX:
+                                                                    fail_code = 110.291
+                                                                    if slide_percent_0 >= SLIDE_40_PERCENT_MIN and slide_percent_0 <= SLIDE_40_PERCENT_MAX:
+                                                                        is_match_pattern = True
+
+                # [同時增加處理case] for 丸的尾巴，是  ccl,
+                if not is_match_pattern:
+                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                        fail_code = 120
+                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
+                            if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                                is_match_pattern = True
+
+                            # [同時增加處理case] for 飹的卯，在先套用 rule#1,2,3 後是  ccl,
+                            if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                                is_match_pattern = True
 
                 # =============================================
-                # [IMPORTANT] 這條線以下，不要增追加可能的 case.
+                # [IMPORTANT] 這條線以下，不要增追加可能的 case, 開始做排除
                 # =============================================
 
  
@@ -391,9 +514,8 @@ class Rule(Rule.Rule):
                         print("data end:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
                         print("data virtual:",x0,y0,x1,y1,x2,y2)
     
-                    if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:                    
+                    if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:                    
                         is_match_pattern = True
-
 
 
                 # 從成功的項目裡，排除已轉彎的項目。
@@ -482,16 +604,7 @@ class Rule(Rule.Rule):
                     else:
                         print("match rule #5:",idx)
 
-
                 if is_match_pattern:
-                    #print("match rule #5:",idx)
-
-                    #if is_debug_mode:
-                    if False:
-                        print("-" * 20)
-                        for debug_idx in range(6):
-                            print(debug_idx-2,": values for rule #5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
-
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
                     # large curve, use small angle.
@@ -529,6 +642,9 @@ class Rule(Rule.Rule):
                     #redo_travel=True
                     #resume_idx = -1
                     #break
+                else:
+                    # canel all un-finished chages!
+                    check_first_point = False
 
         if check_first_point:
             # check close path.

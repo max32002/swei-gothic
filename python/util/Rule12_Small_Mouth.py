@@ -33,7 +33,18 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
-                #print(idx,"debug rule12+0:",format_dict_array[idx]['code'])
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[520,67]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": values#12:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
                     continue
@@ -184,16 +195,23 @@ class Rule(Rule.Rule):
                     # 這是較佳的長度，但是可能會「深入」筆畫裡。
                     previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1,-1 * self.config.ROUND_OFFSET)
                     next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1,-1 * self.config.ROUND_OFFSET)
+                    #print("#12, first next_x,next_y:", next_x,next_y)
+                    #print("#12, code:", format_dict_array[(idx+0)%nodes_length]['code'])
 
                     # 使用較短的邊。
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
-                        previous_x,previous_y=x0,y0
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.ROUND_OFFSET:
+                        #
+                        #previous_x,previous_y=x0,y0
+                        # 直接使用 x0,y0 需要改其程式，因為"點共用"
+                        previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1,-1 * (format_dict_array[(idx+0)%nodes_length]['distance']-2))
 
-                    is_overwrite_next_dot = False
-                    if format_dict_array[(idx+1)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
+                    #is_overwrite_next_dot = False
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.ROUND_OFFSET:
                         #next_x,next_y=x2,y2
+                        # 直接使用 x0,y0 需要改其程式，因為"點共用"
                         next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1,-1 * (format_dict_array[(idx+1)%nodes_length]['distance']-2))
-                        is_overwrite_next_dot = True
+                        #is_overwrite_next_dot = True
+                        #print("#12, resized next_x,next_y:", next_x,next_y)
 
                     # stronge version
                     #previous_recenter_x,previous_recenter_y=x1,y1
@@ -245,11 +263,12 @@ class Rule(Rule.Rule):
                     dot_dict['code']=new_code
 
                     format_dict_array.insert((idx+2)%nodes_length,dot_dict)
-                    #print("rule1 appdend +2 new_code:", new_code)
+                    #print("rule#12 appdend +2 new_code:", new_code)
 
                     # we generated nodes
                     #skip_coordinate.append([previous_x,previous_x])
                     skip_coordinate.append([next_x,next_y])
+                    #print("#12,[next_x,next_y]:", [next_x,next_y])
 
 
                     # update 2
