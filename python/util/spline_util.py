@@ -40,12 +40,19 @@ def is_xyz_on_line(x1,y1,x2,y2,x3,y3,accuracy=0.01):
     dist_compare = dist_1 + dist_2
     dist_full = get_distance(x2,y2,x1,y1)
     dist_diff = abs(dist_full-dist_compare)
+
     compare_accuracy = dist_full * accuracy
     if compare_accuracy <= 2:
         compare_accuracy = 2
         #distance too short, need more accuracy.
         if dist_full <= 100:
             compare_accuracy = 1
+    
+    #print("dist_full:", dist_full)
+    #print("dist_compare:", dist_compare)
+    #print("dist_diff:",dist_diff)
+    #print("compare_accuracy:", compare_accuracy)
+
     if dist_diff <= compare_accuracy:
         ret = True
     return ret

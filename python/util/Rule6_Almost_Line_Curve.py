@@ -19,10 +19,11 @@ class Rule(Rule.Rule):
 
         # transform c to l for splash line.
         #大於等於 0.01 很醜！ex: 「㚞」的大，在 0.02變超細。
-        SLASH_IN_LINE_ACCURACY = 0.003
+        SLASH_IN_LINE_ACCURACY = 0.002
 
         # 愈長的曲線變直線，更醜。
-        SKIP_TOO_LONG_LINE_MERGE = 90
+        SKIP_TOO_LONG_LINE_MERGE_DEFAULT = 90
+        SKIP_TOO_LONG_LINE_MERGE = SKIP_TOO_LONG_LINE_MERGE_DEFAULT
 
         # clone
         format_dict_array=[]
@@ -42,18 +43,20 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[621,801]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": values#6:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
                 is_match_pattern = False
-
-                #print(idx,"debug rule6:",format_dict_array[idx]['code'])
-                
-                #if not [format_dict_array[idx]['x'],format_dict_array[idx]['y']]==[399,576]:
-                    #continue
-
-                #if True:
-                if False:
-                    print("-" * 20)
-                    for debug_idx in range(6):
-                        print(debug_idx-2,": values:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                     fail_code = 100
@@ -92,27 +95,67 @@ class Rule(Rule.Rule):
                 x2 = format_dict_array[(idx+1)%nodes_length]['x']
                 y2 = format_dict_array[(idx+1)%nodes_length]['y']
 
+                x2_1 = format_dict_array[(idx+1)%nodes_length]['x1']
+                y2_1 = format_dict_array[(idx+1)%nodes_length]['y1']
+                x2_2 = format_dict_array[(idx+1)%nodes_length]['x2']
+                y2_2 = format_dict_array[(idx+1)%nodes_length]['y2']
+
                 if is_match_pattern:
                     #print(idx,"debug rule6 P0:",format_dict_array[(idx+0)%nodes_length]['code'])
                     fail_code = 300
                     is_match_pattern = False
 
-                    x2_1 = format_dict_array[(idx+1)%nodes_length]['x1']
-                    y2_1 = format_dict_array[(idx+1)%nodes_length]['y1']
-                    x2_2 = format_dict_array[(idx+1)%nodes_length]['x2']
-                    y2_2 = format_dict_array[(idx+1)%nodes_length]['y2']
-
                     test_1 = spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_1,y2_1,accuracy=DISTANCE_IN_LINE_ACCURACY)
-                    test_2 = spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_2,y2_2,accuracy=DISTANCE_IN_LINE_ACCURACY)
+                    test_2 = None
+                    if x2_1 == x2_2 and y2_1 == y2_2:
+                        test_2 = test_1
+                    else:
+                        test_2 = spline_util.is_xyz_on_line(x1,y1,x2,y2,x2_2,y2_2,accuracy=DISTANCE_IN_LINE_ACCURACY)
+                    
+                    #print("DISTANCE_IN_LINE_ACCURACY:", DISTANCE_IN_LINE_ACCURACY)
+                    #print("test_1:", test_1)
+                    #print("test_2:", test_2)
                     if test_1 and test_2:
                         is_match_pattern = True
 
+                if is_match_pattern:
+                    fail_code = 310
+                    is_match_pattern = False
+                    slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],x2_1,y2_1,format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
+                    slide_percent_2 = None
+                    if x2_1 == x2_2 and y2_1 == y2_2:
+                        slide_percent_2 = slide_percent_1
+                    else:
+                        slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],x2_2,y2_2,format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
+
+                    if is_debug_mode:
+                    #if False:
+                        print("slide_percent 1:", slide_percent_1)
+                        print("slide_percent 2:", slide_percent_2)
+
+                    # for case 㜷 uni3737
+                    # for 說 8AAA，要大於 1.980
+                    if slide_percent_1 >= 1.982 and slide_percent_2 >= 1.982:
+                        is_match_pattern = True
+
+                # [important]: must reset to default, because variable in loop...
+                SKIP_TOO_LONG_LINE_MERGE = SKIP_TOO_LONG_LINE_MERGE_DEFAULT
+                if is_match_pattern:
+                    # for 㜷, 的「女」斜邊，放大可以變成直線的長度。
+                    if format_dict_array[(idx+0)%nodes_length]['t'] == 'l':
+                        if format_dict_array[(idx+2+nodes_length)%nodes_length]['t'] == 'l':
+                            SKIP_TOO_LONG_LINE_MERGE = 280
                 
                 # 太長會出問題，例如：的，絢 字。
                 # PS: to dot+1, distance in +0
+                if is_debug_mode:
+                    print("+0 distance:", format_dict_array[(idx+0)%nodes_length]['distance'])
+                    print("SKIP_TOO_LONG_LINE_MERGE:", SKIP_TOO_LONG_LINE_MERGE)
+
                 if format_dict_array[(idx+0)%nodes_length]['distance'] >= SKIP_TOO_LONG_LINE_MERGE:
                     fail_code = 400
                     is_match_pattern = False
+                    #print("SKIP_TOO_LONG_LINE_MERGE:", SKIP_TOO_LONG_LINE_MERGE)
 
                 # 連續曲線變直線會怪怪：for case.26158:爬.
                 # 連續曲線變直線會怪怪：for case:飹.
@@ -126,8 +169,7 @@ class Rule(Rule.Rule):
                                             fail_code = 500
                                             is_match_pattern = False
 
-                # 連續曲線變直線會怪怪：for case.26158:爬.
-                # 連續曲線變直線會怪怪：for case:飹.
+                # 連續曲線變直線會怪怪：for case.26158:爬 / 飹 / 虞 865E / 
                 if format_dict_array[(idx-1+nodes_length)%nodes_length]['t'] == 'c':
                     if format_dict_array[(idx+0)%nodes_length]['t'] == 'c':
                         if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
@@ -138,39 +180,58 @@ class Rule(Rule.Rule):
                                             fail_code = 510
                                             is_match_pattern = False
 
+                # 連續曲線變直線會怪怪：for case:昴 uni6634.
+                if format_dict_array[(idx+0)%nodes_length]['t'] == 'c':
+                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                        if format_dict_array[(idx+2+nodes_length)%nodes_length]['t'] == 'c':
+                            if (format_dict_array[(idx+0)%nodes_length]['x_direction'] == format_dict_array[(idx+1)%nodes_length]['x_direction']) or format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                                if (format_dict_array[(idx+1+nodes_length)%nodes_length]['x_direction'] == format_dict_array[(idx+2)%nodes_length]['x_direction']) or format_dict_array[(idx+1+nodes_length)%nodes_length]['x_equal_fuzzy']:
+                                    if (format_dict_array[(idx+0+nodes_length)%nodes_length]['y_direction'] == format_dict_array[(idx+1)%nodes_length]['y_direction']) or format_dict_array[(idx+0+nodes_length)%nodes_length]['y_equal_fuzzy']:
+                                        if (format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']) or format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                                            fail_code = 520
+                                            is_match_pattern = False
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code #6:", fail_code)
-                    pass
+                #rule_no=3
+                #is_match_pattern, fail_code = self.rule_test(format_dict_array,idx,rule_no,inside_stroke_dict)
+
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,"debug fail_code #6:", fail_code)
+                    else:
+                        print("match rule #6:",idx)
 
                 if is_match_pattern:
-                    #print("match rule #6")
-
-                    #if True:
-                    if False:
-                        print("-" * 20)
-                        for debug_idx in range(6):
-                            print(debug_idx-2,": values for rule6:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+                    #print("="*30)
+                    #print("match rule #6:",idx, format_dict_array[(idx+0)%nodes_length]['code'])
 
                     # use default
                     new_x = format_dict_array[(idx+1)%nodes_length]['x']
                     new_y = format_dict_array[(idx+1)%nodes_length]['y']
 
                     # 讓手的下面水平切齊。
-                    if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                    # PS: 這個有優點，也有很多缺點！
+                    # for: 「繈」uni7E48, 造成斜線，變成直線！進而造成 in stroke check fail!
+                    #if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
                         # use parent x, maybe a little lower.
-                        new_x = format_dict_array[(idx+0)%nodes_length]['x']
+                        #new_x = format_dict_array[(idx+0)%nodes_length]['x']
                         #new_y = format_dict_array[(idx+1)%nodes_length]['y']
-                    if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                    #if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
                         #new_x = format_dict_array[(idx+1)%nodes_length]['x']
-                        new_y = format_dict_array[(idx+0)%nodes_length]['y']
+                        #new_y = format_dict_array[(idx+0)%nodes_length]['y']
+
+                    # 修改為，只有較短長度和距離下，才變直線。
+                    if format_dict_array[(idx+0)%nodes_length]['distance']<=100:
+                        if abs(format_dict_array[(idx+0)%nodes_length]['x']-format_dict_array[(idx+1)%nodes_length]['x'])<=3:
+                            new_x = format_dict_array[(idx+0)%nodes_length]['x']
+                        if abs(format_dict_array[(idx+0)%nodes_length]['y']-format_dict_array[(idx+1)%nodes_length]['y'])<=3:
+                            new_y = format_dict_array[(idx+0)%nodes_length]['y']
 
                     format_dict_array[(idx+1)%nodes_length]['x']=new_x
                     format_dict_array[(idx+1)%nodes_length]['y']=new_y
                     format_dict_array[(idx+1)%nodes_length]['t']= 'l'
                     new_code_string = " %d %d l 1\n" % (new_x, new_y)
                     format_dict_array[(idx+1)%nodes_length]['code'] = new_code_string
-                    #print("new +1 code string:", new_code_string)
+                    #print("#6, new +1 code string:", new_code_string)
 
                     redo_travel=True
                     resume_idx = idx

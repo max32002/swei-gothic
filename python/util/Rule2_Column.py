@@ -40,34 +40,47 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[913,414]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        #continue
+                        pass
+                    else:
+                        print("="*30)
+                        print("index:", idx)
+                        for debug_idx in range(8):
+                            print(debug_idx-2,": val#2:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+
                 if [format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+1:",format_dict_array[(idx+1)%nodes_length]['code'])
+                        pass
                     continue
 
                 # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+2:",format_dict_array[(idx+2)%nodes_length]['code'])
+                        pass
                     continue
 
                 # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
                 if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+3:",format_dict_array[(idx+3)%nodes_length]['code'])
+                        pass
                     continue
 
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+0:",format_dict_array[(idx+0)%nodes_length]['code'])
+                        pass
                     continue
 
                 is_match_pattern = False
-
-                #print("-"*20)
-                #print(idx,"debug rule2:",format_dict_array[idx]['code'])
-
-                #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in [[781,373]]):
-                    #continue
-
-                #if True:
-                if False:
-                    print("="*30)
-                    print("index:", idx)
-                    for debug_idx in range(6):
-                        print(debug_idx-2,": values for rule2:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 # compare direction
                 # start to compare.
@@ -95,27 +108,127 @@ class Rule(Rule.Rule):
                             if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
                                 is_match_pattern = True
 
-                    # 追加進階款 for:.42922 「欠」系列的人頭。
-                    # 線愈長，允許誤差大。
-                    AXIS_EQUAL_ACCURACY = int(AXIS_EQUAL_ACCURACY_RATE * format_dict_array[(idx+1)%nodes_length]['distance'])
-                    if AXIS_EQUAL_ACCURACY < AXIS_EQUAL_ACCURACY_MIN:
-                        AXIS_EQUAL_ACCURACY = AXIS_EQUAL_ACCURACY_MIN
+                # 追加進階款 for:.42922 「欠」系列的人頭。
+                # 線愈長，允許誤差大。
+                if is_match_pattern == False:
+                    fail_code = 220
+                    if format_dict_array[(idx+1)%nodes_length]['match_stroke_width']:
+                        AXIS_EQUAL_ACCURACY = int(AXIS_EQUAL_ACCURACY_RATE * format_dict_array[(idx+1)%nodes_length]['distance'])
+                        if AXIS_EQUAL_ACCURACY < AXIS_EQUAL_ACCURACY_MIN:
+                            AXIS_EQUAL_ACCURACY = AXIS_EQUAL_ACCURACY_MIN
 
-                    if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-                        # 中間是平的。
+                        if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                            # 中間是平的。
+                            if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                                    # 另一邊切齊垂直。
+                                    if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                                        # 左邊切齊
+                                        if abs(format_dict_array[(idx+1)%nodes_length]['x'] - format_dict_array[(idx+1)%nodes_length]['x2']) <= AXIS_EQUAL_ACCURACY:
+                                            is_match_pattern = True
+                                        # 左邊切齊
+                                        if abs(format_dict_array[(idx+1)%nodes_length]['x'] - format_dict_array[(idx+1)%nodes_length]['x1']) <= AXIS_EQUAL_ACCURACY:
+                                            is_match_pattern = True
+
+                # 追加進階款 for:釶 91F6「也」向下的頭。
+                # default: 1.24 釶 91F6 / 1.13 潛 6F5B /
+                SLIDE_1_PERCENT_MIN = 1.05
+                SLIDE_1_PERCENT_MAX = 1.68
+
+                # default: 1.58 釶 91F6 / 1.53 潛 6F5B /
+                SLIDE_2_PERCENT_MIN = 1.14
+                SLIDE_2_PERCENT_MAX = 1.68
+
+
+                if is_match_pattern == False:
+                    fail_code = 230
+                    if format_dict_array[(idx+1)%nodes_length]['match_stroke_width']:
+                        if is_debug_mode:
+                            print("+0",format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy'])
+                            print("+1",format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy'])
+                            print("+2",format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy'])
+
+                        is_match_also_sharp = False
+                        # for 釶 91F6
+                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                            if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                                y_diff = abs(format_dict_array[(idx+2)%nodes_length]['y'] - format_dict_array[(idx+1)%nodes_length]['y'])
+                                #if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy'] or 
+                                if y_diff <= 20:
+                                    is_match_also_sharp = True
+                        
+                        # for 潛 6F5B 右上角，向上尾巴。
+                        is_match_1_side = False
+                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                            is_match_1_side = True
+                        if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                            is_match_1_side = True
                         if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
-                                # 另一邊切齊垂直。
-                                if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
-                                    # 左邊切齊
-                                    if abs(format_dict_array[(idx+1)%nodes_length]['x'] - format_dict_array[(idx+1)%nodes_length]['x2']) <= AXIS_EQUAL_ACCURACY:
-                                        is_match_pattern = True
-                                    # 左邊切齊
-                                    if abs(format_dict_array[(idx+1)%nodes_length]['x'] - format_dict_array[(idx+1)%nodes_length]['x1']) <= AXIS_EQUAL_ACCURACY:
-                                        is_match_pattern = True
+                            is_match_1_side = True
+
+                        if is_match_1_side:
+                            fail_code = 240
+
+                            is_match_x0 = False
+                            # dot#1 垂直。
+                            if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                                is_match_x0 = True
+                            # allow 微誤差。
+                            if not is_match_x0:
+                                x_diff_0 = abs(format_dict_array[(idx+0)%nodes_length]['x'] - format_dict_array[(idx+1)%nodes_length]['x'])
+                                if x_diff_0 < 20:
+                                    is_match_x0 = True
+                            # allow 微誤差。
+                            if not is_match_x0:
+                                if format_dict_array[(idx+1)%nodes_length]['t']=="c":
+                                    x_diff_0 = abs(format_dict_array[(idx+0)%nodes_length]['x'] - format_dict_array[(idx+1)%nodes_length]['x2'])
+                                    if x_diff_0 < 20:
+                                        is_match_x0 = True
+
+                            is_match_y1 = False
+                            # dot#2 水平。
+                            if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                                is_match_y1 = True
+                            # allow 微誤差。
+                            if not is_match_y1:
+                                x_diff_0 = abs(format_dict_array[(idx+2)%nodes_length]['y'] - format_dict_array[(idx+1)%nodes_length]['y'])
+                                if x_diff_0 < 25:
+                                    is_match_y1 = True
+
+                            is_match_x2 = False
+                            # dot#3 垂直。
+                            if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                                is_match_x2 = True
+                            # allow 微誤差。
+                            if not is_match_x2:
+                                x_diff_0 = abs(format_dict_array[(idx+3)%nodes_length]['x'] - format_dict_array[(idx+2)%nodes_length]['x'])
+                                if x_diff_0 < 20:
+                                    is_match_x2 = True
+                            # allow 微誤差。
+                            if not is_match_x2:
+                                if format_dict_array[(idx+3)%nodes_length]['t']=="c":
+                                    x_diff_0 = abs(format_dict_array[(idx+2)%nodes_length]['x'] - format_dict_array[(idx+3)%nodes_length]['x1'])
+                                    if x_diff_0 < 20:
+                                        is_match_x2 = True
+                            
+                            if is_match_x2 and is_match_y1 and is_match_x0:
+                                is_match_also_sharp = True
+
+                        #print("is_match_also_sharp:", is_match_also_sharp)
+                        if is_match_also_sharp:
+                            slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                            slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+                            if is_debug_mode:
+                                print("slide_percent_1:",slide_percent_1)
+                                print("slide_percent_2:",slide_percent_2)
+
+                            if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
+                                if slide_percent_2 >= SLIDE_2_PERCENT_MIN and slide_percent_2 <= SLIDE_2_PERCENT_MAX:
+                                    is_match_pattern = True
+
 
                 # compare NEXT_DISTANCE_MIN
                 if is_match_pattern:
-                    fail_code = 220
+                    fail_code = 320
                     is_match_pattern = False
                     if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.NEXT_DISTANCE_MIN:
                         is_match_pattern = True
@@ -170,9 +283,11 @@ class Rule(Rule.Rule):
                     if inside_stroke_flag1 or inside_stroke_flag2:
                         is_match_pattern = True
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code2:", fail_code)
-                    pass
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,": debug fail_code #2:", fail_code)
+                    else:
+                        print(idx,": match rule #2")
 
                 if is_match_pattern:
 

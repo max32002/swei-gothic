@@ -12,13 +12,14 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict, skip_coordinate):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule):
         redo_travel=False
         check_first_point = False
 
         # default: 1.33(small,inside), 1.49(large,outside)
-        SLIDE_10_PERCENT_MIN = 0.70
-        SLIDE_10_PERCENT_MAX = 1.89
+        # MIN 的值，設在 0.80 以下，「幺」的內角會套到。
+        SLIDE_10_PERCENT_MIN = 0.79
+        SLIDE_10_PERCENT_MAX = 1.80
 
         # default: x.x (large 女), x.xx (small 女), 0.30 - 0.53(下半扁女）
         #SLIDE_0_PERCENT_MIN = 2.0
@@ -29,7 +30,7 @@ class Rule(Rule.Rule):
 
         SLIDE_30_PERCENT_MIN = 0.20
         SLIDE_30_PERCENT_MAX = 0.80
-        
+
         # default: x.x - x.x (large 女), x.x (small 女), 0.89-1.15(下半扁女）
         #SLIDE_1_PERCENT_MIN = 2.0
         #SLIDE_1_PERCENT_MAX = 1.88
@@ -39,7 +40,7 @@ class Rule(Rule.Rule):
 
         SLIDE_31_PERCENT_MIN = 0.70
         SLIDE_31_PERCENT_MAX = 1.35
-        
+
         # default: x.x - x.x (large 女), x.x (small 女), 0.78-0.97(下半扁女）
         #SLIDE_2_PERCENT_MIN = 2.0
         #SLIDE_2_PERCENT_MAX = 1.38
@@ -50,7 +51,7 @@ class Rule(Rule.Rule):
         SLIDE_32_PERCENT_MIN = 0.58
         SLIDE_32_PERCENT_MAX = 1.17
 
-        # 戶 左上角。因為2邊都被套用 round curve. 
+        # 戶 左上角。因為2邊都被套用 round curve.
         # default: 1.41
         SLIDE_40_PERCENT_MIN = 1.88
         SLIDE_40_PERCENT_MAX = 1.99
@@ -83,7 +84,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[261,28]]
+                    debug_coordinate_list = [[263,776]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -92,7 +93,7 @@ class Rule(Rule.Rule):
                     for debug_idx in range(8):
                         print(debug_idx-2,": values#5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
-                # 這個效果滿好玩的，「口」會變成二直，二圓。            
+                # 這個效果滿好玩的，「口」會變成二直，二圓。
                 if self.config.PROCESS_MODE in ["HALFMOON"]:
                     idx_previuos = (idx -1 + nodes_length) % nodes_length
                     if [format_dict_array[idx_previuos]['x'],format_dict_array[idx_previuos]['y']] in skip_coordinate:
@@ -100,7 +101,13 @@ class Rule(Rule.Rule):
 
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
                     if is_debug_mode:
-                        print("match skip dot +0:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
+                        print("match skip dot +0:",[format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']])
+                        pass
+                    continue
+
+                if format_dict_array[idx]['code'] in skip_coordinate_rule:
+                    if is_debug_mode:
+                        print("match skip skip_coordinate_rule +0:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
                         pass
                     continue
 
@@ -313,7 +320,7 @@ class Rule(Rule.Rule):
                 #+1 : values for rule5:  495 471 448 555 396 629 c 1 -( 190 )
                 #+2 : values for rule5:  437 694 464 745 488 796 c 1 -( 52 )
                 LONG_EDGE_DISTANCE=110
-                
+
                 # PS: >= 0.01 很可怕，ex:「叔」系列。
                 DISTANCE_IN_LINE_ACCURACY = 0.001
 
@@ -330,7 +337,7 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+1)%nodes_length]['distance'] >= LONG_EDGE_DISTANCE:
                             # maybe tranformed by our small curve
                             #if format_dict_array[(idx+2)%nodes_length]['match_stroke_width']:
-                            
+
                             # for 「㚢」
                             #if format_dict_array[(idx+2)%nodes_length]['distance'] <= self.config.STROKE_WIDTH_MAX:
                             if True:
@@ -357,7 +364,8 @@ class Rule(Rule.Rule):
                                                     #print("mom I am here.")
                                                     is_match_convert_l_direction = True
 
-                
+
+                #print("is_match_convert_l_direction:", is_match_convert_l_direction)
                 if is_match_convert_l_direction:
                     if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                         x1=format_dict_array[(idx+0)%nodes_length]['x']
@@ -379,7 +387,7 @@ class Rule(Rule.Rule):
                             # [IMPORTANT] if change code, must triger check_first_point=True
                             check_first_point=True
 
-                    if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':                                                    
+                    if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
                         x1=format_dict_array[(idx+1)%nodes_length]['x']
                         y1=format_dict_array[(idx+1)%nodes_length]['y']
                         x2=format_dict_array[(idx+2)%nodes_length]['x']
@@ -471,7 +479,7 @@ class Rule(Rule.Rule):
                 # [IMPORTANT] 這條線以下，不要增追加可能的 case, 開始做排除
                 # =============================================
 
- 
+
                 # compare distance, muse large than our "large round"
                 if is_match_pattern:
                     fail_code = 200
@@ -487,15 +495,23 @@ class Rule(Rule.Rule):
                 y1 = format_dict_array[(idx+1)%nodes_length]['y']
                 x2 = format_dict_array[(idx+2)%nodes_length]['x']
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
-                
+
                 # use more close coordinate.
                 #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
                 if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-                    x0 = format_dict_array[(idx+1)%nodes_length]['x2']
-                    y0 = format_dict_array[(idx+1)%nodes_length]['y2']
+                    x_from = x0
+                    y_from = y0
+                    x_center = format_dict_array[(idx+1)%nodes_length]['x2']
+                    y_center = format_dict_array[(idx+1)%nodes_length]['y2']
+                    x0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+                    y0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
                 if format_dict_array[(idx+2)%nodes_length]['t']=='c':
-                    x2 = format_dict_array[(idx+2)%nodes_length]['x1']
-                    y2 = format_dict_array[(idx+2)%nodes_length]['y1']
+                    x_from = x2
+                    y_from = y2
+                    x_center = format_dict_array[(idx+2)%nodes_length]['x1']
+                    y_center = format_dict_array[(idx+2)%nodes_length]['y1']
+                    x2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+                    y2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
                 #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
 
                 previous_x,previous_y=0,0
@@ -515,8 +531,8 @@ class Rule(Rule.Rule):
                         print("slide_percent 1:", slide_percent_1)
                         print("data end:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
                         print("data virtual:",x0,y0,x1,y1,x2,y2)
-    
-                    if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:                    
+
+                    if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:
                         is_match_pattern = True
 
 
@@ -561,6 +577,15 @@ class Rule(Rule.Rule):
                                             is_match_pattern = False
 
 
+                # data been overwrite by pre-format code.
+                x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                x1 = format_dict_array[(idx+1)%nodes_length]['x']
+                y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                # PS: to test inside_stroke_flag, please use real position instead of x1,y1.
+
                 # compare distance, muse large than our "large round"
                 is_apply_large_corner = False
 
@@ -568,12 +593,18 @@ class Rule(Rule.Rule):
                     fail_code = 400
                     is_match_pattern = False
 
-                    inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
+                    stroke_debug_mode = False
+                    #stroke_debug_mode = True      # debug.
+
+                    inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict, debug_mode=stroke_debug_mode)
                     #print(idx,"debug rule1+0:",format_dict_array[idx]['code'])
                     #print(idx,"debug rule1+3:",format_dict_array[(idx+3)%nodes_length]['code'])
                     #print("x1=%d\ny1=%d\nx2=%d\ny2=%d\nx3=%d\ny3=%d" % (previous_x, previous_y, x1, y1, next_x, next_y))
                     #print("y_offset=", self.bmp_y_offset)
-                    #print("inside_stroke_flag:", inside_stroke_flag)
+
+                    if is_debug_mode:
+                        print("inside_stroke_flag:", inside_stroke_flag)
+                        print('data:', x0, y0, x1, y1, x2, y2)
 
                     if inside_stroke_flag:
                         # match outside large conver.
@@ -582,17 +613,30 @@ class Rule(Rule.Rule):
                         is_apply_large_corner = True
                         is_match_pattern = True
                     else:
+                        fail_code = 410
                         # 使用圖片去猜，會有遇到 X 這種斜邊的判斷，有點難。
                         # 改用手動輸入的 default stroke width 來判斷 line join.
 
-                        join_flag = self.join_line_check(x0,y0,x1,y1,x2,y2)
-                        #print("check1_flag:",join_flag)
-                        if not join_flag:
-                            join_flag = self.join_line_check(x2,y2,x1,y1,x0,y0)
-                            #print("check2_flag:",join_flag)
-                            pass
+                        join_debug_mode = False
+                        #join_debug_mode = True      # debug.
 
-                        #print("final join flag:", join_flag)
+                        join_flag = self.join_line_check(x0,y0,x1,y1,x2,y2, debug_mode=join_debug_mode)
+                        join_flag_1 = join_flag
+                        join_flag_2 = None
+                        if not join_flag:
+                            fail_code = 420
+                            join_flag = self.join_line_check(x2,y2,x1,y1,x0,y0)
+                            join_flag_2 = join_flag
+                            pass
+                        
+                        #if False:
+                        if is_debug_mode:
+                            print("join_flag_1:",join_flag_1)
+                            print("join_flag_1 data:",x0,y0,x1,y1,x2,y2)
+                            print("join_flag_2:",join_flag_2)
+                            print("join_flag_2 data:",x2,y2,x1,y1,x0,y0)
+                            print("final join flag:", join_flag)
+
                         if not join_flag:
                             #print("match small coner")
                             #print(idx,"small rule5:",format_dict_array[idx]['code'])
@@ -627,11 +671,16 @@ class Rule(Rule.Rule):
 
                     # cache transformed nodes.
                     # we generated nodes
-                    # 因為只有作用在2個coordinate. 
+                    # 因為只有作用在2個coordinate.
                     if self.config.PROCESS_MODE in ["HALFMOON"]:
                         # 加了這行，會讓「口」的最後一個角，無法套到。
                         skip_coordinate.append([previous_x,previous_y])
                         pass
+
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                    skip_coordinate_rule.append(generated_code)
 
 
                     check_first_point = True
@@ -652,4 +701,4 @@ class Rule(Rule.Rule):
             # check close path.
             self.reset_first_point(format_dict_array, spline_dict)
 
-        return redo_travel, resume_idx, inside_stroke_dict, skip_coordinate
+        return redo_travel, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule

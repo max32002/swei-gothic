@@ -21,6 +21,7 @@ class Convertor():
         # return field.
         stroke_dict = {}
         encoding_string = None
+        width_string = None
         
         dot_dict = {}
         dots_array = []
@@ -31,6 +32,9 @@ class Convertor():
 
         code_encoding_string = 'Encoding: '
         code_encoding_string_length = len(code_encoding_string)
+
+        code_width_string = 'Width: '
+        code_width_string_length = len(code_width_string)
 
         code_begin_string = 'SplineSet'
         code_begin_string_length = len(code_begin_string)
@@ -45,6 +49,9 @@ class Convertor():
         for x_line in myfile:
             if code_encoding_string == x_line[:code_encoding_string_length]:
                 encoding_string = x_line[code_encoding_string_length:]
+
+            if code_width_string == x_line[:code_width_string_length]:
+                width_string = x_line[code_width_string_length:].strip()
 
             if not is_code_flag:
                 # check begin.
@@ -154,7 +161,7 @@ class Convertor():
                 dots_array.append(dot_dict)
 
         myfile.close()
-        return stroke_dict, encoding_string
+        return stroke_dict, encoding_string, width_string
 
     def write_to_file(self, filename_input, stroke_dict, readonly):
         filename_input_new = filename_input + ".tmp"
@@ -215,7 +222,7 @@ class Convertor():
         
         stroke_dict = {}
         encoding_string = None
-        stroke_dict, encoding_string = self.load_to_memory(filename_input)
+        stroke_dict, encoding_string, width_string = self.load_to_memory(filename_input)
         
         unicode_int = -1
         if not encoding_string is None:
@@ -238,28 +245,61 @@ class Convertor():
                         print("exported image not exist:", bmp_path)
                         pass
         
+        width_int = -1
+        if len(width_string) > 0:
+            width_int = int(width_string)
+            #print("glyph width:", width_int)
+            if width_int <= 0:
+                # do nothing.
+                unicode_int = -1
 
-        self.sp.assign_config(self.config)
-        #print("trace file:", filename_input)
-        #print("stroke_dict:", stroke_dict)
+            #if width_int <= 990:
+                #unicode_int = -1
 
-        #for debug input date is correct.
-        '''
-        for key in stroke_dict.keys():
-            spline_dict = stroke_dict[key]
-            print("key:", key, 'code:', spline_dict['dots'][0])
-            #print("spline_dict:", spline_dict)
-            for dot_dict in spline_dict['dots']:
-                new_line = dot_dict['code']
-                print("code:", new_line)
-        '''
+        # special range only
+        # 中日韓統一表意文字擴充區A, 3400 – U+4DBF
+        # CJK Unified Ideographs, 4E00 - U+9FFF
+        # 中日韓統一表意文字擴充區B, U+20000 – U+2A6DF
+        # 中日韓統一表意文字擴展區G, U+30000 – U+3134F
+        #print("unicode_int:", unicode_int)
+        convert_range_list = [['3400','9FFF'],['20000','3134F']]
+        convert_target_range = False
+        #convert_target_range = True     # not full scan, debug purpose.
+        if convert_target_range:
+            is_match_convert_target = False
 
-        stroke_dict = self.sp.trace(stroke_dict, unicode_int, bmp_image)
+            for r in convert_range_list:
+                if unicode_int >= int(r[0],16) and unicode_int<=int(r[1],16):
+                    is_match_convert_target = True
+                if is_match_convert_target:
+                    break
+            #print("is_match_convert_target:", is_match_convert_target)
+            if not is_match_convert_target:
+                unicode_int = -1
 
-        if not stroke_dict is None:
-            #print("write to file:", filename_input)
-            self.write_to_file(filename_input,stroke_dict,readonly)
-            stroke_dict = None
+        if unicode_int > 0: 
+            self.sp.assign_config(self.config)
+            #print("trace file:", filename_input)
+            #print("stroke_dict:", stroke_dict)
+
+            #for debug input date is correct.
+            '''
+            for key in stroke_dict.keys():
+                spline_dict = stroke_dict[key]
+                print("key:", key, 'code:', spline_dict['dots'][0])
+                #print("spline_dict:", spline_dict)
+                for dot_dict in spline_dict['dots']:
+                    new_line = dot_dict['code']
+                    print("code:", new_line)
+            '''
+
+            stroke_dict = self.sp.trace(stroke_dict, unicode_int, bmp_image)
+
+            if not stroke_dict is None:
+                #print("write to file:", filename_input)
+                self.write_to_file(filename_input,stroke_dict,readonly)
+                stroke_dict = None
+                ret = True
 
         return ret
 

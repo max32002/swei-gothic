@@ -32,19 +32,21 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
-                #print(idx,": debug rule14:",format_dict_array[idx]['code'])
+                is_debug_mode = False
+                #is_debug_mode = True
 
-                #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']]==[341,405]) :
-                    #continue
-
-                #if True:
-                if False:
-                    print("-" * 20)
-                    for debug_idx in range(6):
-                        print(debug_idx-2,": values for rule5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+                if is_debug_mode:
+                    debug_coordinate_list = [[525,666]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        #continue
+                        pass
+                    else:
+                        print("="*30)
+                        print("index:", idx)
+                        for debug_idx in range(8):
+                            print(debug_idx-2,": val#14:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 is_match_pattern = False
-
 
                 x0 = format_dict_array[idx]['x']
                 y0 = format_dict_array[idx]['y']
@@ -71,19 +73,36 @@ class Rule(Rule.Rule):
                     distance_1 = format_dict_array[idx]['distance']
                     distance_2 = format_dict_array[idx_next1]['distance']
                     distance_full = spline_util.get_distance(x0,y0,x2,y2)
-                    #print("distance 1,2,3:",distance_1,distance_2,distance_full)
+                    if is_debug_mode:
+                        print("distance_full:",distance_full)
+                        print("distance 1,2,(sum):",distance_1,distance_2,(distance_1+distance_2))
+                        print("EUQAL_ACCURACY:", EUQAL_ACCURACY)
                     #is_match_pattern = True
                     if abs(distance_full - (distance_1+distance_2)) <= EUQAL_ACCURACY:
                         is_match_pattern = True
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code #14:", fail_code)
-                    pass
+                if is_match_pattern:
+                    fail_code = 300
+                    is_match_pattern = False
+                    slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                    if is_debug_mode:
+                        print("slide_percent 1:", slide_percent_1)
+                        print("slide_percent 1 dat:", format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+
+                    if slide_percent_1 >= 1.99 and slide_percent_1 >= 1.99:
+                        is_match_pattern = True
+
+
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,"debug fail_code #14:", fail_code)
+                    else:
+                        print("="*30)
+                        print("match rule #14:",idx)
+                        print("currence code+0:", format_dict_array[idx]['code'])
+                        print("currence code+1:", format_dict_array[idx_next1]['code'])
 
                 if is_match_pattern:
-                    #print("match rule #14")
-                    #print(idx,": debug rule14:",format_dict_array[idx]['code'])
-
                     del format_dict_array[idx_next1]
 
                     redo_travel=True

@@ -46,22 +46,20 @@ class Rule(Rule.Rule):
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
                     continue
 
-                is_match_pattern = False
+                is_debug_mode = False
+                #is_debug_mode = True
 
-                #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']]==[740, -7]):
-                    #continue
+                if is_debug_mode:
+                    debug_coordinate_list = [[905,472]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
 
-                #print("-"*20)
-                #print(idx,"debug rule3:",format_dict_array[idx]['code'])
-                
-                #if format_dict_array[(idx+0)%nodes_length]['x']==804:
-                if False:
-                #if True:
                     print("="*30)
                     print("index:", idx)
-                    for debug_idx in range(6):
-                        print(debug_idx-2,"values for rule3:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": val#3:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
+                is_match_pattern = False
 
                 # 格式化例外：.31881 「閒」的上面的斜線。
                 # convert ?cc? => ?cl?
@@ -207,22 +205,15 @@ class Rule(Rule.Rule):
                     if inside_stroke_flag1 or inside_stroke_flag2:
                         is_match_pattern = True
 
-                if not is_match_pattern:
-                    #print(idx,"debug fail_code3:", fail_code)
-                    pass
+                if is_debug_mode:
+                    if not is_match_pattern:
+                        print(idx,"debug fail_code #3:", fail_code)
+                    else:
+                        print("match rule #3:",idx)
 
                 if is_match_pattern:
                     #print("match rule #3")
                     #print(idx,": debug rule3:",format_dict_array[idx]['code'])
-                    
-                    if False:
-                    #if True:
-                    #if format_dict_array[idx]['x']==831:
-                        print("#"*40)
-                        for debug_idx in range(6):
-                            target_idx = (idx+debug_idx+nodes_length-2)%nodes_length
-                            print(debug_idx-2,": values for rule1:",format_dict_array[target_idx]['code'])
-                            print("...direction x,y:",format_dict_array[target_idx]['x_direction'],',',format_dict_array[target_idx]['y_direction'], '==' ,format_dict_array[target_idx]['distance'])
                     
                     center_x,center_y = self.apply_round_transform(format_dict_array,idx)
 

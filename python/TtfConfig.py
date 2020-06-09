@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "1.042"
+    VERSION = "1.045"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
 
@@ -20,9 +20,10 @@ class TtfConfig():
     STROKE_MIN = 34
 
     # for X,Y axis equal compare.
-    # each 100 px, +- 8 px.
+    # each 100 px, +- 7 px.
+    # PS: 大於等於8，其實滿可怕的。
     EQUAL_ACCURACY_MIN = 3
-    EQUAL_ACCURACY_PERCENT = 0.08
+    EQUAL_ACCURACY_PERCENT = 0.07
 
     # for Regular
     ROUND_OFFSET = 33

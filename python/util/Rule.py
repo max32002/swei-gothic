@@ -3,6 +3,7 @@
 
 from . import spline_util
 
+import os
 import cv2
 import numpy as np
 
@@ -86,7 +87,7 @@ class Rule():
     # test triangle but only near center conver pixels.
     # Save resule to cache.
     # PS: x2,y2 is center coordinate.
-    def test_inside_coner(self, x1, y1, x2, y2, x3, y3, coner_offset, inside_stroke_dict):
+    def test_inside_coner(self, x1, y1, x2, y2, x3, y3, coner_offset, inside_stroke_dict, debug_mode = False):
         previous_x,previous_y=spline_util.two_point_extend(x1,y1,x2,y2,-1 * coner_offset)
         next_x,next_y=spline_util.two_point_extend(x3,y3,x2,y2,-1 * coner_offset)
         inside_stroke_key = "%d,%d_%d,%d_%d,%dx%d" % (previous_x, previous_y, x1, y1, next_x, next_y, coner_offset)
@@ -94,12 +95,12 @@ class Rule():
             inside_stroke_flag = inside_stroke_dict[inside_stroke_key]
         else:
             # start to parse.
-            inside_stroke_flag = self.is_inside_triangle(previous_x,previous_y,x2,y2,next_x,next_y)
+            inside_stroke_flag = self.is_inside_triangle(previous_x,previous_y,x2,y2,next_x,next_y, debug_mode=debug_mode)
         return inside_stroke_flag,inside_stroke_dict
 
     # for triangle
     # only test center point.
-    def is_inside_triangle(self, x1, y1, x2, y2, x3, y3):
+    def is_inside_triangle(self, x1, y1, x2, y2, x3, y3, debug_mode=False):
         ret = True
 
         if not self.bmp_image is None:
@@ -112,7 +113,6 @@ class Rule():
 
             center_x = int((x1+x3)/2)
             center_y = int((y1+y3)/2)
-            #print("center_x,y:",center_x,center_y)
 
             bmp_x = self.ff_x_to_bmp_x(center_x)
             bmp_y = self.ff_y_to_bmp_y(center_y)
@@ -126,9 +126,15 @@ class Rule():
             if bmp_y >= bottom:
                 bmp_y = bottom
 
-            #print("bmp_x,y:",bmp_x,bmp_y)
             data=self.bmp_image.getpixel((bmp_x, bmp_y))
-            #print("data:", data)
+
+            if debug_mode:
+                print("center_x,y:",center_x,center_y)
+                print("bmp_x,y:",bmp_x,bmp_y)
+                print("bmp x_offset:", self.bmp_x_offset)
+                print("bmp y_offset:", self.bmp_y_offset)
+                print("data:", data)
+
             if data>=128:
                 ret=False
         else:
@@ -232,6 +238,10 @@ class Rule():
             coner_offset = 10
 
             if debug_mode:
+                filename = "U_%s.bmp" % (self.unicode_int)
+                bmp_path = os.path.join(self.config.BMP_PATH, filename)
+                print("bmp_path:", bmp_path)
+                print("image file:")
                 print("test coordinate:", x0,y0, "-" , x1,y1, "-", x2,y2)
 
             # prepare the get-pixel environment.
@@ -564,11 +574,20 @@ class Rule():
         # use more close coordinate.
         #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            x0 = format_dict_array[(idx+1)%nodes_length]['x2']
-            y0 = format_dict_array[(idx+1)%nodes_length]['y2']
+            x_from = x0
+            y_from = y0
+            x_center = format_dict_array[(idx+1)%nodes_length]['x2']
+            y_center = format_dict_array[(idx+1)%nodes_length]['y2']
+            x0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+            y0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
         if format_dict_array[(idx+2)%nodes_length]['t']=='c':
-            x2 = format_dict_array[(idx+2)%nodes_length]['x1']
-            y2 = format_dict_array[(idx+2)%nodes_length]['y1']
+            x_from = x2
+            y_from = y2
+            x_center = format_dict_array[(idx+2)%nodes_length]['x1']
+            y_center = format_dict_array[(idx+2)%nodes_length]['y1']
+            x2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+            y2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
+        #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
 
         # generate small coner.
         # 這是較佳的長度，但是可能會「深入」筆畫裡。
@@ -580,7 +599,6 @@ class Rule():
             previous_x,previous_y=orig_x0,orig_y0
         if format_dict_array[(idx+1)%nodes_length]['distance'] < round_offset:
             next_x,next_y=orig_x2,orig_y2
-
 
         previous_x_offset = x1 - previous_x
         previous_y_offset = y1 - previous_y
@@ -605,8 +623,21 @@ class Rule():
         if format_dict_array[(idx+1)%nodes_length]['t']=="c":
             # 內縮，造成奇怪的曲線。
 
+            # for case 「㐉」的丁.
+            # 如果 x1,y1=x,y, 順便調整另一組。
+            if old_code_array[1] == old_code_array[5] and old_code_array[2] == old_code_array[6]:
+                old_code_array[1] = str(previous_x)
+                old_code_array[2] = str(previous_y)
+
+            # 套用修改前，如果 x1,y1=x2,y2, 順便調整另一組。
+            if old_code_array[1] == old_code_array[3] and old_code_array[2] == old_code_array[4]:
+                #print("match x1,y1=x2,y2:", old_code_string)
+                old_code_array[1] = str(int(float(old_code_array[3]))-previous_x_offset)
+                old_code_array[2] = str(int(float(old_code_array[4]))-previous_y_offset)
+
             old_code_array[3] = str(int(float(old_code_array[3]))-previous_x_offset)
             old_code_array[4] = str(int(float(old_code_array[4]))-previous_y_offset)
+
 
             old_code_array[5] = str(previous_x)
             old_code_array[6] = str(previous_y)
@@ -645,21 +676,11 @@ class Rule():
                 print("orig xy3:", orig_x3, orig_y3)
                 print("xy2 offset:", x2_offset, y2_offset)
 
-            # from top move to bottom, check overflow.
-            if y2_offset < 0:
-                if extend_offset_y < orig_y3:
-                    extend_offset_y = orig_y3
-            # bottom to top.
-            if y2_offset > 0:
-                if extend_offset_y > orig_y3:
-                    extend_offset_y = orig_y3
-            # from right move to left.
-            if x2_offset < 0:
-                if extend_offset_x < orig_x3:
-                    extend_offset_x = orig_x3
-            if x2_offset > 0:
-                if extend_offset_x > orig_x3:
-                    extend_offset_x = orig_x3
+            # 套用修改前，如果 x1,y1=x2,y2, 順便調整另一組。
+            if old_code_array[1] == old_code_array[3] and old_code_array[2] == old_code_array[4]:
+                #print("match x1,y1=x2,y2:", old_code_string)
+                old_code_array[1] = str(extend_offset_x)
+                old_code_array[2] = str(extend_offset_x)
 
             old_code_array[1] = str(extend_offset_x)
             old_code_array[2] = str(extend_offset_y)
@@ -669,7 +690,9 @@ class Rule():
 
             new_code = ' '.join(old_code_array)
             format_dict_array[(idx+2)%nodes_length]['code'] = new_code
-    
+            #print("old +2 code:", old_code_string)
+            #print("update +2 code:", new_code)
+
 
         # append new #2
         # strong version
@@ -690,6 +713,7 @@ class Rule():
 
         insert_idx = (idx+2)%nodes_length
         format_dict_array.insert(insert_idx, dot_dict)
+        
         #print("insert to index:",insert_idx)
         #print("appdend +3 new_code:", new_code)
 
@@ -726,11 +750,20 @@ class Rule():
         # use more close coordinate.
         #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            x0 = format_dict_array[(idx+1)%nodes_length]['x2']
-            y0 = format_dict_array[(idx+1)%nodes_length]['y2']
+            x_from = x0
+            y_from = y0
+            x_center = format_dict_array[(idx+1)%nodes_length]['x2']
+            y_center = format_dict_array[(idx+1)%nodes_length]['y2']
+            x0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+            y0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
         if format_dict_array[(idx+3)%nodes_length]['t']=='c':
-            x3 = format_dict_array[(idx+3)%nodes_length]['x1']
-            y3 = format_dict_array[(idx+3)%nodes_length]['y1']
+            x_from = x3
+            y_from = y3
+            x_center = format_dict_array[(idx+3)%nodes_length]['x1']
+            y_center = format_dict_array[(idx+3)%nodes_length]['y1']
+            x3 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x2,y2),spline_util.get_distance(x_center,y_center,x2,y2),x_from,x_center,x2)
+            y3 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x2,y2),spline_util.get_distance(x_center,y_center,x2,y2),y_from,y_center,y2)
+        #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
 
         # 斜線上的「內縮」的新坐標。
         # 這是較佳的長度，但是可能會「深入」筆畫裡。
@@ -802,6 +835,10 @@ class Rule():
             format_dict_array[(idx+3)%nodes_length]['x1']=extend_offset_x
             format_dict_array[(idx+3)%nodes_length]['y1']=extend_offset_y
 
+            # 如果 x1,y1=x2,y2, 順便調整另一組。
+            if old_code_array[1] == old_code_array[3] and old_code_array[2] == old_code_array[4]:
+                old_code_array[3] = str(extend_offset_x)
+                old_code_array[4] = str(extend_offset_y)
 
             # 調整 +3 的 x2,y2
 
@@ -820,32 +857,6 @@ class Rule():
             if after_extend_distance < before_extend_distance:
                 # 調整強度的百分比。
                 extend_offset_x,extend_offset_y = spline_util.two_point_extend(extend_offset_x,extend_offset_y,orig_x3,orig_y3,-1 * after_extend_distance)
-            
-            '''
-            if format_dict_array[idx]['y_direction'] > 0:
-                # to top, check overflow.
-                if extend_offset_y < orig_y3:
-                    extend_offset_y = orig_y3
-                if extend_offset_y > new_y2:
-                    extend_offset_y = new_y2
-            else:
-                if extend_offset_y > orig_y3:
-                    extend_offset_y = orig_y3
-                if extend_offset_y < new_y2:
-                    extend_offset_y = new_y2
-            if format_dict_array[idx]['x_direction'] > 0:
-                # to right, check overflow.
-                if extend_offset_x < orig_x3:
-                    extend_offset_x = orig_x3
-                if extend_offset_x > new_x2:
-                    extend_offset_x = new_x2
-            else:
-                # between is better...
-                if extend_offset_x > orig_x3:
-                    extend_offset_x = orig_x3
-                if extend_offset_x < new_x2:
-                    extend_offset_x = new_x2
-            '''
 
             old_code_array[3] = str(extend_offset_x)
             old_code_array[4] = str(extend_offset_y)
@@ -853,44 +864,11 @@ class Rule():
             format_dict_array[(idx+3)%nodes_length]['x2']=extend_offset_x
             format_dict_array[(idx+3)%nodes_length]['y2']=extend_offset_y
 
-
             new_code = ' '.join(old_code_array)
             format_dict_array[(idx+3)%nodes_length]['code'] = new_code
             #print("before code:", old_code_string)
             #print("new_code code:", new_code)
 
-        # 下面是腦筋打結時寫的程式，我也不清楚在寫什麼。
-        '''
-        if format_dict_array[(idx+3)%nodes_length]['t']=='c':
-            #print("checking next curve...")
-            is_wrong_direction = False
-
-            curvy1_x1=format_dict_array[(idx+3)%nodes_length]['x1']
-            curvy1_y1=format_dict_array[(idx+3)%nodes_length]['y1']
-            #print("curvy1_x1:",curvy1_x1,curvy1_y1)
-
-            if format_dict_array[(idx+0)%nodes_length]['x_direction']>0:
-                # go right.
-                if curvy1_x1 > new_x2:
-                    is_wrong_direction = True
-
-            if format_dict_array[(idx+0)%nodes_length]['x_direction']<0:
-                # go left.
-                if curvy1_x1 < new_x2:
-                    is_wrong_direction = True
-
-            #print("is_wrong_direction:",is_wrong_direction)
-            if is_wrong_direction:
-                format_dict_array[(idx+3)%nodes_length]['x1']=new_x2
-                format_dict_array[(idx+3)%nodes_length]['y1']=new_y2
-
-                old_code_string = format_dict_array[(idx+3)%nodes_length]['code']
-                old_code_array = old_code_string.split(' ')
-                old_code_array[1] = str(new_x2)
-                old_code_array[2] = str(new_y2)
-                new_code = ' '.join(old_code_array)
-                format_dict_array[(idx+3)%nodes_length]['code'] = new_code
-        '''
         
         # update #1
         #print("self.config.PROCESS_MODE:", self.config.PROCESS_MODE)
@@ -901,9 +879,33 @@ class Rule():
 
             old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
             old_code_array = old_code_string.split(' ')
-            
+
             # this should not happen in this rule, because dot-1 must match "l"
             if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+
+                # 內縮，造成奇怪的曲線。
+                # strong offset
+                #extend_offset_x = int(old_code_array[1])+ int(x2_offset/1)
+                #extend_offset_y = int(old_code_array[2])+ int(y2_offset/1)
+                
+                # soft offset
+                extend_offset_x = int(float(old_code_array[3]))+ int(x1_offset/2)
+                extend_offset_y = int(float(old_code_array[4]))+ int(y1_offset/2)
+
+
+                # 如果 x1,y1=x,y, 順便調整另一組。
+                if old_code_array[1] == old_code_array[3] and old_code_array[2] == old_code_array[4]:
+                    old_code_array[1] = str(extend_offset_x)
+                    old_code_array[2] = str(extend_offset_y)
+
+                old_code_array[3] = str(extend_offset_x)
+                old_code_array[4] = str(extend_offset_y)
+
+                # 如果 x1,y1=x,y, 順便調整另一組。
+                if old_code_array[1] == old_code_array[5] and old_code_array[2] == old_code_array[6]:
+                    old_code_array[1] = str(new_x1)
+                    old_code_array[2] = str(new_y1)
+
                 old_code_array[5] = str(new_x1)
                 old_code_array[6] = str(new_y1)
             else:
@@ -1053,3 +1055,23 @@ class Rule():
                         is_match_pattern = True
 
         return is_match_pattern, fail_code
+
+    def compute_curve_new_x1(self,x_distance_full,x_distance_diff,x0_from,x0_center,x1):
+        # 角度的影響，修改為取決於距離長度。
+        if x_distance_full == 0:
+            x_distance_full = 1
+
+        # 全部用到 x0_center
+        # PS: x_distance_diff 也許會大於 x_distance_full
+        x_percent = 1.0
+        if x_distance_diff < 0.4 * x_distance_full:
+            if x_distance_diff < 0.1 * x_distance_full:
+                # 省略
+                x_percent = 0.0
+            else:
+                x_percent = x_distance_diff / x_distance_full
+        x_offset = x0_center - x0_from
+        x0 = int(x0_from + x_offset * x_percent)
+        return x0
+
+

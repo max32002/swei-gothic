@@ -18,9 +18,9 @@ class Rule(Rule.Rule):
         # default: 1.33(small,inside), 1.49(large,outside)
         SLIDE_1_PERCENT_MIN = 1.08
         SLIDE_1_PERCENT_MAX = 1.58
-        # default: 1.70(small,inside), 1.78(large,outside)
+        # default: 1.70(small,inside), 1.78-1.96(邋,908B)(large,outside)
         SLIDE_2_PERCENT_MIN = 1.50
-        SLIDE_2_PERCENT_MAX = 1.90
+        SLIDE_2_PERCENT_MAX = 1.99
         # default: 1.36(small,inside), 1.84(large,outside)
         SLIDE_3_PERCENT_MIN = 1.25
         SLIDE_3_PERCENT_MAX = 1.90
@@ -48,7 +48,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[755,142]]
+                    debug_coordinate_list = [[447,686]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 

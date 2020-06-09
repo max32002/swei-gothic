@@ -266,18 +266,22 @@ class Spline():
         from . import Rule4_Curve_Coner
         ru4=Rule4_Curve_Coner.Rule()
         ru4.assign_config(self.config)
+        ru4.assign_unicode(unicode_int)
 
         from . import Rule10_Clean_Noise
         ru10=Rule10_Clean_Noise.Rule()
         ru10.assign_config(self.config)
+        ru10.assign_unicode(unicode_int)
         
         from . import Rule14_Merge_Line
         ru14=Rule14_Merge_Line.Rule()
         ru14.assign_config(self.config)
+        ru14.assign_unicode(unicode_int)
 
         from . import Rule6_Almost_Line_Curve
         ru6=Rule6_Almost_Line_Curve.Rule()
         ru6.assign_config(self.config)
+        ru6.assign_unicode(unicode_int)
 
         spline_dict = stroke_dict[key]
 
@@ -343,52 +347,54 @@ class Spline():
         ru1=Rule1_Row.Rule()
         ru1.assign_config(self.config)
         ru1.assign_bmp(bmp_image, y_offset=y_offset)
+        ru1.assign_unicode(unicode_int)
 
         from . import Rule2_Column
         ru2=Rule2_Column.Rule()
         ru2.assign_config(self.config)
         ru2.assign_bmp(bmp_image, y_offset=y_offset)
+        ru2.assign_unicode(unicode_int)
 
         from . import Rule3_Water
         ru3=Rule3_Water.Rule()
         ru3.assign_config(self.config)
         ru3.assign_bmp(bmp_image, y_offset=y_offset)
+        ru3.assign_unicode(unicode_int)
 
         from . import Rule7_Little_Cap
         ru7=Rule7_Little_Cap.Rule()
         ru7.assign_config(self.config)
+        ru7.assign_unicode(unicode_int)
 
         from . import Rule8_Little_Tail
         ru8=Rule8_Little_Tail.Rule()
         ru8.assign_config(self.config)
+        ru8.assign_unicode(unicode_int)
 
         from . import Rule12_Small_Mouth
         ru12=Rule12_Small_Mouth.Rule()
         ru12.assign_config(self.config)
         ru12.assign_bmp(bmp_image, y_offset=y_offset)
+        ru12.assign_unicode(unicode_int)
 
         from . import Rule13_Small_Mouth_Flip
         ru13=Rule13_Small_Mouth_Flip.Rule()
         ru13.assign_config(self.config)
         ru13.assign_bmp(bmp_image, y_offset=y_offset)
+        ru13.assign_unicode(unicode_int)
 
         from . import Rule16_Curve_Tail
         ru16=Rule16_Curve_Tail.Rule()
         ru16.assign_config(self.config)
         ru16.assign_bmp(bmp_image, y_offset=y_offset)
+        ru16.assign_unicode(unicode_int)
 
         # PS: must apply this rule after all.
         from . import Rule21_Fix_Arrow
         ru21=Rule21_Fix_Arrow.Rule()
         ru21.assign_config(self.config)
         ru21.assign_bmp(bmp_image, y_offset=y_offset)
-
-
-        # PS: must apply this rule after all.
-        from . import Rule22_Fix_Left_Top_Hold
-        ru22=Rule22_Fix_Left_Top_Hold.Rule()
-        ru22.assign_config(self.config)
-        ru22.assign_bmp(bmp_image, y_offset=y_offset)
+        ru21.assign_unicode(unicode_int)
 
         # start process here.
         spline_dict = stroke_dict[key]
@@ -396,11 +402,12 @@ class Spline():
         # start to travel nodes for [RULE #16]
         # 已灣，且向後翹的尾巴。
         # PS: must before Rule#1+#2+3!
+        # PS: 這個己改用 Rule#2 來解決。但由於
         if DEBUG_CRASH_RULE:
             print("start Rule # 16...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+        #redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
@@ -445,6 +452,25 @@ class Spline():
                 print("occure bug at rule#13!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
         ru13 = None
+
+
+        # start to travel nodes for [RULE #7]
+        # PS: 應該比 1，2，3 早套用，還是晚套用，這個很難取捨。
+        if DEBUG_CRASH_RULE:
+            print("start Rule # 7...")
+        idx=-1
+        redo_travel=False   # Disable
+        redo_travel=True    # Enable
+        if DISABLE_ALL_RULE:
+            redo_travel=False
+            pass
+        redo_count=0
+        while redo_travel:
+            redo_count+=1
+            if redo_count==100:
+                print("occure bug at rule#7!")
+            redo_travel,idx,skip_coordinate=ru7.apply(spline_dict, idx,skip_coordinate)
+        ru7 = None
 
         if self.config.PROCESS_MODE in ["GOTHIC"]:
             # start to travel nodes for [RULE #8]
@@ -527,42 +553,6 @@ class Spline():
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru21.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
             ru21 = None
 
-            # start to travel nodes for [RULE #22]
-            # 
-            if DEBUG_CRASH_RULE:
-                print("start Rule # 22...")
-            idx=-1
-            redo_travel=False   # Disable
-            redo_travel=True    # Enable
-            if DISABLE_ALL_RULE:
-                redo_travel=False
-                pass
-            redo_count=0
-            while redo_travel:
-                redo_count+=1
-                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru22.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
-            ru22 = None
-
-        # start to travel nodes for [RULE #7]
-        # 
-        if DEBUG_CRASH_RULE:
-            print("start Rule # 7...")
-        idx=-1
-        redo_travel=False   # Disable
-        redo_travel=True    # Enable
-        if DISABLE_ALL_RULE:
-            redo_travel=False
-            pass
-        redo_count=0
-        while redo_travel:
-            redo_count+=1
-            if redo_count==100:
-                print("occure bug at rule#7!")
-            redo_travel,idx,skip_coordinate=ru7.apply(spline_dict, idx,skip_coordinate)
-        ru7 = None
-
-
-
         return inside_stroke_dict, skip_coordinate
 
 
@@ -574,11 +564,13 @@ class Spline():
         ru11=Rule11_Inside_Curve.Rule()
         ru11.assign_config(self.config)
         ru11.assign_bmp(bmp_image, y_offset=y_offset)
+        ru11.assign_unicode(unicode_int)
 
         from . import Rule99_Coner_Killer
         ru99=Rule99_Coner_Killer.Rule()
         ru99.assign_config(self.config)
         ru99.assign_bmp(bmp_image, y_offset=y_offset)
+        ru99.assign_unicode(unicode_int)
 
         spline_dict = stroke_dict[key]
 
@@ -594,20 +586,23 @@ class Spline():
         #if not key == 1:
             #return spline_dict
 
+        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
+
+        skip_coordinate_rule5 = []
+
         # start to travel nodes for [RULE #11]
         # check outside curve
         #print("start Rule # 11...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+        #redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
         while redo_travel:
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru11.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+            redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5=ru11.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5)
         ru11 = None
 
-        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
 
         # start to travel nodes for [RULE #99]
         # kill all small coner.
@@ -620,7 +615,7 @@ class Spline():
             pass
         while redo_travel:
             black_mode = False
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, black_mode)
+            redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5 =ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule5, black_mode)
         ru99 = None
 
         return spline_dict
@@ -636,11 +631,13 @@ class Spline():
         ru5=Rule5_Outside_Curve.Rule()
         ru5.assign_config(self.config)
         ru5.assign_bmp(bmp_image, y_offset=y_offset)
+        ru5.assign_unicode(unicode_int)
 
         from . import Rule99_Coner_Killer
         ru99=Rule99_Coner_Killer.Rule()
         ru99.assign_config(self.config)
         ru99.assign_bmp(bmp_image, y_offset=y_offset)
+        ru99.assign_unicode(unicode_int)
 
         spline_dict = stroke_dict[key]
 
@@ -672,8 +669,11 @@ class Spline():
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
+        
+        # cache skip coordinate, same transformed position should not do twice.
+        skip_coordinate_rule5 = []
         while redo_travel:
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru5.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule5=ru5.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule5)
         ru5 = None
 
 
@@ -690,7 +690,7 @@ class Spline():
                 pass
             while redo_travel:
                 black_mode = True
-                redo_travel,idx, inside_stroke_dict,skip_coordinate=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, black_mode)
+                redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule5, black_mode)
             ru99 = None
 
         return spline_dict

@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule):
         redo_travel=False
         check_first_point = False
 
@@ -43,12 +43,27 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+0:",format_dict_array[(idx+0)%nodes_length]['code'])
+                        pass
                     continue
 
                 # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
                 # for case.3122 上面的點。
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+2:",format_dict_array[(idx+2)%nodes_length]['code'])
+                        pass
+                    continue
+
+                if format_dict_array[idx]['code'] in skip_coordinate_rule:
+                    if is_debug_mode:
+                        print("match skip skip_coordinate_rule +0:",format_dict_array[idx]['code'])
+                        pass
                     continue
 
                 is_debug_mode = False
@@ -200,6 +215,11 @@ class Rule(Rule.Rule):
                         skip_coordinate.append([previous_x,previous_y])
                         pass
 
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                    #print("generated_code:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
+
                     check_first_point = True
                     redo_travel=True
 
@@ -217,4 +237,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate
+        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule

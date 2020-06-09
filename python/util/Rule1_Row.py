@@ -42,14 +42,14 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[816,413]]
+                    debug_coordinate_list = [[923,620]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
                     print("="*30)
                     print("index:", idx)
                     for debug_idx in range(8):
-                        print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+                        print(debug_idx-2,": val#1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 if [format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']] in skip_coordinate:
                     if is_debug_mode:
@@ -76,7 +76,6 @@ class Rule(Rule.Rule):
                         print("match skip dot +0:",[format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']])
                         pass
                     continue
-
 
                 is_match_pattern = False
 
@@ -133,7 +132,7 @@ class Rule(Rule.Rule):
                 # let special rule do it.
                 if is_match_pattern:
                     fail_code = 110
-                    
+
                     #print(idx,"debug rule1:",format_dict_array[idx]['code'])
                     # PS: just need check idx+0 & idx+2
                     for debug_idx in range(3):
@@ -145,12 +144,12 @@ class Rule(Rule.Rule):
                     #print(idx,"debug rule1:",format_dict_array[idx]['code'])
                     fail_code = 200
                     is_match_pattern = False
-                    
+
                     #print(idx,"stroke_width:",format_dict_array[(idx+1)%nodes_length]['match_stroke_width'])
                     #print(idx,"distance 1:",format_dict_array[(idx+1)%nodes_length]['distance'])
                     #print(idx,"y_equal_fuzzy 0:", format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy'])
                     #print(idx,"y_equal_fuzzy 2:", format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy'])
-                    
+
                     if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
                         if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
                             is_match_pattern = True
@@ -184,7 +183,7 @@ class Rule(Rule.Rule):
                                 distance_accuracy_max = distance_accuracy_1
                                 if distance_accuracy_2 > distance_accuracy_max:
                                     distance_accuracy_max = distance_accuracy_2
-                                
+
                                 if False:
                                     print("#1 compare x,y:", x_compare, y_compare)
                                     print("#1 compare distance:",  compare_distance)
@@ -192,7 +191,7 @@ class Rule(Rule.Rule):
                                     print("distance_diff:", distance_diff)
                                     print("#1 point-0 distance:",  format_dict_array[(idx+0)%nodes_length]['distance'])
                                     print("distance_accuracy:", distance_accuracy_max)
-                                
+
                                 if abs(distance_diff) <= distance_accuracy_max:
                                     is_match_pattern = True
                                 else:
@@ -264,17 +263,17 @@ class Rule(Rule.Rule):
                     bmp_y3 = format_dict_array[(idx+2)%nodes_length]['y']
                     bmp_x4 = format_dict_array[(idx+3)%nodes_length]['x']
                     bmp_y4 = format_dict_array[(idx+3)%nodes_length]['y']
-                    
+
                     # 精簡的比對，會出錯，例如「緫」、「縃」、「繳」的方。「解」的刀。「繫」的山。
                     #bmp_x2 = bmp_x1 + (5 * format_dict_array[(idx+0)%nodes_length]['x_direction'])
                     #bmp_x3 = bmp_x4 + (5 * format_dict_array[(idx+0)%nodes_length]['x_direction'])
                     #bmp_y2 = bmp_y1 + (5 * format_dict_array[(idx+0)%nodes_length]['y_direction'])
                     #bmp_y3 = bmp_y4 + (5 * format_dict_array[(idx+0)%nodes_length]['y_direction'])
-                    
+
                     # full rectangle compare.
                     #inside_stroke_flag = self.is_inside_stroke(bmp_x1, bmp_y1, bmp_x2, bmp_y2, bmp_x3, bmp_y3, bmp_x4, bmp_y4)
 
-                    # compact triangle compare, 
+                    # compact triangle compare,
                     # allow one coner match to continue
                     inside_stroke_flag2 = False
                     inside_stroke_flag1,inside_stroke_dict = self.test_inside_coner(bmp_x1, bmp_y1, bmp_x2, bmp_y2, bmp_x3, bmp_y3, self.config.STROKE_MIN, inside_stroke_dict)
@@ -296,22 +295,16 @@ class Rule(Rule.Rule):
                 if is_match_pattern:
                     #print("match rule #1")
                     #print(idx,"debug rule1:",format_dict_array[idx]['code'])
-                    
-                    #if is_debug_mode:
-                    if False:
-                        print("#"*40)
-                        for debug_idx in range(8):
-                            print(idx,debug_idx-2,"values for rule #1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
 
                     center_x,center_y = self.apply_round_transform(format_dict_array,idx)
 
                     # cache transformed nodes.
                     # 加了，會造成其他的誤判，因為「點」共用。
                     #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-                    
+
                     # we generated nodes
                     skip_coordinate.append([center_x,center_y])
-                    
+
                     # next_x,y is used for next rule!
                     # 加了，會造成其他的誤判，因為「點」共用。
                     #skip_coordinate.append([new_x2,new_y2])
@@ -322,16 +315,10 @@ class Rule(Rule.Rule):
 
                     # due to add new dot.
                     nodes_length = len(format_dict_array)
-                    if is_debug_mode:
-                    #if False:
-                        print("after modify")
-                        print("#"*40)
-                        for debug_idx in range(8):
-                            print(idx,debug_idx-2,"values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
 
                     redo_travel=True
                     check_first_point = True
-                    
+
                     # current version is not stable!, redo will cuase strange curves.
                     # [BUT], if not use -1, some case will be lost if dot near the first dot.
                     resume_idx = -1

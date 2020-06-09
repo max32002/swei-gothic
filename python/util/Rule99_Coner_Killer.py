@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate, black_mode):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule, black_mode):
         redo_travel=False
         check_first_point = False
 
@@ -48,8 +48,9 @@ class Rule(Rule.Rule):
         SLIDE_32_PERCENT_MIN = 1.49
         SLIDE_32_PERCENT_MAX = 1.88
 
-        SLIDE_10_PERCENT_MIN = 0.80
-        SLIDE_10_PERCENT_MAX = 1.88
+        # 這裡 MIN 的值，需要設小。
+        SLIDE_10_PERCENT_MIN = 0.79
+        SLIDE_10_PERCENT_MAX = 1.80
 
 
         # clone
@@ -70,21 +71,34 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
-                #print(idx,"debug rule99+0:",format_dict_array[idx]['code'])
+                is_debug_mode = False
+                #is_debug_mode = True
 
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+0:",format_dict_array[(idx+0)%nodes_length]['code'])
+                        pass
                     continue
                     
                 # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
                 # for case.3122 上面的點。
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                    if is_debug_mode:
+                        print("match skip idx+2:",format_dict_array[(idx+2)%nodes_length]['code'])
+                        pass
+                    continue
+
+                if format_dict_array[idx]['code'] in skip_coordinate_rule:
+                    if is_debug_mode:
+                        print("match skip skip_coordinate_rule +0:",format_dict_array[idx]['code'])
+                        pass
                     continue
 
                 is_debug_mode = False
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[524,13]]
+                    debug_coordinate_list = [[627,552]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -190,20 +204,29 @@ class Rule(Rule.Rule):
                                                 if slide_percent_0 >= SLIDE_30_PERCENT_MIN and slide_percent_0 <= SLIDE_30_PERCENT_MAX:
                                                     is_match_pattern = True
 
+
+                x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                x1 = format_dict_array[(idx+1)%nodes_length]['x']
+                y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                # PS: to test inside_stroke_flag, please use real position instead of x1,y1.
+
                 # compare distance, muse large than our "large round"
-                round_offset = self.config.ROUND_OFFSET
 
                 inside_stroke_flag = False
+                inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
+
+                round_offset = self.config.ROUND_OFFSET
+                if not inside_stroke_flag:
+                    round_offset = self.config.INSIDE_ROUND_OFFSET
+
                 if is_match_pattern:
                     fail_code = 300
                     is_match_pattern = False
 
                     if black_mode:
-
-                        inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
-                        if not inside_stroke_flag:
-                            round_offset = self.config.INSIDE_ROUND_OFFSET
-
                         # 為避免與 rule#5 衝突，
                         # 使用較短邊
                         if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
@@ -224,7 +247,6 @@ class Rule(Rule.Rule):
                         
                         #round_offset = self.config.ROUND_OFFSET
                         # white mode 使用較小的 size.
-                        round_offset = self.config.INSIDE_ROUND_OFFSET
                         if format_dict_array[(idx+1)%nodes_length]['distance'] < round_offset:
                             round_offset = format_dict_array[(idx+1)%nodes_length]['distance']
                         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_offset:
@@ -238,12 +260,23 @@ class Rule(Rule.Rule):
                 x2 = format_dict_array[(idx+2)%nodes_length]['x']
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
 
+                # use more close coordinate.
+                #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
                 if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-                    x0 = format_dict_array[(idx+1)%nodes_length]['x2']
-                    y0 = format_dict_array[(idx+1)%nodes_length]['y2']
+                    x_from = x0
+                    y_from = y0
+                    x_center = format_dict_array[(idx+1)%nodes_length]['x2']
+                    y_center = format_dict_array[(idx+1)%nodes_length]['y2']
+                    x0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+                    y0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
                 if format_dict_array[(idx+2)%nodes_length]['t']=='c':
-                    x2 = format_dict_array[(idx+2)%nodes_length]['x1']
-                    y2 = format_dict_array[(idx+2)%nodes_length]['y1']
+                    x_from = x2
+                    y_from = y2
+                    x_center = format_dict_array[(idx+2)%nodes_length]['x1']
+                    y_center = format_dict_array[(idx+2)%nodes_length]['y1']
+                    x2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
+                    y2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
+                #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
 
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
@@ -270,14 +303,10 @@ class Rule(Rule.Rule):
                 # 為了在 white mode 使用。
                 if is_match_pattern:
                     need_check_join_line = False
-                    if black_mode:
-                        fail_code = 500
-                        if not inside_stroke_flag:
-                            need_check_join_line = True
-                    else:
-                        # white mode.
-                        need_check_join_line = True
 
+                    fail_code = 500
+                    if not inside_stroke_flag:
+                        need_check_join_line = True
 
                     if need_check_join_line:
                         fail_code = 600
@@ -313,11 +342,6 @@ class Rule(Rule.Rule):
                         print("match rule #99:",idx)
 
                 if is_match_pattern:
-                    #print("match rule #99")
-                    #print(idx,"debug rule99+0:",format_dict_array[idx]['code'])
-                    #print(idx,"debug rule99+1:",format_dict_array[(idx+1)%nodes_length]['code'])
-                    #print(idx,"debug rule99+2:",format_dict_array[(idx+2)%nodes_length]['code'])
-
                     # make coner curve
                     format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx)
 
@@ -328,6 +352,12 @@ class Rule(Rule.Rule):
                         # 加了這行，會讓「口」的最後一個角，無法套到。
                         skip_coordinate.append([previous_x,previous_y])
                         pass
+
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                    #print("generated_code:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
 
                     check_first_point = True
                     redo_travel=True
@@ -346,4 +376,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate
+        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule
