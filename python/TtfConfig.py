@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "1.045"
+    VERSION = "2.050"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
 
