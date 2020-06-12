@@ -54,7 +54,7 @@ class Rule(Rule.Rule):
                     print("="*30)
                     print("index:", idx)
                     for debug_idx in range(8):
-                        print(debug_idx-2,": values#6:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
+                        print(debug_idx-2,": val#6:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 is_match_pattern = False
 
@@ -190,9 +190,6 @@ class Rule(Rule.Rule):
                                         if (format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']) or format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
                                             fail_code = 520
                                             is_match_pattern = False
-
-                #rule_no=3
-                #is_match_pattern, fail_code = self.rule_test(format_dict_array,idx,rule_no,inside_stroke_dict)
 
                 if is_debug_mode:
                     if not is_match_pattern:

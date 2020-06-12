@@ -231,7 +231,7 @@ class Convertor():
                 unicode_string = encoding_string_array[self.config.UNICODE_FIELD-1]
                 if len(unicode_string) > 0:
                     unicode_int = int(unicode_string)
-                if unicode_int > 0:
+                if unicode_int > 0 and not self.config.BMP_PATH is None:
                     filename = "U_%s.bmp" % (unicode_int)
                     bmp_path = os.path.join(self.config.BMP_PATH, filename)
                     #print("bmp:", bmp_path, filename_input)
@@ -277,24 +277,12 @@ class Convertor():
             if not is_match_convert_target:
                 unicode_int = -1
 
+        is_modified = False
         if unicode_int > 0: 
             self.sp.assign_config(self.config)
-            #print("trace file:", filename_input)
-            #print("stroke_dict:", stroke_dict)
+            is_modified, stroke_dict = self.sp.trace(stroke_dict, unicode_int, bmp_image)
 
-            #for debug input date is correct.
-            '''
-            for key in stroke_dict.keys():
-                spline_dict = stroke_dict[key]
-                print("key:", key, 'code:', spline_dict['dots'][0])
-                #print("spline_dict:", spline_dict)
-                for dot_dict in spline_dict['dots']:
-                    new_line = dot_dict['code']
-                    print("code:", new_line)
-            '''
-
-            stroke_dict = self.sp.trace(stroke_dict, unicode_int, bmp_image)
-
+        if is_modified:
             if not stroke_dict is None:
                 #print("write to file:", filename_input)
                 self.write_to_file(filename_input,stroke_dict,readonly)

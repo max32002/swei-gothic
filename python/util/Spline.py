@@ -89,6 +89,7 @@ class Spline():
     def trace(self, stroke_dict, unicode_int, bmp_image):
         #print("trace")
         #print(stroke_dict)
+        is_modified = False
 
         glyph_margin={}
 
@@ -107,7 +108,6 @@ class Spline():
                     glyph_margin["bottom"] = stroke_dict[key]["bottom"]
                     glyph_margin["left"] = stroke_dict[key]["left"]
                     glyph_margin["right"] = stroke_dict[key]["right"]
-
  
                 if glyph_margin["top"] < spline_dict["top"]:
                     glyph_margin["top"]  = spline_dict["top"]
@@ -132,11 +132,9 @@ class Spline():
             #print("bmp_top=",BMP_TOP)
             #print("y_offset=",y_offset)
 
-
-        # for debug.
-        #print("■"*60)
-
-        self.preprocess(stroke_dict, unicode_int)
+        preprocess_result = self.preprocess(stroke_dict, unicode_int)
+        if preprocess_result:
+            is_modified = True
 
         for key in stroke_dict.keys():
             spline_dict = stroke_dict[key]
@@ -146,18 +144,22 @@ class Spline():
             if True:
                 clockwise = self.check_clockwise(spline_dict)
                 #print("clockwise:", clockwise)
-                self.normalize(stroke_dict, key, unicode_int, bmp_image, y_offset)
-                
+                normalize_result = self.normalize(stroke_dict, key, unicode_int, bmp_image, y_offset)
+                if normalize_result:
+                    is_modified = True
+ 
                 if clockwise:
-                    self.trace_black_block(stroke_dict, key, unicode_int, bmp_image, y_offset)
-                    pass
+                    trace_result = self.trace_black_block(stroke_dict, key, unicode_int, bmp_image, y_offset)
+                    if trace_result:
+                        is_modified = True
                 else:
-                    self.trace_white_block(stroke_dict, key, unicode_int, bmp_image, y_offset)
-                    pass
+                    trace_result = self.trace_white_block(stroke_dict, key, unicode_int, bmp_image, y_offset)
+                    if trace_result:
+                        is_modified = True
 
             stroke_dict[key] = spline_dict
 
-        return stroke_dict
+        return is_modified, stroke_dict
 
     def detect_margin(self, spline_dict):
         default_int = -9999
@@ -250,6 +252,7 @@ class Spline():
         return redo_split
 
     def preprocess(self, stroke_dict, unicode_int):
+        is_modified = False
         MAX_SPLIT_CONNT = 100
 
         idx=-1
@@ -258,11 +261,17 @@ class Spline():
         while redo_split:
             idx+=1
             redo_split=self.split_spline(stroke_dict, unicode_int)
+            if redo_split:
+                is_modified = True
             if idx >= MAX_SPLIT_CONNT:
                 redo_split = False
 
+        return is_modified
+
 
     def normalize(self, stroke_dict, key, unicode_int, bmp_image, y_offset):
+        is_modified = False
+
         from . import Rule4_Curve_Coner
         ru4=Rule4_Curve_Coner.Rule()
         ru4.assign_config(self.config)
@@ -290,18 +299,18 @@ class Spline():
         # ==================================================
 
         if self.config.PROCESS_MODE in ["GOTHIC"]:
-            if self.config.STYLE in ["DemiLight","Medium","Regular"]:
-                # format code.
-                # start to travel nodes for [RULE #6]
-                # format curve coner as l conver
-                #print("start Rule # 6...")
-                idx=-1
-                redo_travel=False   # Disable
-                redo_travel=True    # Enable
-                while redo_travel:
-                    redo_travel,idx=ru6.apply(spline_dict, idx)
-                ru6 = None
-
+            # format code.
+            # start to travel nodes for [RULE #6]
+            # format curve coner as l conver
+            #print("start Rule # 6...")
+            idx=-1
+            redo_travel=False   # Disable
+            redo_travel=True    # Enable
+            while redo_travel:
+                redo_travel,idx=ru6.apply(spline_dict, idx)
+                if redo_travel:
+                    is_modified = True
+            ru6 = None
 
         # start to travel nodes for [RULE #10]
         # format curve coner as l conver
@@ -311,6 +320,8 @@ class Spline():
         redo_travel=True    # Enable
         while redo_travel:
             redo_travel,idx=ru10.apply(spline_dict, idx)
+            if redo_travel:
+                is_modified = True
         ru10 = None
 
         # start to travel nodes for [RULE #14]
@@ -321,6 +332,8 @@ class Spline():
         redo_travel=True    # Enable
         while redo_travel:
             redo_travel,idx=ru14.apply(spline_dict, idx)
+            if redo_travel:
+                is_modified = True
         ru14 = None
 
         # start to travel nodes for [RULE #4]
@@ -331,12 +344,16 @@ class Spline():
         redo_travel=True    # Enable
         while redo_travel:
             redo_travel,idx=ru4.apply(spline_dict, idx)
+            if redo_travel:
+                is_modified = True
         ru4 = None
 
-        return spline_dict
+        return is_modified
 
     # run both in clockwise and counter clockwise.
     def trace_common(self, stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate):
+        is_modified = False
+
         DEBUG_CRASH_RULE = False    # online
         #DEBUG_CRASH_RULE = True    # debug
 
@@ -413,6 +430,8 @@ class Spline():
             pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru16.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            if redo_travel:
+                is_modified = True
         ru16 = None
 
 
@@ -433,6 +452,8 @@ class Spline():
             if redo_count==100:
                 print("occure bug at rule#12!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru12.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            if redo_travel:
+                is_modified = True
         ru12 = None
 
         # start to travel nodes for [RULE #13]
@@ -451,6 +472,8 @@ class Spline():
             if redo_count==100:
                 print("occure bug at rule#13!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            if redo_travel:
+                is_modified = True
         ru13 = None
 
 
@@ -470,6 +493,8 @@ class Spline():
             if redo_count==100:
                 print("occure bug at rule#7!")
             redo_travel,idx,skip_coordinate=ru7.apply(spline_dict, idx,skip_coordinate)
+            if redo_travel:
+                is_modified = True
         ru7 = None
 
         if self.config.PROCESS_MODE in ["GOTHIC"]:
@@ -487,6 +512,8 @@ class Spline():
             while redo_travel:
                 redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru8.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+                if redo_travel:
+                    is_modified = True
             ru8 = None
 
             # start to travel nodes for [RULE #2]
@@ -503,6 +530,8 @@ class Spline():
             while redo_travel:
                 redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru2.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+                if redo_travel:
+                    is_modified = True
             ru2 = None
 
             # start to travel nodes for [RULE #1]
@@ -519,6 +548,8 @@ class Spline():
             while redo_travel:
                 redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru1.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+                if redo_travel:
+                    is_modified = True
             ru1 = None
 
             # start to travel nodes for [RULE #3]
@@ -535,6 +566,8 @@ class Spline():
             while redo_travel:
                 redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru3.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+                if redo_travel:
+                    is_modified = True
             ru3 = None
 
             # start to travel nodes for [RULE #21]
@@ -551,12 +584,16 @@ class Spline():
             while redo_travel:
                 redo_count+=1
                 redo_travel,idx, inside_stroke_dict,skip_coordinate=ru21.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate)
+                if redo_travel:
+                    is_modified = True
             ru21 = None
 
-        return inside_stroke_dict, skip_coordinate
+        return is_modified, inside_stroke_dict, skip_coordinate
 
 
     def trace_white_block(self, stroke_dict, key, unicode_int, bmp_image, y_offset):
+        is_modified = False
+
         DISABLE_ALL_RULE = False    # online
         #DISABLE_ALL_RULE = True    # debug specific rule.
 
@@ -586,7 +623,7 @@ class Spline():
         #if not key == 1:
             #return spline_dict
 
-        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
+        is_modified, inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
 
         skip_coordinate_rule5 = []
 
@@ -601,6 +638,8 @@ class Spline():
             pass
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5=ru11.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5)
+            if redo_travel:
+                is_modified = True
         ru11 = None
 
 
@@ -616,11 +655,15 @@ class Spline():
         while redo_travel:
             black_mode = False
             redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5 =ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule5, black_mode)
+            if redo_travel:
+                is_modified = True
         ru99 = None
 
-        return spline_dict
+        return is_modified
 
     def trace_black_block(self, stroke_dict, key, unicode_int, bmp_image, y_offset):
+        is_modified = False
+
         DEBUG_CRASH_RULE = False    # online
         #DEBUG_CRASH_RULE = True    # debug
 
@@ -657,7 +700,7 @@ class Spline():
         # transform code block
         # ==================================================
 
-        inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
+        is_modified, inside_stroke_dict, skip_coordinate = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate)
 
         # start to travel nodes for [RULE #5]
         # check outside curve
@@ -674,6 +717,8 @@ class Spline():
         skip_coordinate_rule5 = []
         while redo_travel:
             redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule5=ru5.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule5)
+            if redo_travel:
+                is_modified = True
         ru5 = None
 
 
@@ -691,6 +736,8 @@ class Spline():
             while redo_travel:
                 black_mode = True
                 redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule5=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule5, black_mode)
+                if redo_travel:
+                    is_modified = True
             ru99 = None
 
-        return spline_dict
+        return is_modified
