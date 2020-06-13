@@ -21,8 +21,8 @@ class Rule(Rule.Rule):
         # default: 1.70(small,inside), 1.78-1.96(邋,908B)(large,outside)
         SLIDE_2_PERCENT_MIN = 1.50
         SLIDE_2_PERCENT_MAX = 1.99
-        # default: 1.36(small,inside), 1.84(large,outside)
-        SLIDE_3_PERCENT_MIN = 1.25
+        # default: 1.36(small,inside), 1.84(large,outside), 1.22(邋,908B)
+        SLIDE_3_PERCENT_MIN = 1.11
         SLIDE_3_PERCENT_MAX = 1.90
 
 
@@ -48,7 +48,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[447,686]]
+                    debug_coordinate_list = [[589,813]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -103,7 +103,9 @@ class Rule(Rule.Rule):
                     is_match_pattern = False
                     if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                         if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
-                            if format_dict_array[(idx+3)%nodes_length]['t'] == 'c':
+                            # for 邋，+3 == 'l'
+                            if True:
+                            #if format_dict_array[(idx+3)%nodes_length]['t'] == 'c':
                                 if format_dict_array[(idx+4)%nodes_length]['t'] == 'c':
                                     if format_dict_array[(idx+5)%nodes_length]['t'] == 'c':
                                         if format_dict_array[(idx+6)%nodes_length]['t'] == 'c':

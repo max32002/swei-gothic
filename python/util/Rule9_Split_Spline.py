@@ -16,7 +16,7 @@ class Rule(Rule.Rule):
     def apply(self, spline_dict, resume_idx):
         redo_travel=False
 
-        TOO_CLOSE_DISTANCE = 13
+        TOO_CLOSE_DISTANCE = 16
 
         # clone
         format_dict_array=[]

@@ -50,7 +50,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[765,587]]
+                    debug_coordinate_list = [[46,606]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -195,10 +195,11 @@ class Rule(Rule.Rule):
 
                 if is_match_pattern:
 
-                    #print("is_senond_mode:", is_senond_mode)
-                    #print("is_also_mode:",is_also_mode)
-                    if not is_senond_mode:
+                    if is_debug_mode:
+                        print("is_senond_mode:", is_senond_mode)
+                        print("is_also_mode:",is_also_mode)
 
+                    if not is_senond_mode:
                         # 多，模式。
                         center_x = int((format_dict_array[(idx+2)%nodes_length]['x']+format_dict_array[(idx+3)%nodes_length]['x'])/2)
                         #center_y = int((format_dict_array[(idx+2)%nodes_length]['y']+format_dict_array[(idx+3)%nodes_length]['y'])/2)
@@ -232,11 +233,11 @@ class Rule(Rule.Rule):
                         center_y_p2 = int((center_y + new_y2)/2) + 3
 
                         # update #2
-                        new_code = ' %d %d %d %d %d %d c 1\n' % (center_x_p0, center_y + 1, center_x_p0, center_y+1, center_x, center_y)
+                        new_code = ' %d %d l 1\n' % (center_x, center_y)
                         dot_dict={}
                         dot_dict['x']=center_x
                         dot_dict['y']=center_y
-                        dot_dict['t']='c'
+                        dot_dict['t']='l'
                         dot_dict['code']=new_code
                         format_dict_array[(idx+2)%nodes_length]=dot_dict
 
@@ -253,9 +254,11 @@ class Rule(Rule.Rule):
                         dot_dict['y']=new_y2
                         dot_dict['t']='c'
                         dot_dict['code']=new_code
-                        format_dict_array[(idx+3)%nodes_length]=dot_dict
+                        #format_dict_array[(idx+3)%nodes_length]=dot_dict
+                        #真神奇，註解掉，還是有作用。
 
                         if is_also_mode:
+                            # 也模式。
                             #print("is_also_mode")
                             target_index = (idx+4)%nodes_length
                             if format_dict_array[target_index]['t'] == 'l':
@@ -277,7 +280,7 @@ class Rule(Rule.Rule):
                         #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
 
                         # we generated nodes
-                        skip_coordinate.append([new_x2,new_y2])
+                        #skip_coordinate.append([new_x2,new_y2])
 
                     else:
                         # 乙，模式。

@@ -773,8 +773,19 @@ class Rule():
         # 使用較短的邊。
         if format_dict_array[(idx+0)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
             new_x1,new_y1=x0,y0
+        else:
+            if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                virtal_distance = spline_util.get_distance(format_dict_array[(idx+1)%nodes_length]['x2'],format_dict_array[(idx+1)%nodes_length]['y2'],x1,y1)
+                if virtal_distance < self.config.ROUND_OFFSET:
+                    new_x1,new_y1=format_dict_array[(idx+1)%nodes_length]['x2'],format_dict_array[(idx+1)%nodes_length]['y2']
+        
         if format_dict_array[(idx+2)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
             new_x2,new_y2=x3,y3
+        else:
+            if format_dict_array[(idx+3)%nodes_length]['t']=='c':
+                virtal_distance = spline_util.get_distance(format_dict_array[(idx+3)%nodes_length]['x1'],format_dict_array[(idx+3)%nodes_length]['y1'],x2,y2)
+                if virtal_distance < self.config.ROUND_OFFSET:
+                    new_x2,new_y2=format_dict_array[(idx+3)%nodes_length]['x1'],format_dict_array[(idx+3)%nodes_length]['y1']
 
         x1_offset = new_x1 - x1
         y1_offset = new_y1 - y1
@@ -786,6 +797,17 @@ class Rule():
             print("center x,y:", center_x, center_y)
             print("new x1,y1:", new_x1, new_y1)
             print("new x2,y2:", new_x2, new_y2)
+
+
+        # for 辶部，的凹洞.
+        # PS: 這是檢測水平線，還無法處理斜線型的凹洞。
+        is_prefer_y1_straight = False
+        #print("-1 y_equal_fuzzy:", format_dict_array[(idx-1+nodes_length)%nodes_length]['y_equal_fuzzy'])
+        if format_dict_array[(idx-1+nodes_length)%nodes_length]['y_equal_fuzzy']:
+            if format_dict_array[(idx-1+nodes_length)%nodes_length]['x_direction'] == format_dict_array[(idx+0+nodes_length)%nodes_length]['x_direction']:
+                if format_dict_array[(idx+1+nodes_length)%nodes_length]['t']=='c':
+                    if abs(format_dict_array[(idx+1+nodes_length)%nodes_length]['y2']-format_dict_array[(idx-1+nodes_length)%nodes_length]['y'])<=3:
+                        is_prefer_y1_straight = True
 
         # re-center again
         # see alpha Y (id.319, it's not work!)
@@ -892,6 +914,9 @@ class Rule():
                 extend_offset_x = int(float(old_code_array[3]))+ int(x1_offset/2)
                 extend_offset_y = int(float(old_code_array[4]))+ int(y1_offset/2)
 
+                # 讓線變直，for 辶部。
+                if is_prefer_y1_straight:
+                    extend_offset_y = int(float(old_code_array[4]))
 
                 # 如果 x1,y1=x,y, 順便調整另一組。
                 if old_code_array[1] == old_code_array[3] and old_code_array[2] == old_code_array[4]:
@@ -914,7 +939,12 @@ class Rule():
             new_code = ' '.join(old_code_array)
             target_index = (idx+1)%nodes_length
             format_dict_array[target_index]['code'] = new_code
-            #print("+1 idx:%d, code:%s" % (target_index, new_code))
+    
+            #if True:
+            if False:
+                print("old_code_string:", old_code_string)
+                print("is_prefer_y1_straight:", is_prefer_y1_straight)
+                print("+1 idx:%d, code:%s" % (target_index, new_code))
 
             # update #2
             #new_code = ' %d %d %d %d %d %d c 1\n' % (new_x1, new_y1, x1, y1, center_x, center_y)
