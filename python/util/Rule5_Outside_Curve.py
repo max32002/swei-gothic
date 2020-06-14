@@ -84,7 +84,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[267,311]]
+                    debug_coordinate_list = [[57,385],[245,446]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -125,6 +125,8 @@ class Rule(Rule.Rule):
 
                 #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']]==[687,352]) :
                     #continue
+
+                undo_changes = []
 
                 is_match_pattern = False
 
@@ -284,7 +286,7 @@ class Rule(Rule.Rule):
                     format_dict_array[(idx+0)%nodes_length]['y']=extend_y
 
                     old_code_string = format_dict_array[(idx+0)%nodes_length]['code']
-                    #print("old_code_string:",old_code_string)
+                    #print("orig code +0:", old_code_string)
                     old_code_array = old_code_string.split(' ')
                     if format_dict_array[(idx+0)%nodes_length]['t']=='c':
                         old_code_array[1] = str(int(float(old_code_array[1]))+offset_x)
@@ -298,21 +300,21 @@ class Rule(Rule.Rule):
                         old_code_array[2] = str(extend_y)
                     new_code = ' '.join(old_code_array)
                     format_dict_array[(idx+0)%nodes_length]['code'] = new_code
-                    #print("new_code:", new_code)
+                    #print("new_code +0:", new_code)
+                    self.apply_code(format_dict_array,idx)
 
                     # [IMPORTANT] if change code, must triger check_first_point=True
                     check_first_point=True
 
+                    undo_changes.append([idx,old_code_string])
 
                     # manuall compute distance for PREVIOUS dot.
-                    new_distance = spline_util.get_distance(extend_x,extend_y,format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
-                    #print("new distance #1:",new_distance)
-                    format_dict_array[(idx+0)%nodes_length]['distance']=new_distance
-
-                    # manuall compute distance for PREVIOUS PREVIOUS dot.
-                    new_distance = spline_util.get_distance(extend_x,extend_y,format_dict_array[idx_previuos]['x'],format_dict_array[idx_previuos]['y'])
-                    #print("new distance #2:",new_distance)
-                    format_dict_array[idx_previuos]['distance']=new_distance
+                    #print("befor +0 distance:", format_dict_array[(idx+0)%nodes_length]['distance'])
+                    #print("befor -1 distance:", format_dict_array[(idx-1+nodes_length)%nodes_length]['distance'])
+                    format_dict_array[(idx+0)%nodes_length]['distance']=self.current_distance(format_dict_array,(idx+0)%nodes_length)
+                    format_dict_array[(idx-1+nodes_length)%nodes_length]['distance']=self.current_distance(format_dict_array,(idx-1+nodes_length)%nodes_length)
+                    #print("after +0 distance:", format_dict_array[(idx+0)%nodes_length]['distance'])
+                    #print("after -1 distance:", format_dict_array[(idx-1+nodes_length)%nodes_length]['distance'])
 
 
                 # pre-format for 「甾」系列的《
@@ -550,12 +552,6 @@ class Rule(Rule.Rule):
 
                 # 從成功的項目裡，排除已轉彎的項目。
                 if is_match_pattern:
-                    #if True:
-                    if False:
-                        print("-" * 20)
-                        for debug_idx in range(6):
-                            print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
-
                     # ex: 「扌」和「糸」下方的水平腳
                     #is_match_pattern = False
                     if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
@@ -598,7 +594,7 @@ class Rule(Rule.Rule):
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
                 # PS: to test inside_stroke_flag, please use real position instead of x1,y1.
 
-                # compare distance, muse large than our "large round"
+                # compare distance, must large than our "large round"
                 is_apply_large_corner = False
 
                 if is_match_pattern:
@@ -706,7 +702,22 @@ class Rule(Rule.Rule):
                     #resume_idx = -1
                     #break
                 else:
-                    # canel all un-finished chages!
+                    # cancel all un-finished chages!
+                    if check_first_point:
+                        for undo_item in undo_changes:
+                            undo_idx = undo_item[0]
+                            undo_code = undo_item[1]
+                            #print("undo idx:",undo_item[0],undo_item[1])
+                            format_dict_array[undo_idx]['code'] = undo_code
+                            self.apply_code(format_dict_array,undo_idx)
+                            
+                            #print("befor +0 distance:", format_dict_array[(undo_idx+0)%nodes_length]['distance'])
+                            #print("befor -1 distance:", format_dict_array[(undo_idx-1+nodes_length)%nodes_length]['distance'])
+                            format_dict_array[(undo_idx+0)%nodes_length]['distance']=self.current_distance(format_dict_array,(undo_idx+0)%nodes_length)
+                            format_dict_array[(undo_idx-1+nodes_length)%nodes_length]['distance']=self.current_distance(format_dict_array,(undo_idx-1+nodes_length)%nodes_length)
+                            #print("after +0 distance:", format_dict_array[(undo_idx+0)%nodes_length]['distance'])
+                            #print("after -1 distance:", format_dict_array[(undo_idx-1+nodes_length)%nodes_length]['distance'])
+
                     check_first_point = False
 
         if check_first_point:

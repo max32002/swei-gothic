@@ -495,6 +495,43 @@ class Rule():
         spline_dict['dots'] = format_dict_array
 
 
+    # purpose: apply new value to dict from code.
+    #        : for only update specific index only.
+    def apply_code(self, format_dict_array, idx):
+        code = format_dict_array[idx]['code']
+        # type
+        t=''
+        if ' m ' in code:
+            t='m'
+        if ' l ' in code:
+            t='l'
+        if ' c ' in code:
+            t='c'
+
+        old_code_array = code.split(' ')
+        if t=='c':
+            format_dict_array[idx]['x1']=int(float(old_code_array[1]))
+            format_dict_array[idx]['y1']=int(float(old_code_array[2]))
+            format_dict_array[idx]['x2']=int(float(old_code_array[3]))
+            format_dict_array[idx]['y2']=int(float(old_code_array[4]))
+            format_dict_array[idx]['x']=int(float(old_code_array[5]))
+            format_dict_array[idx]['y']=int(float(old_code_array[6]))
+        else:
+            format_dict_array[idx]['x']=int(float(old_code_array[1]))
+            format_dict_array[idx]['y']=int(float(old_code_array[2]))
+
+    # purpose: get current index distance,
+    #        : for only update specific index only.
+    def current_distance(self, format_dict_array, idx):
+        nodes_length = len(format_dict_array)
+        next_index = (idx+1)%nodes_length
+        current_x = format_dict_array[idx]['x']
+        current_y = format_dict_array[idx]['y']
+        next_x = format_dict_array[next_index]['x']
+        next_y = format_dict_array[next_index]['y']
+        distance = spline_util.get_distance(current_x,current_y,next_x,next_y)
+        return distance
+
     def caculate_distance(self, format_dict_array):
         nodes_length = len(format_dict_array)
         for idx in range(nodes_length):
@@ -502,18 +539,7 @@ class Rule():
 
             # It's easy to forget to fill attrib!
             # restore value from code.
-            old_code_string = format_dict_array[idx]['code']
-            old_code_array = old_code_string.split(' ')
-            if format_dict_array[idx]['t']=='c':
-                format_dict_array[idx]['x1']=int(float(old_code_array[1]))
-                format_dict_array[idx]['y1']=int(float(old_code_array[2]))
-                format_dict_array[idx]['x2']=int(float(old_code_array[3]))
-                format_dict_array[idx]['y2']=int(float(old_code_array[4]))
-                format_dict_array[idx]['x']=int(float(old_code_array[5]))
-                format_dict_array[idx]['y']=int(float(old_code_array[6]))
-            else:
-                format_dict_array[idx]['x']=int(float(old_code_array[1]))
-                format_dict_array[idx]['y']=int(float(old_code_array[2]))
+            self.apply_code(format_dict_array,idx)
 
             current_x = format_dict_array[idx]['x']
             current_y = format_dict_array[idx]['y']

@@ -257,12 +257,14 @@ class Convertor():
                 #unicode_int = -1
 
         # special range only
+        # CJK Radicals Supplement, U+2E80 - U+2EFF
         # 中日韓統一表意文字擴充區A, 3400 – U+4DBF
         # CJK Unified Ideographs, 4E00 - U+9FFF
+        # CJK Compatibility Ideographs, U+F900 - U+FAFF
         # 中日韓統一表意文字擴充區B, U+20000 – U+2A6DF
         # 中日韓統一表意文字擴展區G, U+30000 – U+3134F
         #print("unicode_int:", unicode_int)
-        convert_range_list = [['3400','9FFF'],['20000','3134F']]
+        convert_range_list = [['2E80','9FFF'],['F900','FAFF'],['20000','3134F']]
         convert_target_range = False
         #convert_target_range = True     # not full scan, debug purpose.
         if convert_target_range:
