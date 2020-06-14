@@ -84,7 +84,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[263,776]]
+                    debug_coordinate_list = [[267,311]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -474,6 +474,18 @@ class Rule(Rule.Rule):
                             # [同時增加處理case] for 飹的卯，在先套用 rule#1,2,3 後是  ccl,
                             if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
                                 is_match_pattern = True
+
+                            # for:脚 811A「月」slide_percent_41: 1.22
+                            SLIDE_41_PERCENT_MIN = 0.80
+                            SLIDE_41_PERCENT_MAX = 1.60
+                            slide_percent_41 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                            if is_debug_mode:
+                                print("slide_percent_41:",slide_percent_41)
+                            if slide_percent_41 >= SLIDE_41_PERCENT_MIN and slide_percent_41 <= SLIDE_41_PERCENT_MAX:
+                                is_match_pattern = True
+                            # for:脚 811A「月」拿掉上面的2個限制。
+                            #is_match_pattern = True
+
 
                 # =============================================
                 # [IMPORTANT] 這條線以下，不要增追加可能的 case, 開始做排除

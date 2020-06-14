@@ -50,7 +50,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[905,472]]
+                    debug_coordinate_list = [[147,272]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -60,6 +60,70 @@ class Rule(Rule.Rule):
                         print(debug_idx-2,": val#3:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 is_match_pattern = False
+
+                # for:脚 811A「月」slide_percent_1: 0.84
+                SLIDE_1_PERCENT_MIN = 0.50
+                SLIDE_1_PERCENT_MAX = 1.80
+
+                slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+                if is_debug_mode:
+                    print("slide_percent_1:",slide_percent_1)
+                    print("slide_percent_2:",slide_percent_2)
+
+                # 合併斜線：.uni811A 「脚」月上的斜線，分成二段。
+                check_more_merge_stroke_condition = False
+                if format_dict_array[(idx+0)%nodes_length]['distance'] > 150:
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] < 50:
+                        if format_dict_array[(idx+2)%nodes_length]['distance'] < 50:
+                            if format_dict_array[(idx+3)%nodes_length]['distance'] > 150:
+                                if (format_dict_array[(idx+1)%nodes_length]['distance']+format_dict_array[(idx+2)%nodes_length]['distance']) >= 30:
+                                    if (format_dict_array[(idx+1)%nodes_length]['distance']+format_dict_array[(idx+2)%nodes_length]['distance']) <= 120:
+                                        check_more_merge_stroke_condition = True
+                #print("check_more_merge_stroke_condition 1:", check_more_merge_stroke_condition)
+                if check_more_merge_stroke_condition:
+                    check_more_merge_stroke_condition = False
+                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
+                            if format_dict_array[(idx+3)%nodes_length]['t'] == 'c':
+                                check_more_merge_stroke_condition = True
+                #print("check_more_merge_stroke_condition 2:", check_more_merge_stroke_condition)
+                if check_more_merge_stroke_condition:
+                    check_more_merge_stroke_condition = False
+                    if format_dict_array[(idx+0)%nodes_length]['x_direction'] == -1 * format_dict_array[(idx+3)%nodes_length]['x_direction']:
+                        if format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+0)%nodes_length]['x_direction']:
+                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] == format_dict_array[(idx+2)%nodes_length]['x_direction']:
+                                check_more_merge_stroke_condition = True
+                #print("check_more_merge_stroke_condition 3:", check_more_merge_stroke_condition)
+                if check_more_merge_stroke_condition:
+                    check_more_merge_stroke_condition = False
+                    if format_dict_array[(idx+0)%nodes_length]['y_direction'] == -1 * format_dict_array[(idx+3)%nodes_length]['y_direction']:
+                        if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+3)%nodes_length]['y_direction']:
+                            if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']:
+                                check_more_merge_stroke_condition = True
+                #print("check_more_merge_stroke_condition 4:", check_more_merge_stroke_condition)
+                if check_more_merge_stroke_condition:
+                    check_more_merge_stroke_condition = False
+                    if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
+                        # for:脚 811A「月」slide_percent_2: 1.98
+                        if slide_percent_2 >= 1.96:
+                            check_more_merge_stroke_condition = True
+                #print("check_more_merge_stroke_condition 5:", check_more_merge_stroke_condition)
+                if check_more_merge_stroke_condition:
+                    # start to merge line.
+                    format_dict_array[(idx+1)%nodes_length]['distance'] = (format_dict_array[(idx+1)%nodes_length]['distance']+format_dict_array[(idx+2)%nodes_length]['distance'])
+
+                    new_code = ' %d %d l 1\n' % (format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+                    format_dict_array[(idx+3)%nodes_length]['t'] = 'l'
+                    format_dict_array[(idx+3)%nodes_length]['code'] = new_code
+                    #print("new +3 code:", new_code)
+
+                    del format_dict_array[(idx+2)%nodes_length]
+
+                    if idx > (idx+2)%nodes_length:
+                        idx +=1
+                    nodes_length = len(format_dict_array)
+
 
                 # 格式化例外：.31881 「閒」的上面的斜線。
                 # convert ?cc? => ?cl?
@@ -110,6 +174,15 @@ class Rule(Rule.Rule):
                     is_match_pattern = False
                     if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.NEXT_DISTANCE_MIN:
                         is_match_pattern = True
+
+                # check slide#1
+                # 去除部份情況
+                if is_match_pattern:
+                    if slide_percent_1 < SLIDE_1_PERCENT_MIN:
+                        is_match_pattern = False
+                    if slide_percent_1 > SLIDE_1_PERCENT_MAX:
+                        is_match_pattern = False
+
 
                 # compare direction
                 if is_match_pattern:
