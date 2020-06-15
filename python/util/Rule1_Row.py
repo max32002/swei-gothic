@@ -71,7 +71,7 @@ class Rule(Rule.Rule):
                         pass
                     continue
 
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
                     if is_debug_mode:
                         print("match skip dot +0:",[format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']])
                         pass

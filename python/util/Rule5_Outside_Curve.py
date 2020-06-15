@@ -99,15 +99,15 @@ class Rule(Rule.Rule):
                     if [format_dict_array[idx_previuos]['x'],format_dict_array[idx_previuos]['y']] in skip_coordinate:
                         continue
 
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
                     if is_debug_mode:
                         print("match skip dot +0:",[format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']])
                         pass
                     continue
 
-                if format_dict_array[idx]['code'] in skip_coordinate_rule:
+                if format_dict_array[(idx+0)%nodes_length]['code'] in skip_coordinate_rule:
                     if is_debug_mode:
-                        print("match skip skip_coordinate_rule +0:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
+                        print("match skip skip_coordinate_rule +0:",[format_dict_array[(idx+0)%nodes_length]['code']])
                         pass
                     continue
 

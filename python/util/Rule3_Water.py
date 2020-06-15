@@ -43,7 +43,7 @@ class Rule(Rule.Rule):
                 if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
                     continue
 
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
                     continue
 
                 is_debug_mode = False
@@ -51,7 +51,7 @@ class Rule(Rule.Rule):
 
                 if is_debug_mode:
                     debug_coordinate_list = [[147,272]]
-                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                    if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
 
                     print("="*30)

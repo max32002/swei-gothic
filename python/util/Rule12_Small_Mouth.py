@@ -46,7 +46,7 @@ class Rule(Rule.Rule):
                     for debug_idx in range(8):
                         print(debug_idx-2,": values#12:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
                     continue
 
                 # [IMPORTANT]:
