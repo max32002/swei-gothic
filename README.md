@@ -5,6 +5,7 @@
 和思源黑體一樣，支援7種的字重：
 ![字重比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_style.png)
 
+## 與其他字體的比較
 「獅尾圓體」、「源泉圓體」、「jf open 粉圓」的比較：
 
 ![字體比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_swei_gothic.png)
@@ -13,6 +14,8 @@
 * 在「肉」、「糸」、「女」、「辶」、「食」的筆畫，獅尾比較相似台灣教育部推薦字體筆順，適合教育用途。
 * 在「草」部的筆畫，獅尾是分開的二個部份。
 * 字體裡的「草字頭部首」中間該不該連起來，「肉字旁部首」該不該變成「月」，要不要把手寫習慣代入印刷字體？整體看來，會不會影響視覺的延伸性？會不會影響印刷的可行性與閱讀的便利性？這個答案我也不清楚，如果你是台灣教育部標準字符的愛好者，獅尾字體應該是一個不錯的選擇。
+* 和「源泉圓體TW」的差異之一，是Regular 的字重有調整了部份的常用字，因為拔腳之後，不平衡的問題。
+![字體比較](https://github.com/max32002/swei-gothic/raw/master/preview/fix_balance.png)
 
 ## 更新日誌
 [點擊此處](https://github.com/max32002/swei-gothic/change_log.md) 查看更新記錄。
