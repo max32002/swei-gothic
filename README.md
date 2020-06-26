@@ -18,7 +18,7 @@
 ![字體比較](https://github.com/max32002/swei-gothic/raw/master/preview/fix_balance.png)
 
 ## 更新日誌
-[點擊此處](https://github.com/max32002/swei-gothic/change_log.md) 查看更新記錄。
+[點擊此處](https://github.com/max32002/swei-gothic/blob/master/change_log.md) 查看更新記錄。
 
 ## 下載字型
 
