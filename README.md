@@ -50,8 +50,12 @@
 
 * 台灣圓體 TaiwanPearl
 https://max-everyday.com/2020/06/taiwanpearl/
+* 獅尾肉丸 Swei Meatball
+https://max-everyday.com/2020/06/swei-meatball/
 * 獅尾四季春字體 Swei Spring
 https://max-everyday.com/2020/04/swei-spring/
+* 獅尾半月字體 Swei Gothic
+https://max-everyday.com/2020/04/swei-half-moon/
 * 獅尾圓體 Swei Gothic
 https://max-everyday.com/2020/04/swei-gothic/
 * 獅尾黑體 Swei Sans
