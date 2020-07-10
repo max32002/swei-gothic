@@ -83,16 +83,6 @@ class Rule(Rule.Rule):
                 is_debug_mode = False
                 #is_debug_mode = True
 
-                if is_debug_mode:
-                    debug_coordinate_list = [[57,385],[245,446]]
-                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
-                        continue
-
-                    print("="*30)
-                    print("index:", idx)
-                    for debug_idx in range(8):
-                        print(debug_idx-2,": values#5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
-
                 # 這個效果滿好玩的，「口」會變成二直，二圓。
                 if self.config.PROCESS_MODE in ["HALFMOON"]:
                     idx_previuos = (idx -1 + nodes_length) % nodes_length
@@ -121,10 +111,18 @@ class Rule(Rule.Rule):
                             pass
                         continue
 
-                # 因為我們程式會去移動下一個點，所以可能前二和後二的距離會是<10.
+                is_debug_mode = False
+                #is_debug_mode = True
 
-                #if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']]==[687,352]) :
-                    #continue
+                if is_debug_mode:
+                    debug_coordinate_list = [[269,649]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        continue
+
+                    print("="*30)
+                    print("index:", idx)
+                    for debug_idx in range(8):
+                        print(debug_idx-2,": values#5:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 undo_changes = []
 
@@ -246,6 +244,11 @@ class Rule(Rule.Rule):
                                             # 好長哦，借一些來用用。
                                             if format_dict_array[(idx+0)%nodes_length]['y_direction'] == format_dict_array[idx_previuos]['y_direction']:
                                                 extend_lag_flag = True
+                                                # for 「絮」左上角的「女」的右上角。
+                                                if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                                                    if format_dict_array[idx_previuos]['y_equal_fuzzy']:
+                                                        # direction is different, cancel
+                                                        extend_lag_flag = False
 
                 # white mode, 不處理。
                 if extend_lag_flag:
@@ -493,6 +496,39 @@ class Rule(Rule.Rule):
                 # [IMPORTANT] 這條線以下，不要增追加可能的 case, 開始做排除
                 # =============================================
 
+                # for D.Lucy
+                if self.config.PROCESS_MODE in ["D"]:
+                    if is_match_pattern:
+                        # - sharp.
+                        if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                                fail_code = 2201
+                                is_match_pattern = False
+
+                    if is_match_pattern:
+                        # | sharp.
+                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                                fail_code = 2202
+                                is_match_pattern = False
+
+                    if is_match_pattern:
+                        # < sharp. go up.
+                        if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                            if format_dict_array[(idx+0)%nodes_length]['y_direction'] > 0:
+                                if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                                    if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
+                                        fail_code = 2203
+                                        is_match_pattern = False
+
+                    if is_match_pattern:
+                        # < sharp. to down.
+                        if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                            if format_dict_array[(idx+0)%nodes_length]['y_direction'] < 0:
+                                if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                                    if format_dict_array[(idx+1)%nodes_length]['y_direction'] < 0:
+                                        fail_code = 2203
+                                        is_match_pattern = False
 
                 # compare distance, muse large than our "large round"
                 if is_match_pattern:
@@ -548,8 +584,20 @@ class Rule(Rule.Rule):
 
                     if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:
                         is_match_pattern = True
+                    else:
+                        # try real point.
+                        # for case "加"的力的右上角。
+                        x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                        y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                        x1 = format_dict_array[(idx+1)%nodes_length]['x']
+                        y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                        x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                        y2 = format_dict_array[(idx+2)%nodes_length]['y']
 
-
+                        slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
+                        if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:
+                            is_match_pattern = True
+                    
                 # 從成功的項目裡，排除已轉彎的項目。
                 if is_match_pattern:
                     # ex: 「扌」和「糸」下方的水平腳
@@ -659,6 +707,15 @@ class Rule(Rule.Rule):
                         print("match rule #5:",idx)
 
                 if is_match_pattern:
+                    #print("match rule #5")
+                    #print(idx,"debug rule5:",format_dict_array[idx]['code'])
+
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+0)%nodes_length]['code']
+                    #print("generated_code:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
+
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
                     # large curve, use small angle.
@@ -675,7 +732,7 @@ class Rule(Rule.Rule):
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx)
+                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule)
 
                     # cache transformed nodes.
                     # we generated nodes
@@ -684,11 +741,6 @@ class Rule(Rule.Rule):
                         # 加了這行，會讓「口」的最後一個角，無法套到。
                         skip_coordinate.append([previous_x,previous_y])
                         pass
-
-                    # to avoid same code apply twice.
-                    nodes_length = len(format_dict_array)
-                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
-                    skip_coordinate_rule.append(generated_code)
 
 
                     check_first_point = True

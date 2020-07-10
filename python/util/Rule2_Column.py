@@ -11,7 +11,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule, only_mark_log):
         redo_travel=False
         check_first_point = False
 
@@ -43,17 +43,6 @@ class Rule(Rule.Rule):
                 is_debug_mode = False
                 #is_debug_mode = True
 
-                if is_debug_mode:
-                    debug_coordinate_list = [[913,414]]
-                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
-                        #continue
-                        pass
-                    else:
-                        print("="*30)
-                        print("index:", idx)
-                        for debug_idx in range(8):
-                            print(debug_idx-2,": val#2:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
-
                 if [format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']] in skip_coordinate:
                     if is_debug_mode:
                         print("match skip idx+1:",format_dict_array[(idx+1)%nodes_length]['code'])
@@ -80,7 +69,25 @@ class Rule(Rule.Rule):
                         pass
                     continue
 
-                is_match_pattern = False
+                if format_dict_array[(idx+0)%nodes_length]['code'] in skip_coordinate_rule:
+                    if is_debug_mode:
+                        print("match skip skip_coordinate_rule +0:",[format_dict_array[(idx+0)%nodes_length]['code']])
+                        pass
+                    continue
+
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if is_debug_mode:
+                    debug_coordinate_list = [[913,414]]
+                    if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
+                        #continue
+                        pass
+                    else:
+                        print("="*30)
+                        print("index:", idx)
+                        for debug_idx in range(8):
+                            print(debug_idx-2,": val#2:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
                 # compare direction
                 # start to compare.
@@ -225,6 +232,26 @@ class Rule(Rule.Rule):
                                 if slide_percent_2 >= SLIDE_2_PERCENT_MIN and slide_percent_2 <= SLIDE_2_PERCENT_MAX:
                                     is_match_pattern = True
 
+                # 做例外排除，滿神奇的，會剛好被match.
+                if is_match_pattern:
+                    if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                        if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                        if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                        if format_dict_array[(idx+3)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                        if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                        if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                        if format_dict_array[(idx+3)%nodes_length]['x_equal_fuzzy']:
+                            is_match_pattern = False
 
                 # compare NEXT_DISTANCE_MIN
                 if is_match_pattern:
@@ -290,15 +317,29 @@ class Rule(Rule.Rule):
                         print(idx,": match rule #2")
 
                 if is_match_pattern:
+                    #print(idx,": match rule #2:", format_dict_array[idx]['code'])
 
-                    center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+0)%nodes_length]['code']
+                    #print("generated_code#2:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
 
-                    # cache transformed nodes.
-                    # 加了，會造成其他的誤判，因為「點」共用。
-                    #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-                    
-                    # we generated nodes
-                    skip_coordinate.append([center_x,center_y])
+                    if self.config.PROCESS_MODE in ["D"]:
+                        generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                        #print("generated_code#2 +1:", generated_code)
+                        skip_coordinate_rule.append(generated_code)
+
+                    if not only_mark_log:
+                        center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                        #print("center_x,center_y:",center_x,center_y)
+
+                        # cache transformed nodes.
+                        # 加了，會造成其他的誤判，因為「點」共用。
+                        #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
+                        
+                        # we generated nodes
+                        skip_coordinate.append([center_x,center_y])
                     
                     # next_x,y is used for next rule!
                     # 加了，會造成其他的誤判，因為「點」共用。
@@ -319,4 +360,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate
+        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule

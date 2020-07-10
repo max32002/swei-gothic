@@ -120,6 +120,22 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+1)%nodes_length]['distance'] >= MIN_DISTANCE:
                             is_match_pattern = True
 
+
+                # for D.Lucy
+                if self.config.PROCESS_MODE in ["D"]:
+                    if is_match_pattern:
+                        # - sharp.
+                        if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                                fail_code = 2201
+                                is_match_pattern = False
+
+                        # | sharp.
+                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                                fail_code = 2202
+                                is_match_pattern = False
+
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
 
@@ -205,7 +221,7 @@ class Rule(Rule.Rule):
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx)
+                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule)
 
                     # cache transformed nodes.
                     # we generated nodes

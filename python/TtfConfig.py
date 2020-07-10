@@ -2,9 +2,10 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.054"
+    VERSION = "2.063"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
+    #PROCESS_MODE = "D"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
@@ -110,6 +111,9 @@ class TtfConfig():
 
         # 只需要大彎.
         if self.PROCESS_MODE=="HALFMOON":
+            self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
+
+        if self.PROCESS_MODE=="D":
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
     def __init__(self, weight_code):

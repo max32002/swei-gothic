@@ -11,7 +11,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule,only_mark_log):
         redo_travel=False
         check_first_point = False
 
@@ -35,6 +35,9 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
+                is_debug_mode = False
+                #is_debug_mode = True
+
                 # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
                 if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
                     continue
@@ -44,6 +47,12 @@ class Rule(Rule.Rule):
                     continue
 
                 if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
+                    continue
+
+                if format_dict_array[(idx+0)%nodes_length]['code'] in skip_coordinate_rule:
+                    if is_debug_mode:
+                        print("match skip skip_coordinate_rule +0:",[format_dict_array[(idx+0)%nodes_length]['code']])
+                        pass
                     continue
 
                 is_debug_mode = False
@@ -184,6 +193,27 @@ class Rule(Rule.Rule):
                         is_match_pattern = False
 
 
+                # 做例外排除，滿神奇的，會剛好被match.
+                if is_match_pattern:
+                    if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                        if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                        if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                        if format_dict_array[(idx+3)%nodes_length]['y_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                        if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                        if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                            is_match_pattern = False
+                    if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                        if format_dict_array[(idx+3)%nodes_length]['x_equal_fuzzy']:
+                            is_match_pattern = False
+
                 # compare direction
                 if is_match_pattern:
                     fail_code = 400
@@ -287,167 +317,28 @@ class Rule(Rule.Rule):
                 if is_match_pattern:
                     #print("match rule #3")
                     #print(idx,": debug rule3:",format_dict_array[idx]['code'])
-                    
-                    center_x,center_y = self.apply_round_transform(format_dict_array,idx)
 
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+0)%nodes_length]['code']
+                    #print("generated_code#3:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
 
-                    # 因為「先內縮」的關係，造成 curvy1_x2,y2 的方向可能是錯誤的！
-                    # 先套上 offset
-                    '''
-                    if format_dict_array[(idx+1)%nodes_length]['t']=="c":
-                        # 上一個點，可能在內縮後的右邊。
-                        # 這個直接加 offset 會產生「奇怪的曲線」
-                        curvy1_x2=format_dict_array[(idx+1)%nodes_length]['x2'] + x1_offset
-                        curvy1_y2=format_dict_array[(idx+1)%nodes_length]['y2'] + y1_offset
+                    if self.config.PROCESS_MODE in ["D"]:
+                        generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                        #print("generated_code#3+1:", generated_code)
+                        skip_coordinate_rule.append(generated_code)
 
-                        format_dict_array[(idx+1)%nodes_length]['x2']=curvy1_x2
-                        format_dict_array[(idx+1)%nodes_length]['y2']=curvy1_y2
-                        old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                        old_code_array = old_code_string.split(' ')
+                    if not only_mark_log:
+                        center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                        #print("center_x,center_y:", center_x,center_y)
 
-                        # 如果前一條線很長。
-                        if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.ROUND_OFFSET * 2:
-                            # x1 過中線。
-                            # for case: .31710 的 火🔥，下面解法：火會從曲線變直線。
-                            tmp_center_x = int((x0+x1)/2)
-                            if format_dict_array[(idx+0)%nodes_length]['x_direction']>0:
-                                if int(float(old_code_array[1])) > tmp_center_x:
-                                    old_code_array[1] = str(int(old_code_array[1]) + x1_offset)
-                            if format_dict_array[(idx+0)%nodes_length]['x_direction']<0:
-                                if int(old_code_array[1]) < tmp_center_x:
-                                    old_code_array[1] = str(int(old_code_array[1]) - x1_offset)
-
-                        old_code_array[3] = str(curvy1_x2)
-                        old_code_array[4] = str(curvy1_y2)
-                        new_code = ' '.join(old_code_array)
-                        format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-
-                    # 不知在寫什麼的 code... 開始。
-                    if format_dict_array[(idx+3)%nodes_length]['t']=="c":
-                        curvy2_x1=format_dict_array[(idx+3)%nodes_length]['x1'] + x2_offset
-                        curvy2_y1=format_dict_array[(idx+3)%nodes_length]['y1'] + y2_offset
-
-                        format_dict_array[(idx+3)%nodes_length]['x1']=curvy2_x1
-                        format_dict_array[(idx+3)%nodes_length]['y1']=curvy2_y1
-                        old_code_string = format_dict_array[(idx+3)%nodes_length]['code']
-                        old_code_array = old_code_string.split(' ')
-                        old_code_array[1] = str(curvy2_x1)
-                        old_code_array[2] = str(curvy2_y1)
-                        new_code = ' '.join(old_code_array)
-                        format_dict_array[(idx+3)%nodes_length]['code'] = new_code
-                    # 不知在寫什麼的 code... 結束。
-
-                    # 因為「先內縮」的關係，造成 curvy1_x2,y2 的方向可能是錯誤的！
-                    # fix x1,y1
-                    if format_dict_array[(idx+1)%nodes_length]['t']=="c":
-                        curvy1_x1=format_dict_array[(idx+1)%nodes_length]['x1']
-                        curvy1_y1=format_dict_array[(idx+1)%nodes_length]['y1']
-                        curvy1_x2=format_dict_array[(idx+1)%nodes_length]['x2']
-                        curvy1_y2=format_dict_array[(idx+1)%nodes_length]['y2']
-                        #print("curvy1_x1,y1:", curvy1_x1,curvy1_y1)
-                        is_wrong_direction = False
+                        # cache transformed nodes.
+                        # 加了，會造成其他的誤判，因為「點」共用。例如「甾」的右上角。
+                        #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
                         
-                        # for case: _Identity.310.glyph
-                        if format_dict_array[(idx+0)%nodes_length]['x_direction']>0:
-                            if curvy1_x1 > new_x1:
-                                is_wrong_direction = True
-
-                        if format_dict_array[(idx+0)%nodes_length]['x_direction']<0:
-                            if curvy1_x1 < new_x1:
-                                is_wrong_direction = True
-
-                        #print("is_wrong_direction:", is_wrong_direction)
-                        if is_wrong_direction:
-                            format_dict_array[(idx+1)%nodes_length]['x1']=new_x1
-                            format_dict_array[(idx+1)%nodes_length]['y1']=new_y1
-                            old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                            old_code_array = old_code_string.split(' ')
-                            
-                            # for case: .31710 的 火🔥，下面解法：火會從曲線變直線。
-                            # 只有較短的線做 overwrite, 一般應該是 add offset.
-                            if format_dict_array[(idx+0)%nodes_length]['distance'] < self.config.ROUND_OFFSET * 2:
-                                old_code_array[1] = str(new_x1)
-                                old_code_array[2] = str(new_y1)
-                                old_code_array[3] = str(new_x1)
-                                old_code_array[4] = str(new_y1)
-                            new_code = ' '.join(old_code_array)
-                            format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-                            #print("udpate +1 curvy1_x2,y2 code as (before):", old_code_string)
-                            #print("udpate +1 curvy1_x2,y2 code as (after):", new_code)
-
-                        # for case: .31893 「繞」的尾巴，內縮後會超過 t0
-                        if format_dict_array[(idx+0)%nodes_length]['y_direction']>0:
-                            #print("['y_direction']>0")
-                            #print("curvy1_y1 y0:", curvy1_y1, y0)
-                            if curvy1_y1 < y0:
-                                format_dict_array[(idx+1)%nodes_length]['y1']=y0
-                                old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                                old_code_array = old_code_string.split(' ')
-                                old_code_array[2] = str(y0)
-                                new_code = ' '.join(old_code_array)
-                                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-
-                            if curvy1_y2 < y0:
-                                format_dict_array[(idx+1)%nodes_length]['y2']=y0
-                                old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                                old_code_array = old_code_string.split(' ')
-                                old_code_array[4] = str(y0)
-                                new_code = ' '.join(old_code_array)
-                                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-
-                        if format_dict_array[(idx+0)%nodes_length]['y_direction']<0:
-                            #print("['y_direction']<0")
-                            if curvy1_y1 > y0:
-                                format_dict_array[(idx+1)%nodes_length]['y1']=y0
-                                old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                                old_code_array = old_code_string.split(' ')
-                                old_code_array[2] = str(y0)
-                                new_code = ' '.join(old_code_array)
-                                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-
-                            if curvy1_y2 > y0:
-                                format_dict_array[(idx+1)%nodes_length]['y2']=y0
-                                old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                                old_code_array = old_code_string.split(' ')
-                                old_code_array[4] = str(y0)
-                                new_code = ' '.join(old_code_array)
-                                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-
-                    # 因為「先內縮」的關係，造成 curvy1_x2,y2 的方向可能是錯誤的！
-                    # fix x2,y2
-                    if format_dict_array[(idx+1)%nodes_length]['t']=="c":
-                        curvy1_x2=format_dict_array[(idx+1)%nodes_length]['x2']
-                        curvy1_y2=format_dict_array[(idx+1)%nodes_length]['y2']
-                        #print("curvy1_x2,y2:", curvy1_x2,curvy1_y2)
-                        is_wrong_direction = False
-                        
-                        # for case: _Identity.310.glyph
-                        if format_dict_array[(idx+0)%nodes_length]['x_direction']>0:
-                            if curvy1_x2 > new_x1:
-                                is_wrong_direction = True
-
-                        if format_dict_array[(idx+0)%nodes_length]['x_direction']<0:
-                            if curvy1_x2 < new_x1:
-                                is_wrong_direction = True
-
-                        #print("is_wrong_direction:", is_wrong_direction)
-                        if is_wrong_direction:
-                            format_dict_array[(idx+1)%nodes_length]['x2']=new_x1
-                            format_dict_array[(idx+1)%nodes_length]['y2']=new_y1
-                            old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
-                            old_code_array = old_code_string.split(' ')
-                            old_code_array[3] = str(new_x1)
-                            old_code_array[4] = str(new_y1)
-                            new_code = ' '.join(old_code_array)
-                            format_dict_array[(idx+1)%nodes_length]['code'] = new_code
-                    '''
-
-                    # cache transformed nodes.
-                    # 加了，會造成其他的誤判，因為「點」共用。例如「甾」的右上角。
-                    #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-                    
-                    # we generated nodes
-                    skip_coordinate.append([center_x,center_y])
+                        # we generated nodes
+                        skip_coordinate.append([center_x,center_y])
 
                     # next_x,y is used for next rule!
                     # 加了，會造成其他的誤判，因為「點」共用。
@@ -456,6 +347,8 @@ class Rule(Rule.Rule):
                     # keep the new begin point [FIX]
                     # 加了，會造成其他的誤判，因為「點」共用。例如「甾」的右上角。
                     #skip_coordinate.append([new_x1,new_y1])
+
+                    # to avoid same code apply twice.
 
                     redo_travel=True
                     check_first_point = True
@@ -467,4 +360,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate
+        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule

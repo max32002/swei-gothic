@@ -98,7 +98,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[627,552]]
+                    debug_coordinate_list = [[269,649]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -213,7 +213,21 @@ class Rule(Rule.Rule):
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
                 # PS: to test inside_stroke_flag, please use real position instead of x1,y1.
 
-                # compare distance, muse large than our "large round"
+                # for D.Lucy
+                if self.config.PROCESS_MODE in ["D"]:
+                    if is_match_pattern:
+                        # - sharp.
+                        if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                                fail_code = 2201
+                                is_match_pattern = False
+
+                        # | sharp.
+                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                                fail_code = 2202
+                                is_match_pattern = False
+
 
                 inside_stroke_flag = False
                 inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
@@ -299,6 +313,20 @@ class Rule(Rule.Rule):
         
                     if slide_percent_10 >= SLIDE_10_PERCENT_MIN and slide_percent_10 <= SLIDE_10_PERCENT_MAX:
                         is_match_pattern = True
+                    else:
+                        # try real point.
+                        # for case "加"的力的右上角。
+
+                        x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                        y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                        x1 = format_dict_array[(idx+1)%nodes_length]['x']
+                        y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                        x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                        y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                        slide_percent_10 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
+                        if slide_percent_10 >= SLIDE_10_PERCENT_MIN and slide_percent_10 <= SLIDE_10_PERCENT_MAX:
+                            is_match_pattern = True
+
 
                 # 為了在 white mode 使用。
                 if is_match_pattern:
@@ -333,8 +361,6 @@ class Rule(Rule.Rule):
                             #is_apply_small_corner = True
                             #pass
 
-
-
                 if is_debug_mode:
                     if not is_match_pattern:
                         print(idx,"debug fail_code #99:", fail_code)
@@ -343,7 +369,7 @@ class Rule(Rule.Rule):
 
                 if is_match_pattern:
                     # make coner curve
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx)
+                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule)
 
                     # cache transformed nodes.
                     # we generated nodes

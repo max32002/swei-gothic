@@ -222,7 +222,7 @@ class Rule(Rule.Rule):
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx+2)
+                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx+2,[])
 
                     check_first_point = True
                     redo_travel=True
