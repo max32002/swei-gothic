@@ -120,21 +120,11 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+1)%nodes_length]['distance'] >= MIN_DISTANCE:
                             is_match_pattern = True
 
-
                 # for D.Lucy
                 if self.config.PROCESS_MODE in ["D"]:
                     if is_match_pattern:
-                        # - sharp.
-                        if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
-                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
-                                fail_code = 2201
-                                is_match_pattern = False
-
-                        # | sharp.
-                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
-                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
-                                fail_code = 2202
-                                is_match_pattern = False
+                        is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
 
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
@@ -157,6 +147,19 @@ class Rule(Rule.Rule):
         
                     if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
                         is_match_pattern = True
+                    else:
+                        # try real point.
+                        # for case "加"的力的右上角。
+
+                        x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                        y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                        x1 = format_dict_array[(idx+1)%nodes_length]['x']
+                        y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                        x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                        y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                        slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
+                        if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
+                            is_match_pattern = True
 
                 # check black stroke in white area. @_@;
                 is_apply_large_corner = False

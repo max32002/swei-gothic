@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.063"
+    VERSION = "2.068"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
@@ -49,31 +49,32 @@ class TtfConfig():
     def apply_weight_setting(self):
         self.STYLE=self.STYLE_ARRAY[self.STYLE_INDEX]
 
+        # for uni53BB, 去, 155
         if self.STYLE=="Black":
-            self.STROKE_MAX = 114
+            self.STROKE_MAX = 165
         if self.STYLE=="Bold":
+            self.STROKE_MAX = 137
+        if self.STYLE=="Medium":
             self.STROKE_MAX = 109
         if self.STYLE=="DemiLight":
-            self.STROKE_MAX = 90
+            self.STROKE_MAX = 86
         if self.STYLE=="Light":
-            self.STROKE_MAX = 80
-        if self.STYLE=="Medium":
-            self.STROKE_MAX = 104
+            self.STROKE_MAX = 70
         if self.STYLE=="Thin":
-            self.STROKE_MAX = 60
+            self.STROKE_MAX = 49
 
         if self.STYLE=="Black":
             self.STROKE_MIN = 36
         if self.STYLE=="Bold":
             self.STROKE_MIN = 36
-        if self.STYLE=="DemiLight":
-            self.STROKE_MIN = 34
-        if self.STYLE=="Light":
-            self.STROKE_MIN = 30
         if self.STYLE=="Medium":
             self.STROKE_MIN = 34
+        if self.STYLE=="DemiLight":
+            self.STROKE_MIN = 30
+        if self.STYLE=="Light":
+            self.STROKE_MIN = 28
         if self.STYLE=="Thin":
-            self.STROKE_MIN = 26
+            self.STROKE_MIN = 24
 
         self.STROKE_ACCURACY_PERCENT = 10
         self.STROKE_WIDTH_MAX = int((self.STROKE_MAX * (100+self.STROKE_ACCURACY_PERCENT))/100)

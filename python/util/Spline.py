@@ -350,7 +350,7 @@ class Spline():
         return is_modified
 
     # run both in clockwise and counter clockwise.
-    def trace_common(self, stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule, only_mark_log):
+    def trace_common(self, stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule):
         is_modified = False
 
         DEBUG_CRASH_RULE = False    # online
@@ -534,7 +534,7 @@ class Spline():
                 redo_count+=1
                 if redo_count==100:
                     print("occure bug at rule#2!")
-                redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru2.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule,only_mark_log)
+                redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru2.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule)
                 if redo_travel:
                     is_modified = True
             #print("Rule#2 is_modified:", is_modified)
@@ -556,7 +556,7 @@ class Spline():
                 redo_count+=1
                 if redo_count==100:
                     print("occure bug at rule#1!")
-                redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru1.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule,only_mark_log)
+                redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru1.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule)
                 if redo_travel:
                     is_modified = True
             #print("Rule#1 is_modified:", is_modified)
@@ -578,7 +578,7 @@ class Spline():
                 redo_count+=1
                 if redo_count==100:
                     print("occure bug at rule#3!")
-                redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru3.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule,only_mark_log)
+                redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru3.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule)
                 if redo_travel:
                     is_modified = True
             #print("Rule#3 is_modified:", is_modified)
@@ -644,11 +644,7 @@ class Spline():
         #if not key == 1:
             #return spline_dict
 
-        only_mark_log = False
-        if self.config.PROCESS_MODE in ["D"]:
-            only_mark_log = True
-
-        is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule, only_mark_log)
+        is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
 
         # start to travel nodes for [RULE #11]
         # check outside curve
@@ -725,11 +721,7 @@ class Spline():
         # transform code block
         # ==================================================
 
-        only_mark_log = False
-        if self.config.PROCESS_MODE in ["D"]:
-            only_mark_log = True
-
-        is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule, only_mark_log)
+        is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
 
         # start to travel nodes for [RULE #5]
         # check outside curve
@@ -756,7 +748,7 @@ class Spline():
         #print("start Rule # 99...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+        #redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass

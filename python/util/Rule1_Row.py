@@ -11,7 +11,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule,only_mark_log):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule):
         redo_travel=False
         check_first_point = False
 
@@ -77,7 +77,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[923,620]]
+                    debug_coordinate_list = [[422,582]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -338,7 +338,13 @@ class Rule(Rule.Rule):
                         #print("generated_code#1 +1:", generated_code)
                         skip_coordinate_rule.append(generated_code)
 
-                    if not only_mark_log:
+                    is_goto_apply_round = True
+                    # for D.Lucy
+                    if self.config.PROCESS_MODE in ["D"]:
+                        is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
+                        is_goto_apply_round = is_match_d_base_rule
+
+                    if is_goto_apply_round:
                         center_x,center_y = self.apply_round_transform(format_dict_array,idx)
 
                         # cache transformed nodes.

@@ -11,7 +11,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule, only_mark_log):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule):
         redo_travel=False
         check_first_point = False
 
@@ -326,20 +326,20 @@ class Rule(Rule.Rule):
                     skip_coordinate_rule.append(generated_code)
 
                     if self.config.PROCESS_MODE in ["D"]:
-                        generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                        #generated_code = format_dict_array[(idx+1)%nodes_length]['code']
                         #print("generated_code#2 +1:", generated_code)
-                        skip_coordinate_rule.append(generated_code)
+                        #skip_coordinate_rule.append(generated_code)
+                        pass
 
-                    if not only_mark_log:
-                        center_x,center_y = self.apply_round_transform(format_dict_array,idx)
-                        #print("center_x,center_y:",center_x,center_y)
+                    center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                    #print("center_x,center_y:",center_x,center_y)
 
-                        # cache transformed nodes.
-                        # 加了，會造成其他的誤判，因為「點」共用。
-                        #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-                        
-                        # we generated nodes
-                        skip_coordinate.append([center_x,center_y])
+                    # cache transformed nodes.
+                    # 加了，會造成其他的誤判，因為「點」共用。
+                    #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
+                    
+                    # we generated nodes
+                    skip_coordinate.append([center_x,center_y])
                     
                     # next_x,y is used for next rule!
                     # 加了，會造成其他的誤判，因為「點」共用。

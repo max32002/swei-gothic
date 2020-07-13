@@ -216,18 +216,8 @@ class Rule(Rule.Rule):
                 # for D.Lucy
                 if self.config.PROCESS_MODE in ["D"]:
                     if is_match_pattern:
-                        # - sharp.
-                        if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
-                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
-                                fail_code = 2201
-                                is_match_pattern = False
-
-                        # | sharp.
-                        if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
-                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
-                                fail_code = 2202
-                                is_match_pattern = False
-
+                        is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
 
                 inside_stroke_flag = False
                 inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
@@ -281,15 +271,15 @@ class Rule(Rule.Rule):
                     y_from = y0
                     x_center = format_dict_array[(idx+1)%nodes_length]['x2']
                     y_center = format_dict_array[(idx+1)%nodes_length]['y2']
-                    x0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
-                    y0 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
+                    x0 = x_center
+                    y0 = y_center
                 if format_dict_array[(idx+2)%nodes_length]['t']=='c':
                     x_from = x2
                     y_from = y2
                     x_center = format_dict_array[(idx+2)%nodes_length]['x1']
                     y_center = format_dict_array[(idx+2)%nodes_length]['y1']
-                    x2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),x_from,x_center,x1)
-                    y2 = self.compute_curve_new_x1(spline_util.get_distance(x_from,y_from,x1,y1),spline_util.get_distance(x_center,y_center,x1,y1),y_from,y_center,y1)
+                    x2 = x_center
+                    y2 = y_center
                 #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
 
                 previous_x,previous_y=0,0
