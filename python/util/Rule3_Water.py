@@ -59,7 +59,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[147,272]]
+                    debug_coordinate_list = [[649,214]]
                     if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
 

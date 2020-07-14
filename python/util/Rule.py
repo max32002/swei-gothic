@@ -1188,9 +1188,6 @@ class Rule():
     # 角度的影響，修改為取決於距離長度。
     def compute_curve_new_xy(self,x_from,y_from,x_center,y_center,x1,y1,round_offset):
         distance_full = spline_util.get_distance(x_from,y_from,x1,y1)
-        distance_head = spline_util.get_distance(x_from,y_from,x_center,y_center)
-        distance_tail = spline_util.get_distance(x_center,y_center,x1,y1)
-        distance_middle = distance_full * (distance_head/(distance_head+distance_tail))
         
         x_middle = (x_from + x1) / 2
         y_middle = (y_from + y1) / 2
@@ -1198,17 +1195,24 @@ class Rule():
         new_x_center = int((x_middle + x_center) / 2)
         new_y_center = int((y_middle + y_center) / 2)
 
-        # default: use tail part.
-        use_head_part = False
-        if round_offset > distance_middle:
-            use_head_part = True
-        round_offset_tail = distance_full - round_offset
+        previous_x,previous_y = new_x_center,new_y_center
 
-        previous_x,previous_y = 0,0
-        if not use_head_part:
-            previous_x,previous_y=spline_util.two_point_extend(new_x_center,new_y_center,x1,y1,-1 * round_offset)
-        else:
-            previous_x,previous_y=spline_util.two_point_extend(new_x_center,new_y_center,x_from,y_from,-1 * round_offset_tail)
+        # PS: distance_head and distance_tail maybe equal 0.
+        distance_head = spline_util.get_distance(x_from,y_from,x_center,y_center)
+        distance_tail = spline_util.get_distance(x_center,y_center,x1,y1)
+        if distance_head > 0 and distance_tail > 0:
+            distance_middle = distance_full * (distance_head/(distance_head+distance_tail))
+
+            # default: use tail part.
+            use_head_part = False
+            if round_offset > distance_middle:
+                use_head_part = True
+            round_offset_tail = distance_full - round_offset
+
+            if not use_head_part:
+                previous_x,previous_y=spline_util.two_point_extend(new_x_center,new_y_center,x1,y1,-1 * round_offset)
+            else:
+                previous_x,previous_y=spline_util.two_point_extend(new_x_center,new_y_center,x_from,y_from,-1 * round_offset_tail)
 
         #if True:
         if False:
