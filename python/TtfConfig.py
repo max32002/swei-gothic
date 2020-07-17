@@ -2,10 +2,12 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.069"
+    VERSION = "2.072"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
+    #PROCESS_MODE = "B2"
+    #PROCESS_MODE = "XD"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
@@ -34,7 +36,17 @@ class TtfConfig():
 
     # for Regular
     OUTSIDE_ROUND_OFFSET = 55
-    INSIDE_ROUND_OFFSET = int(OUTSIDE_ROUND_OFFSET * 0.3)
+    INSIDE_ROUND_OFFSET = 19
+
+    if PROCESS_MODE == "B2":
+        INSIDE_ROUND_OFFSET = 30
+
+        if STYLE=="Black":
+            INSIDE_ROUND_OFFSET = 45
+        if STYLE=="Bold":
+            INSIDE_ROUND_OFFSET = 40
+        if STYLE=="Medium":
+            INSIDE_ROUND_OFFSET = 35
 
     # some inside block not able to fill 2 curve coner, use small one.
     INSIDE_SMALL_ROUND_OFFSET=15
@@ -88,12 +100,12 @@ class TtfConfig():
             self.ROUND_OFFSET = 38
         if self.STYLE=="Bold":
             self.ROUND_OFFSET = 36
+        if self.STYLE=="Medium":
+            self.ROUND_OFFSET = 33
         if self.STYLE=="DemiLight":
             self.ROUND_OFFSET = 30
         if self.STYLE=="Light":
             self.ROUND_OFFSET = 27
-        if self.STYLE=="Medium":
-            self.ROUND_OFFSET = 33
         if self.STYLE=="Thin":
             self.ROUND_OFFSET = 20
 
@@ -101,12 +113,12 @@ class TtfConfig():
             self.OUTSIDE_ROUND_OFFSET = 65
         if self.STYLE=="Bold":
             self.OUTSIDE_ROUND_OFFSET = 60
+        if self.STYLE=="Medium":
+            self.OUTSIDE_ROUND_OFFSET = 60
         if self.STYLE=="DemiLight":
             self.OUTSIDE_ROUND_OFFSET = 50
         if self.STYLE=="Light":
             self.OUTSIDE_ROUND_OFFSET = 40
-        if self.STYLE=="Medium":
-            self.OUTSIDE_ROUND_OFFSET = 60
         if self.STYLE=="Thin":
             self.OUTSIDE_ROUND_OFFSET = 28
 
@@ -114,7 +126,7 @@ class TtfConfig():
         if self.PROCESS_MODE=="HALFMOON":
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
-        if self.PROCESS_MODE=="D":
+        if self.PROCESS_MODE in ["D","XD"]:
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
     def __init__(self, weight_code):

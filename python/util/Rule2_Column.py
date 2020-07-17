@@ -325,21 +325,20 @@ class Rule(Rule.Rule):
                     #print("generated_code#2:", generated_code)
                     skip_coordinate_rule.append(generated_code)
 
-                    if self.config.PROCESS_MODE in ["D"]:
-                        #generated_code = format_dict_array[(idx+1)%nodes_length]['code']
-                        #print("generated_code#2 +1:", generated_code)
-                        #skip_coordinate_rule.append(generated_code)
-                        pass
 
-                    center_x,center_y = self.apply_round_transform(format_dict_array,idx)
-                    #print("center_x,center_y:",center_x,center_y)
+                    is_goto_apply_round = True
 
-                    # cache transformed nodes.
-                    # 加了，會造成其他的誤判，因為「點」共用。
-                    #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-                    
-                    # we generated nodes
-                    skip_coordinate.append([center_x,center_y])
+                    # for XD
+                    if self.config.PROCESS_MODE in ["XD"]:
+                        is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
+                        is_goto_apply_round = is_match_d_base_rule
+
+                    if is_goto_apply_round:
+                        center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                        #print("center_x,center_y:",center_x,center_y)
+                        
+                        # we generated nodes
+                        skip_coordinate.append([center_x,center_y])
                     
                     # next_x,y is used for next rule!
                     # 加了，會造成其他的誤判，因為「點」共用。

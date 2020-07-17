@@ -231,7 +231,19 @@ class Convertor():
                 unicode_string = encoding_string_array[self.config.UNICODE_FIELD-1]
                 if len(unicode_string) > 0:
                     unicode_int = int(unicode_string)
-                if unicode_int > 0 and not self.config.BMP_PATH is None:
+                
+                is_need_load_bmp = True
+                if unicode_int <= 0:
+                    is_need_load_bmp = False
+                if self.config.BMP_PATH is None:
+                    is_need_load_bmp = False
+                else:
+                    if len(self.config.BMP_PATH)<=1:
+                        is_need_load_bmp = False
+                if self.config.PROCESS_MODE in ["B2"]:
+                    is_need_load_bmp = False
+
+                if is_need_load_bmp:
                     filename = "U_%s.bmp" % (unicode_int)
                     bmp_path = os.path.join(self.config.BMP_PATH, filename)
                     #print("bmp:", bmp_path, filename_input)

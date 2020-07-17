@@ -59,7 +59,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[649,214]]
+                    debug_coordinate_list = [[715,396]]
                     if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
 
@@ -130,7 +130,7 @@ class Rule(Rule.Rule):
                     del format_dict_array[(idx+2)%nodes_length]
 
                     if idx > (idx+2)%nodes_length:
-                        idx +=1
+                        idx -=1
                     nodes_length = len(format_dict_array)
 
 
@@ -330,20 +330,21 @@ class Rule(Rule.Rule):
                         skip_coordinate_rule.append(generated_code)
 
                     is_goto_apply_round = True
+
                     # for D.Lucy
                     if self.config.PROCESS_MODE in ["D"]:
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
-                        #is_goto_apply_round = False
+
+                    # for XD
+                    if self.config.PROCESS_MODE in ["XD"]:
+                        is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
+                        is_goto_apply_round = is_match_d_base_rule
 
                     if is_goto_apply_round:
                         center_x,center_y = self.apply_round_transform(format_dict_array,idx)
                         #print("center_x,center_y:", center_x,center_y)
 
-                        # cache transformed nodes.
-                        # 加了，會造成其他的誤判，因為「點」共用。例如「甾」的右上角。
-                        #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-                        
                         # we generated nodes
                         skip_coordinate.append([center_x,center_y])
 

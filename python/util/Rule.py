@@ -520,6 +520,16 @@ class Rule():
             format_dict_array[idx]['x']=int(float(old_code_array[1]))
             format_dict_array[idx]['y']=int(float(old_code_array[2]))
 
+        nodes_length = len(format_dict_array)
+        next_index = (idx+1)%nodes_length
+        current_x = format_dict_array[idx]['x']
+        current_y = format_dict_array[idx]['y']
+
+        next_x = format_dict_array[next_index]['x']
+        next_y = format_dict_array[next_index]['y']
+        distance = spline_util.get_distance(current_x,current_y,next_x,next_y)
+        format_dict_array[idx]['distance']=distance
+
     # purpose: get current index distance,
     #        : for only update specific index only.
     def current_distance(self, format_dict_array, idx):
@@ -546,8 +556,8 @@ class Rule():
 
             next_x = format_dict_array[next_index]['x']
             next_y = format_dict_array[next_index]['y']
-            distance = spline_util.get_distance(current_x,current_y,next_x,next_y)
-            format_dict_array[idx]['distance']=distance
+
+            distance = format_dict_array[idx]['distance']
 
             format_dict_array[idx]['match_stroke_width'] = False
             if distance >= self.config.STROKE_WIDTH_MIN and distance <= self.config.STROKE_WIDTH_MAX:
@@ -710,8 +720,9 @@ class Rule():
         #print("update +1 code:", new_code)
 
         if old_code_string in skip_coordinate_rule:
+            #print("+1 old code in rule:", old_code_string)
+            #print("+1 update as new code in rule:", new_code)
             skip_coordinate_rule.append(new_code)
-
 
         # update [next next curve]
         if format_dict_array[(idx+2)%nodes_length]['t']=="c":
@@ -784,6 +795,8 @@ class Rule():
             self.apply_code(format_dict_array,(idx+2)%nodes_length)
 
             if old_code_string in skip_coordinate_rule:
+                #print("+2 old code in rule:", old_code_string)
+                #print("+2 update as new code in rule:", new_code)
                 skip_coordinate_rule.append(new_code)
 
         # append new #2
@@ -805,7 +818,36 @@ class Rule():
 
         insert_idx = (idx+2)%nodes_length
         format_dict_array.insert(insert_idx, dot_dict)
-        
+        nodes_length = len(format_dict_array)
+
+        # 因為較短邊 <= round_offset, 需要合併節點。
+        if idx >= insert_idx:
+            idx += 1
+
+        self.apply_code(format_dict_array,(idx+2)%nodes_length)
+        if format_dict_array[(idx+2)%nodes_length]['distance'] <= 0:
+            del format_dict_array[(idx+3)%nodes_length]
+
+            if idx >= (idx+3)%nodes_length:
+                idx -= 1
+            nodes_length = len(format_dict_array)
+
+        self.apply_code(format_dict_array,(idx+0)%nodes_length)
+        if format_dict_array[(idx+0)%nodes_length]['distance'] <= 0:
+            del format_dict_array[(idx+1)%nodes_length]
+
+            if idx >= (idx+1)%nodes_length:
+                idx -= 1
+            nodes_length = len(format_dict_array)
+        else:
+            # dot+1 is our generated position. skip to transform.
+            # to avoid same code apply twice.
+            nodes_length = len(format_dict_array)
+            generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+            #print("generated_code+1 to rule:", generated_code)
+            skip_coordinate_rule.append(generated_code)
+
+
         #print("insert to index:",insert_idx)
         #print("appdend +3 new_code:", new_code)
 
@@ -848,7 +890,6 @@ class Rule():
             round_length_2 = format_dict_array[(idx+2)%nodes_length]['distance']
 
         # use more close coordinate.
-        #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
             x_from = x0
             y_from = y0
@@ -862,19 +903,30 @@ class Rule():
             x_center = format_dict_array[(idx+3)%nodes_length]['x1']
             y_center = format_dict_array[(idx+3)%nodes_length]['y1']
             x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x3,y3,round_length_2)
-        #print("new x0,y0,x2,y2:", x0,y0,x2,y2)
+
 
         new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1,-1 * round_length_1)
         new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2,-1 * round_length_2)
 
+        #if True:
+        if False:
+            print("orig orig_x0,orig_y0,orig_x3,orig_y3:", orig_x0,orig_y0,orig_x3,orig_y3)
+            print("new x0,y0,x2,y2:", x0,y0,x2,y2)
+            print("new_x1, new_y1:", new_x1, new_y1)
+            print("new_x2, new_y2:", new_x2, new_y2)
+
         # re-center again.
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            orig_new_x1, orig_new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * self.config.ROUND_OFFSET)
-            new_x1, new_y1 = int((orig_new_x1+new_x1)/2) , int((orig_new_y1+new_y1)/2)
+            x_center = format_dict_array[(idx+1)%nodes_length]['x2']
+            y_center = format_dict_array[(idx+1)%nodes_length]['y2']
+            new_x_center, new_y_center = spline_util.two_point_extend(x_center,y_center,x1,y1,-1 * round_length_1)
+            new_x1, new_y1 = int((new_x_center+new_x1)/2) , int((new_y_center+new_y1)/2)
         # re-center again.
         if format_dict_array[(idx+3)%nodes_length]['t']=='c':
-            orig_new_x2, orig_new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * self.config.ROUND_OFFSET)
-            new_x2, new_y2 = int((orig_new_x2+new_x2)/2) , int((orig_new_y2+new_y2)/2)
+            x_center = format_dict_array[(idx+3)%nodes_length]['x1']
+            y_center = format_dict_array[(idx+3)%nodes_length]['y1']
+            new_x_center, new_y_center = spline_util.two_point_extend(x_center,y_center,x2,y2,-1 * round_length_2)
+            new_x2, new_y2 = int((new_x_center+new_x2)/2) , int((new_y_center+new_y2)/2)
 
         x1_offset = new_x1 - x1
         y1_offset = new_y1 - y1
@@ -980,7 +1032,12 @@ class Rule():
 
         # update #1
         #print("self.config.PROCESS_MODE:", self.config.PROCESS_MODE)
-        if self.config.PROCESS_MODE in ["GOTHIC","D"]:
+
+        is_halfmoon_sharp = False
+        if self.config.PROCESS_MODE in ["HALFMOON"]:
+            is_halfmoon_sharp = True
+
+        if not is_halfmoon_sharp:
             #print("self.config.PROCESS_MODE in [GOTHIC]")
             format_dict_array[(idx+1)%nodes_length]['x']= new_x1
             format_dict_array[(idx+1)%nodes_length]['y']= new_y1
@@ -1068,7 +1125,7 @@ class Rule():
             #print("+2 idx:%d, code:%s" % (target_index, new_code))
 
 
-        if self.config.PROCESS_MODE in ["HALFMOON"]:
+        if is_halfmoon_sharp:
             #print("self.config.PROCESS_MODE in [HALFMOON]")
             # move to left
             center_x = x1
@@ -1266,3 +1323,42 @@ class Rule():
 
 
         return going_right, fail_code
+
+
+    # purpose: check for XD base rule.
+    # return:
+    #   True: match, path going right.
+    #   False: not match, path going left.
+    def going_xd_down(self, format_dict_array, idx):
+        going_down = False
+        is_match_pattern = False
+        fail_code = 0
+
+        nodes_length = len(format_dict_array)
+
+        if not is_match_pattern:
+            # | sharp.
+            if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                if format_dict_array[(idx+0)%nodes_length]['y_direction'] < 0:
+                    fail_code = 2201
+                    is_match_pattern = True
+                    going_down = True
+
+        if not is_match_pattern:
+            # - sharp.
+            if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
+                    fail_code = 2202
+                    is_match_pattern = True
+                    going_down = True
+
+        if not is_match_pattern:
+            # \ sharp. go up.
+            # / sharp. go down.
+            if format_dict_array[(idx+0)%nodes_length]['y_direction'] < 0:
+                fail_code = 2203
+                is_match_pattern = True
+                going_down = True
+
+
+        return going_down, fail_code

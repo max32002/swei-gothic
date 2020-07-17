@@ -126,6 +126,12 @@ class Rule(Rule.Rule):
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
                         is_match_pattern = is_match_d_base_rule
 
+                # for XD
+                if self.config.PROCESS_MODE in ["XD"]:
+                    if is_match_pattern:
+                        is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
+
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
 
@@ -151,12 +157,27 @@ class Rule(Rule.Rule):
                         # try real point.
                         # for case "加"的力的右上角。
 
-                        x0 = format_dict_array[(idx+0)%nodes_length]['x']
-                        y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                        # try real point.
+                        # for case 「加」字的力的右上角。
+                        # PS: 「加」字算是例外，一般的字，不應檢查到這裡。
+                        if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                            if format_dict_array[(idx+1)%nodes_length]['x2']==format_dict_array[(idx+1)%nodes_length]['x1'] and format_dict_array[(idx+1)%nodes_length]['y2']==format_dict_array[(idx+1)%nodes_length]['y1']:
+                                pass
+                            else:
+                                # 這個情況，滿特別的，就允許例外看看。
+                                x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                                y0 = format_dict_array[(idx+0)%nodes_length]['y']
                         x1 = format_dict_array[(idx+1)%nodes_length]['x']
                         y1 = format_dict_array[(idx+1)%nodes_length]['y']
-                        x2 = format_dict_array[(idx+2)%nodes_length]['x']
-                        y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                        
+                        if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                            if format_dict_array[(idx+2)%nodes_length]['x2']==format_dict_array[(idx+2)%nodes_length]['x1'] and format_dict_array[(idx+2)%nodes_length]['y2']==format_dict_array[(idx+2)%nodes_length]['y1']:
+                                pass
+                            else:
+                                # 這個情況，滿特別的，就允許例外看看。
+                                x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                                y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                        
                         slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
                         if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
                             is_match_pattern = True
@@ -208,6 +229,12 @@ class Rule(Rule.Rule):
                     #print(idx,"debug rule11+1:",format_dict_array[(idx+1)%nodes_length]['code'])
                     #print(idx,"debug rule11+2:",format_dict_array[(idx+2)%nodes_length]['code'])
 
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+0)%nodes_length]['code']
+                    #print("generated_code:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
+
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
                     # large curve, use small angle.
@@ -233,11 +260,6 @@ class Rule(Rule.Rule):
                         # 加了這行，會讓「口」的最後一個角，無法套到。
                         skip_coordinate.append([previous_x,previous_y])
                         pass
-
-                    nodes_length = len(format_dict_array)
-                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
-                    #print("generated_code:", generated_code)
-                    skip_coordinate_rule.append(generated_code)
 
                     check_first_point = True
                     redo_travel=True

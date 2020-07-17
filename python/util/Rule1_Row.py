@@ -147,6 +147,14 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+debug_idx)%nodes_length]['distance'] <= SKIP_SMALL_DISTANCE:
                             is_match_pattern = False
 
+                # for XD
+                # XD 不在 Rule1 處理水平的case.
+                if self.config.PROCESS_MODE in ["XD"]:
+                    if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                        is_match_pattern = False
+                    if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                        is_match_pattern = False
+
                 # compare direction
                 if is_match_pattern:
                     #print(idx,"debug rule1:",format_dict_array[idx]['code'])
@@ -344,12 +352,14 @@ class Rule(Rule.Rule):
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
 
+                    # for XD
+                    if self.config.PROCESS_MODE in ["XD"]:
+                        is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
+                        is_goto_apply_round = is_match_d_base_rule
+
                     if is_goto_apply_round:
                         center_x,center_y = self.apply_round_transform(format_dict_array,idx)
-
-                        # cache transformed nodes.
-                        # 加了，會造成其他的誤判，因為「點」共用。
-                        #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
+                        #print("center_x,center_y:",center_x,center_y)
 
                         # we generated nodes
                         skip_coordinate.append([center_x,center_y])

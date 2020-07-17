@@ -16,7 +16,7 @@ class Rule(Rule.Rule):
         redo_travel=False
         check_first_point = False
 
-        MIN_DISTANCE = 12
+        RULE_MIN_DISTANCE_REQUIREMENT = 10
         
         # default: 1.6 (large 女), 1.72 (small 女), 1.79(下半扁女）
         SLIDE_0_PERCENT_MIN = 1.40
@@ -49,9 +49,12 @@ class Rule(Rule.Rule):
         SLIDE_32_PERCENT_MAX = 1.88
 
         # 這裡 MIN 的值，需要設小。
-        SLIDE_10_PERCENT_MIN = 0.79
+        SLIDE_10_PERCENT_MIN = 0.59
         SLIDE_10_PERCENT_MAX = 1.80
 
+        if self.config.PROCESS_MODE in ["B2"]:
+            SLIDE_10_PERCENT_MIN = 0.20
+            # PS: 不要調整太高 SLIDE_10_PERCENT_MAX, 會造成內凹，例如：uni9EBC，麼的幺的左側.
 
         # clone
         format_dict_array=[]
@@ -67,12 +70,21 @@ class Rule(Rule.Rule):
         fail_code = -1
         if nodes_length >= rule_need_lines:
             for idx in range(nodes_length):
+                # skip traveled nodes.
                 if idx <= resume_idx:
-                    # skip traveled nodes.
                     continue
+                # length changed, may overfloat, break.
+                nodes_length = len(format_dict_array)
+                if idx >= nodes_length:
+                    break
+                # length changed, may integer division or modulo by zero
+                if nodes_length < rule_need_lines:
+                    break
 
                 is_debug_mode = False
                 #is_debug_mode = True
+
+                #print("code#99,idx:",idx,format_dict_array[(idx+0)%nodes_length]['code'])
 
                 if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
                     if is_debug_mode:
@@ -98,7 +110,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[269,649]]
+                    debug_coordinate_list = [[565,599],[570,599],[552,599],[560,569],[696,599],[696,689]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -128,31 +140,94 @@ class Rule(Rule.Rule):
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
 
-                # match ?l?
-                if format_dict_array[(idx+1)%nodes_length]['t'] == 'l':
-                    fail_code = 100
-                    is_match_pattern = True
+                is_match_pattern = True
 
-                # match ??l
-                if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
-                    fail_code = 110
-                    is_match_pattern = True
-
+                #PS:需要檢查, 對太短的邊做處理，目前的code會有「很多」問題。
                 if is_match_pattern:
                     fail_code = 111
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= MIN_DISTANCE:
-                        fail_code = 120
-                        is_match_pattern = False
 
-                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= MIN_DISTANCE:
-                        fail_code = 130
-                        is_match_pattern = False
+                    is_nodes_enough_to_merge = True
+                    if nodes_length <= 3:
+                        is_nodes_enough_to_merge = False
 
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                        if not is_nodes_enough_to_merge:
+                            fail_code = 120
+                            is_match_pattern = False
+                        else:
+                            # able to merge
+                            # start extend (merge once)
+                            old_code_string = format_dict_array[(idx+0)%nodes_length]['code']
+                            old_code_array = old_code_string.split(' ')
+                            if format_dict_array[(idx+0)%nodes_length]['t']=='c':
+                                old_code_array[5] = str(format_dict_array[(idx+1)%nodes_length]['x'])
+                                old_code_array[6] = str(format_dict_array[(idx+1)%nodes_length]['y'])
+                            else:
+                                # l
+                                old_code_array[1] = str(format_dict_array[(idx+1)%nodes_length]['x'])
+                                old_code_array[2] = str(format_dict_array[(idx+1)%nodes_length]['y'])
+                            new_code = ' '.join(old_code_array)
+                            # only need update code, let formater to re-compute.
+                            format_dict_array[(idx+0)%nodes_length]['code'] = new_code
+
+                            del format_dict_array[(idx+1)%nodes_length]
+                            if idx > (idx+1)%nodes_length:
+                                idx -=1
+                            nodes_length = len(format_dict_array)
+
+                            check_first_point = True
+
+                            # check result again.
+                            self.apply_code(format_dict_array,(idx+0)%nodes_length)
+                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                                fail_code = 121
+                                is_match_pattern = False
+
+                    is_nodes_enough_to_merge = True
+                    if nodes_length <= 3:
+                        is_nodes_enough_to_merge = False
+
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                        if not is_nodes_enough_to_merge:
+                            fail_code = 130
+                            is_match_pattern = False
+                        else:
+                            # able to merge
+                        
+                            # start extend (merge once)
+                            old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
+                            old_code_array = old_code_string.split(' ')
+                            if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                                old_code_array[5] = str(format_dict_array[(idx+2)%nodes_length]['x'])
+                                old_code_array[6] = str(format_dict_array[(idx+2)%nodes_length]['y'])
+                            else:
+                                # l
+                                old_code_array[1] = str(format_dict_array[(idx+2)%nodes_length]['x'])
+                                old_code_array[2] = str(format_dict_array[(idx+2)%nodes_length]['y'])
+                            new_code = ' '.join(old_code_array)
+                            # only need update code, let formater to re-compute.
+                            format_dict_array[(idx+1)%nodes_length]['code'] = new_code
+
+                            del format_dict_array[(idx+2)%nodes_length]
+
+                            if idx > (idx+2)%nodes_length:
+                                idx -=1
+                            nodes_length = len(format_dict_array)
+
+                            check_first_point = True
+
+                            # check result again.
+                            #print("idx:",idx)
+                            #print("nodes_length:",nodes_length)
+                            self.apply_code(format_dict_array,(idx+1)%nodes_length)
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                                fail_code = 131
+                                is_match_pattern = False
 
                 # for all "女" 裡的空白。
                 # match ?cc (almost is lcc, some is ccc).
-
-                if not black_mode:
+                if False:
+                #if not black_mode:
                     #if format_dict_array[(idx+0)%nodes_length]['t'] == 'l':
                     #fail_code = 200
                     if True:
@@ -214,13 +289,22 @@ class Rule(Rule.Rule):
                 # PS: to test inside_stroke_flag, please use real position instead of x1,y1.
 
                 # for D.Lucy
+                # only apply right part.
                 if self.config.PROCESS_MODE in ["D"]:
                     if is_match_pattern:
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
                         is_match_pattern = is_match_d_base_rule
 
+                # for XD
+                if self.config.PROCESS_MODE in ["XD"]:
+                    if is_match_pattern:
+                        is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
+
                 inside_stroke_flag = False
-                inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
+                # B2, skip check image.
+                if not self.config.PROCESS_MODE in ["B2"]:
+                    inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
 
                 round_offset = self.config.ROUND_OFFSET
                 if not inside_stroke_flag:
@@ -233,15 +317,20 @@ class Rule(Rule.Rule):
                     if black_mode:
                         # 為避免與 rule#5 衝突，
                         # 使用較短邊
-                        if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
-                            fail_code = 310
+                        
+                        #似乎不需要檢查。
+                        if True:
+                        #if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
+                            #fail_code = 310
                             is_match_pattern = True
                             if format_dict_array[(idx+1)%nodes_length]['distance'] < round_offset:
                                 round_offset = format_dict_array[(idx+1)%nodes_length]['distance']
                         
-                        if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
-                            fail_code = 320
-                            is_match_pattern = True
+                        #似乎不需要檢查。
+                        if True:
+                        #if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
+                            #fail_code = 320
+                            #is_match_pattern = True
                             if format_dict_array[(idx+0)%nodes_length]['distance'] < round_offset:
                                 round_offset = format_dict_array[(idx+0)%nodes_length]['distance']
                     else:
@@ -305,14 +394,26 @@ class Rule(Rule.Rule):
                         is_match_pattern = True
                     else:
                         # try real point.
-                        # for case "加"的力的右上角。
-
-                        x0 = format_dict_array[(idx+0)%nodes_length]['x']
-                        y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                        # for case 「加」字的力的右上角。
+                        # PS: 「加」字算是例外，一般的字，不應檢查到這裡。
+                        if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                            if format_dict_array[(idx+1)%nodes_length]['x2']==format_dict_array[(idx+1)%nodes_length]['x1'] and format_dict_array[(idx+1)%nodes_length]['y2']==format_dict_array[(idx+1)%nodes_length]['y1']:
+                                pass
+                            else:
+                                # 這個情況，滿特別的，就允許例外看看。
+                                x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                                y0 = format_dict_array[(idx+0)%nodes_length]['y']
                         x1 = format_dict_array[(idx+1)%nodes_length]['x']
                         y1 = format_dict_array[(idx+1)%nodes_length]['y']
-                        x2 = format_dict_array[(idx+2)%nodes_length]['x']
-                        y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                        
+                        if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                            if format_dict_array[(idx+2)%nodes_length]['x2']==format_dict_array[(idx+2)%nodes_length]['x1'] and format_dict_array[(idx+2)%nodes_length]['y2']==format_dict_array[(idx+2)%nodes_length]['y1']:
+                                pass
+                            else:
+                                # 這個情況，滿特別的，就允許例外看看。
+                                x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                                y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                        
                         slide_percent_10 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
                         if slide_percent_10 >= SLIDE_10_PERCENT_MIN and slide_percent_10 <= SLIDE_10_PERCENT_MAX:
                             is_match_pattern = True
@@ -325,6 +426,10 @@ class Rule(Rule.Rule):
                     fail_code = 500
                     if not inside_stroke_flag:
                         need_check_join_line = True
+
+                    # B2, skip check image.
+                    if self.config.PROCESS_MODE in ["B2"]:
+                        need_check_join_line = False
 
                     if need_check_join_line:
                         fail_code = 600
@@ -352,12 +457,19 @@ class Rule(Rule.Rule):
                             #pass
 
                 if is_debug_mode:
+                #if True:
                     if not is_match_pattern:
                         print(idx,"debug fail_code #99:", fail_code)
                     else:
                         print("match rule #99:",idx)
 
                 if is_match_pattern:
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+0)%nodes_length]['code']
+                    #print("generated_code to rule:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
+
                     # make coner curve
                     format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule)
 
@@ -368,12 +480,6 @@ class Rule(Rule.Rule):
                         # 加了這行，會讓「口」的最後一個角，無法套到。
                         skip_coordinate.append([previous_x,previous_y])
                         pass
-
-                    # to avoid same code apply twice.
-                    nodes_length = len(format_dict_array)
-                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
-                    #print("generated_code:", generated_code)
-                    skip_coordinate_rule.append(generated_code)
 
                     check_first_point = True
                     redo_travel=True
