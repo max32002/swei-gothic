@@ -59,7 +59,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[715,396]]
+                    debug_coordinate_list = [[123,299]]
                     if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
 
@@ -341,6 +341,7 @@ class Rule(Rule.Rule):
                         is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
 
+                    #print("is_goto_apply_round:",is_goto_apply_round)
                     if is_goto_apply_round:
                         center_x,center_y = self.apply_round_transform(format_dict_array,idx)
                         #print("center_x,center_y:", center_x,center_y)
