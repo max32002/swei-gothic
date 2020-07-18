@@ -408,7 +408,7 @@ class Spline():
             print("start Rule # 1...")
         idx=-1
         redo_travel=False   # Disable
-        #redo_travel=True    # Enable
+        redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
