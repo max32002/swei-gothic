@@ -1530,5 +1530,11 @@ class Rule():
                 is_match_pattern = True
                 going_down = True
 
+            # for < sharp. "女" 的左半邊。
+            if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
+                fail_code = 2204
+                is_match_pattern = True
+                going_down = True
+
 
         return going_down, fail_code
