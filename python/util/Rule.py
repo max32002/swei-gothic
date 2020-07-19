@@ -917,7 +917,9 @@ class Rule():
             y_from = y3
             x_center = format_dict_array[(idx+3)%nodes_length]['x1']
             y_center = format_dict_array[(idx+3)%nodes_length]['y1']
+            #print("x_from,y_from,x_center,y_center,x2,y2,round_length_2:",x_from,y_from,x_center,y_center,x2,y2,round_length_2)
             x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x2,y2,round_length_2)
+            #print("x3,y3:",x3,y3)
 
         new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1,-1 * round_length_1)
         new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2,-1 * round_length_2)
@@ -960,16 +962,18 @@ class Rule():
 
         #if True:
         if False:
+            print("center x,y:", center_x, center_y)
+
             print("orig orig_x0,orig_y0:", orig_x0,orig_y0)
-            print("new x0,y0,x2,y2:", x0,y0,x2,y2)
-            print("new_x1, new_y1:", new_x1, new_y1)
+            print("new x0,y0 goto x1,y1:", x0,y0, x1,y1)
+            print("compute new_x1, new_y1:", new_x1, new_y1)
 
             print("orig_x3,orig_y3:",orig_x3,orig_y3)
-            print("x3,y3:",x3,y3)
-            print("new_x2, new_y2:", new_x2, new_y2)
+            print("x2,y2 goto x3,y3:",x2,y2, x3,y3)
+            print("compute new_x2, new_y2:", new_x2, new_y2)
 
-            print("prefer_orig_1:",prefer_orig_1)
-            print("prefer_orig_3:",prefer_orig_3)
+            #print("prefer_orig_1:",prefer_orig_1)
+            #print("prefer_orig_3:",prefer_orig_3)
 
         # re-center again.
         if False:
@@ -1006,7 +1010,6 @@ class Rule():
 
         #if True:
         if False:
-            print("center x,y:", center_x, center_y)
             print("new x1,y1:", new_x1, new_y1)
             print("new x2,y2:", new_x2, new_y2)
 
@@ -1219,9 +1222,11 @@ class Rule():
 
             dot_dict['code']=new_code
             target_index = (idx+2)%nodes_length
+            old_code = format_dict_array[target_index]['code']
             format_dict_array[target_index]=dot_dict
             self.apply_code(format_dict_array,(idx+2)%nodes_length)
-            #print("+2 idx:%d, code:%s" % (target_index, new_code))
+            #print("update +2 old_code:", old_code)
+            #print("update +2 idx:%d, code:%s" % (target_index, new_code))
 
 
         if is_halfmoon_sharp:
@@ -1238,6 +1243,7 @@ class Rule():
             dot_dict['t']='l'
             dot_dict['code']=new_code
             format_dict_array[(idx+2)%nodes_length]=dot_dict
+            self.apply_code(format_dict_array,(idx+2)%nodes_length)
             #print("rule16 new_code:", new_code)
 
         # append new #3
@@ -1250,7 +1256,7 @@ class Rule():
         dot_dict['code']=new_code
         target_index = (idx+3)%nodes_length
         format_dict_array.insert(target_index,dot_dict)
-        #print("+3 idx:%d, code:%s" % (target_index, new_code))
+        #print("insert +3 idx:%d, code:%s" % (target_index, new_code))
 
         return center_x,center_y
 
@@ -1360,10 +1366,16 @@ class Rule():
 
         is_bonus_mode = False
 
-        if direct_distance_full >= 40:
-            if bonus_distance_full >= 40:
+        if direct_distance_full >= 60:
+            if bonus_distance_full >= 30:
                 if round_offset >= 10:
                     is_bonus_mode = True
+
+        if False:
+            print("direct_distance_full:", direct_distance_full)
+            print("bonus_distance_full:", bonus_distance_full)
+            print("round_offset:", round_offset)
+            print("is_bonus_mode:", is_bonus_mode)
 
         if not is_bonus_mode:
             # without bonus.
@@ -1378,10 +1390,22 @@ class Rule():
             direct_percent = direct_length / direct_distance_full
             bonus_length = bonus_distance_full * direct_percent
 
-            if is_high_bonus:
-                new_x,new_y=spline_util.two_point_extend(x_from, y_from, bonus_x, bonus_y, bonus_length)
+            if bonus_length <=2:
+                new_x,new_y = bonus_x,bonus_y
             else:
-                new_x,new_y=spline_util.two_point_extend(x_end, y_end, bonus_x, bonus_y, bonus_length)
+                # PS: bonus_length == 0 會出問題。
+                # PS: 呼叫函數前，請先確定 distance_offset 不為 0，因為無法判斷要放在 from 還是 end.
+                if is_high_bonus:
+                    new_x,new_y=spline_util.two_point_extend(x_from, y_from, bonus_x, bonus_y, bonus_length)
+                else:
+                    new_x,new_y=spline_util.two_point_extend(x_end, y_end, bonus_x, bonus_y, bonus_length)
+
+            if False:
+                print("is_high_bonus:", is_high_bonus)
+                print("bonus_length:", bonus_length)
+                print("x_from, y_from, bonus_x, bonus_y, bonus_length:", x_from, y_from, bonus_x, bonus_y, bonus_length)
+                print("x_end, y_end, bonus_x, bonus_y, bonus_length:", x_end, y_end, bonus_x, bonus_y, bonus_length)
+                print("new_x,new_y:", new_x,new_y)
 
         return new_x,new_y
 

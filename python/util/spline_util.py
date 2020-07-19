@@ -16,6 +16,7 @@ def slide_percent(x1,y1,x2,y2,x3,y3):
             percent = 2.0
     return percent
 
+# PS: 呼叫函數前，請先確定 distance_offset 不為 0，因為無法判斷要放在 from 還是 end.
 def two_point_extend(x1,y1,x2,y2,distance_offset):
     distance = get_distance(x1,y1,x2,y2)
     distance_percent = 1
