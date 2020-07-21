@@ -48,6 +48,14 @@
     
 ## 相關網頁
 
+* 獅尾XD珍珠 Swei.XD.Pearl
+https://max-everyday.com/2020/07/swei-xd-pearl/
+* 獅尾B2黑體 Swei B2 Sans
+https://max-everyday.com/2020/07/swei-b2-sans/
+* 獅尾B2宋朝 Swei B2 Serif
+https://max-everyday.com/2020/07/swei-b2-serif/
+* 獅尾D露西 Swei D Lucy
+https://max-everyday.com/2020/07/swei-d-lucy/
 * 台灣圓體 TaiwanPearl
 https://max-everyday.com/2020/06/taiwanpearl/
 * 獅尾肉丸 Swei Meatball
@@ -83,5 +91,5 @@ https://max-everyday.com/2020/04/stroke-join-check/
 
 ## 贊助Max
 
-很高興可以替中華民國美學盡一分心力，如果你覺得這篇文章寫的很好，想打賞Max，贊助方式如下：
+很高興可以替中華民國美學盡一分心力、讓台灣擁有更好的文字風景，希望能提供另一種美學讓大家選擇，如果你覺得這篇文章寫的很好，想打賞Max，贊助方式如下：
 https://max-everyday.com/about/#donate
