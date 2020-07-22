@@ -2,11 +2,12 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.076"
+    VERSION = "2.078"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
     #PROCESS_MODE = "B2"
+    #PROCESS_MODE = "B4"
     #PROCESS_MODE = "XD"
 
     STYLE_INDEX = 5
@@ -38,7 +39,9 @@ class TtfConfig():
     OUTSIDE_ROUND_OFFSET = 55
     INSIDE_ROUND_OFFSET = 19
 
-    if PROCESS_MODE == "B2":
+    NEED_LOAD_BMP_IMAGE = True
+    if PROCESS_MODE in ["B2"]:
+        NEED_LOAD_BMP_IMAGE = False
         INSIDE_ROUND_OFFSET = 30
 
         if STYLE=="Black":
@@ -47,6 +50,17 @@ class TtfConfig():
             INSIDE_ROUND_OFFSET = 40
         if STYLE=="Medium":
             INSIDE_ROUND_OFFSET = 35
+
+    if PROCESS_MODE in ["B4"]:
+        NEED_LOAD_BMP_IMAGE = False
+        INSIDE_ROUND_OFFSET = 25
+
+        if STYLE=="Black":
+            INSIDE_ROUND_OFFSET = 40
+        if STYLE=="Bold":
+            INSIDE_ROUND_OFFSET = 35
+        if STYLE=="Medium":
+            INSIDE_ROUND_OFFSET = 30
 
     # some inside block not able to fill 2 curve coner, use small one.
     INSIDE_SMALL_ROUND_OFFSET=15

@@ -666,6 +666,8 @@ class Rule():
 
         # make curve more "SOFT"
         #curve_version = 2
+        if self.config.PROCESS_MODE in ["B4"]:
+            curve_version = 2
         if curve_version==2:
             previous_recenter_x = int((previous_x + x1)/2)
             previous_recenter_y = int((previous_y + y1)/2)
@@ -834,6 +836,8 @@ class Rule():
         if idx >= insert_idx:
             idx += 1
 
+        MIN_DISTANCE_TO_MERGE = 10
+
         self.apply_code(format_dict_array,(idx+2)%nodes_length)
         if format_dict_array[(idx+2)%nodes_length]['distance'] <= 0:
             del format_dict_array[(idx+3)%nodes_length]
@@ -841,6 +845,31 @@ class Rule():
             if idx >= (idx+3)%nodes_length:
                 idx -= 1
             nodes_length = len(format_dict_array)
+            #print("match is_need_redo_current_dot:", format_dict_array[(idx+0)%nodes_length]['code'])
+        else:
+
+            # merge short edge.
+            if format_dict_array[(idx+2)%nodes_length]['distance'] <= MIN_DISTANCE_TO_MERGE:
+                old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
+                old_code_array = old_code_string.split(' ')
+                new_x = str(format_dict_array[(idx+3)%nodes_length]['x'])
+                new_y = str(format_dict_array[(idx+3)%nodes_length]['y'])
+                if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                    old_code_array[5] = new_x
+                    old_code_array[6] = new_y
+                else:
+                    # l
+                    old_code_array[1] = new_x
+                    old_code_array[2] = new_y
+                new_code = ' '.join(old_code_array)
+                # only need update code, let formater to re-compute.
+                format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+
+                del format_dict_array[(idx+3)%nodes_length]
+
+                if idx > (idx+3)%nodes_length:
+                    idx -=1
+                nodes_length = len(format_dict_array)
 
         self.apply_code(format_dict_array,(idx+0)%nodes_length)
         if format_dict_array[(idx+0)%nodes_length]['distance'] <= 0:
@@ -852,10 +881,37 @@ class Rule():
         else:
             # dot+1 is our generated position. skip to transform.
             # to avoid same code apply twice.
-            nodes_length = len(format_dict_array)
-            generated_code = format_dict_array[(idx+1)%nodes_length]['code']
-            #print("generated_code+1 to rule:", generated_code)
-            skip_coordinate_rule.append(generated_code)
+
+            # merge short edge.
+            if format_dict_array[(idx+0)%nodes_length]['distance'] <= MIN_DISTANCE_TO_MERGE:
+                old_code_string = format_dict_array[(idx+0)%nodes_length]['code']
+                old_code_array = old_code_string.split(' ')
+                new_x = str(format_dict_array[(idx+1)%nodes_length]['x'])
+                new_y = str(format_dict_array[(idx+1)%nodes_length]['y'])
+                if format_dict_array[(idx+0)%nodes_length]['t']=='c':
+                    old_code_array[5] = new_x
+                    old_code_array[6] = new_y
+                else:
+                    # l
+                    old_code_array[1] = new_x
+                    old_code_array[2] = new_y
+                new_code = ' '.join(old_code_array)
+                # only need update code, let formater to re-compute.
+                format_dict_array[(idx+0)%nodes_length]['code'] = new_code
+
+                del format_dict_array[(idx+1)%nodes_length]
+
+                if idx >= (idx+1)%nodes_length:
+                    idx -= 1
+                nodes_length = len(format_dict_array)
+
+            # 己忘記什麼情況下需要使用到這一段code, 
+            # 但加了之後，會讓 uni7345 獅的帀裡的一個轉角沒套用到效果.
+            if False:
+                nodes_length = len(format_dict_array)
+                generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                #print("generated_code+1 to rule:", generated_code)
+                skip_coordinate_rule.append(generated_code)
 
 
         #print("insert to index:",insert_idx)

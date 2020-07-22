@@ -668,7 +668,7 @@ class Spline():
             #return spline_dict
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","XD","HALFMOON"]:
+        if self.config.PROCESS_MODE in ["B2","B4","XD","HALFMOON"]:
             is_common_enable = False
 
         if is_common_enable:
@@ -685,13 +685,17 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
-        if self.config.PROCESS_MODE in ["B2"]:
+        if self.config.PROCESS_MODE in ["B2","B4"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
+        redo_count=0
         while redo_travel:
+            redo_count+=1
+            if redo_count==200:
+                print("occure bug at rule#11!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule=ru11.apply(spline_dict, idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule)
             if redo_travel:
                 is_modified = True
@@ -758,7 +762,7 @@ class Spline():
         # ==================================================
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","XD","HALFMOON"]:
+        if self.config.PROCESS_MODE in ["B2","B4","XD","HALFMOON"]:
             is_common_enable = False
 
         if is_common_enable:
@@ -776,7 +780,7 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
-        if self.config.PROCESS_MODE in ["B2"]:
+        if self.config.PROCESS_MODE in ["B2","B4"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
@@ -784,7 +788,11 @@ class Spline():
             pass
         
         # cache skip coordinate, same transformed position should not do twice.
+        redo_count=0
         while redo_travel:
+            redo_count+=1
+            if redo_count==200:
+                print("occure bug at rule#5!")
             redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru5.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
             if redo_travel:
                 is_modified = True
@@ -801,7 +809,12 @@ class Spline():
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
+        redo_count=0
         while redo_travel:
+            redo_count+=1
+            if redo_count==200:
+                print("occure bug at rule#9!")
+
             black_mode = True
             redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule, black_mode)
             if redo_travel:
