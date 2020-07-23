@@ -17,6 +17,12 @@
 * 和「源泉圓體TW」的差異之一，是Regular 的字重有調整了部份的常用字，因為拔腳之後，不平衡的問題。
 ![字體比較](https://github.com/max32002/swei-gothic/raw/master/preview/fix_balance.png)
 
+### 「CJK TC」和「CJK SC」的比較：
+![TC和SC比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_tc_sc.png)
+* 在「肉」、「糸」、「女」、「辶」、「食」的筆畫不同，CJK SC 「肉字旁部首」變成「月」。 
+* 在「草」部的筆畫，CJK SC 中間連起來。
+* 雨、身、戶、舟、北、㕣、酋字寫法不同。
+
 ## 更新日誌
 [點擊此處](https://github.com/max32002/swei-gothic/blob/master/change_log.md) 查看更新記錄。
 
