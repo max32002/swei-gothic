@@ -781,11 +781,20 @@ class Rule():
 
                 virtal_distance = spline_util.get_distance(x1,y1,next_x,next_y)
                 x1y1_distance = spline_util.get_distance(x1,y1,int(old_code_array[1]),int(old_code_array[2]))
-                
+
                 is_virtual_dot_need_offset = False
                 #is_virtual_dot_need_offset = True
-                if x1y1_distance <= int(virtal_distance * 1.0):
-                    is_virtual_dot_need_offset = True
+                # for uni7D93 經的幺，要不要offset.
+                # virtal_distance = 29
+                # x1y1_distance = 35
+                if x1y1_distance <= int(virtal_distance * 1.3):
+                    x1y1_distance_remain = spline_util.get_distance(orig_x2,orig_y2,int(old_code_array[1]),int(old_code_array[2]))
+                    #print("orig_x2,orig_y2:",orig_x2,orig_y2)
+                    #print("x1y1_distance_remain:",x1y1_distance_remain)
+                    
+                    # 需要夠長的空間來做 offset
+                    if x1y1_distance_remain >= virtal_distance * 3:
+                        is_virtual_dot_need_offset = True
 
                 #print("virtual distance:", virtal_distance)
                 #print("x1y1 distance:", x1y1_distance)
@@ -907,6 +916,13 @@ class Rule():
 
             # 己忘記什麼情況下需要使用到這一段code, 
             # 但加了之後，會讓 uni7345 獅的帀裡的一個轉角沒套用到效果.
+            
+            # [TODO]:找到為什麼加這段code,是 uni7D93 經的幺，
+            # 在「沒有」做 offset 的情況下，會發生一連串的重覆套用，
+            # 因為第一點產生完是 clockwise, 第二點原本是 counter clockwise,
+            # Rule5/Rule99, 會先用 virtual dot 做比對，會變成銳角。
+            # 解法，是遇到第二段edge=='c'時，clockwise + counter clockwise, 
+            # 這個情況下，做skip_coordinate_rule.append() 
             if False:
                 nodes_length = len(format_dict_array)
                 generated_code = format_dict_array[(idx+1)%nodes_length]['code']

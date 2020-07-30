@@ -110,7 +110,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[595,35]]
+                    debug_coordinate_list = [[63,465]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -397,7 +397,7 @@ class Rule(Rule.Rule):
                             if format_dict_array[(idx+1)%nodes_length]['x2']==format_dict_array[(idx+1)%nodes_length]['x1'] and format_dict_array[(idx+1)%nodes_length]['y2']==format_dict_array[(idx+1)%nodes_length]['y1']:
                                 pass
                             else:
-                                # 這個情況，滿特別的，就允許例外看看。
+                                # 這個「不相等」的情況，滿特別，允許例外。
                                 x0 = format_dict_array[(idx+0)%nodes_length]['x']
                                 y0 = format_dict_array[(idx+0)%nodes_length]['y']
                         x1 = format_dict_array[(idx+1)%nodes_length]['x']
@@ -407,7 +407,7 @@ class Rule(Rule.Rule):
                             if format_dict_array[(idx+2)%nodes_length]['x2']==format_dict_array[(idx+2)%nodes_length]['x1'] and format_dict_array[(idx+2)%nodes_length]['y2']==format_dict_array[(idx+2)%nodes_length]['y1']:
                                 pass
                             else:
-                                # 這個情況，滿特別的，就允許例外看看。
+                                # 這個「不相等」的情況，滿特別，允許例外。
                                 x2 = format_dict_array[(idx+2)%nodes_length]['x']
                                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
                         
