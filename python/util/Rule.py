@@ -737,6 +737,9 @@ class Rule():
             skip_coordinate_rule.append(new_code)
 
         # update [next next curve]
+        # PS: 目前使用的解法問題多多，應該有更好的解法。
+        # PS: 目前使用work around 解法1. 
+        # PS: [TODO]: 連續套用，並產生奇怪曲線的問題，還是可能會發生，而且目前還沒有去檢查和解決。
         if format_dict_array[(idx+2)%nodes_length]['t']=="c":
             old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
             old_code_array = old_code_string.split(' ')
@@ -785,14 +788,19 @@ class Rule():
                 is_virtual_dot_need_offset = False
                 #is_virtual_dot_need_offset = True
                 # for uni7D93 經的幺，要不要offset.
-                # virtal_distance = 29
-                # x1y1_distance = 35
-                if x1y1_distance <= int(virtal_distance * 1.3):
+                # (regular) virtal_distance = 29
+                # (regular) x1y1_distance = 35
+                # (medium) virtal_distance = 29
+                # (medium) x1y1_distance = 39
+                if x1y1_distance <= int(virtal_distance * 1.0):
+                    is_virtual_dot_need_offset = True
+                else:
+                    # 不確定這個解法，會不會造成再下一個點造成內凹。
                     x1y1_distance_remain = spline_util.get_distance(orig_x2,orig_y2,int(old_code_array[1]),int(old_code_array[2]))
                     #print("orig_x2,orig_y2:",orig_x2,orig_y2)
                     #print("x1y1_distance_remain:",x1y1_distance_remain)
                     
-                    # 需要夠長的空間來做 offset
+                    # 需要夠長的空間，都做 offset
                     if x1y1_distance_remain >= virtal_distance * 3:
                         is_virtual_dot_need_offset = True
 
