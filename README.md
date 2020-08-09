@@ -2,6 +2,8 @@
 
 獅尾圓體基於[思源黑體](https://github.com/adobe-fonts/source-han-sans)的拔腳和加圓改造，更加簡明現代化的字體。支援简体中文、繁體中文、韓文與日文。
 
+「獅尾腿圓體」和「獅尾圓體」差別有有沒有拔腳。「有拔腳」的字會較圓，但是會造成有些字因直接去掉腿後左右不平衡、左右不對襯的「懸空」問題。使用「腿」系列就比較不會有問題。
+
 和思源黑體一樣，支援7種的字重：
 ![字重比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_style.png)
 
@@ -36,9 +38,9 @@
 
 請點選GitHub此畫面右上綠色「Clone or download」按鈕，並選擇「Download ZIP」，或點進想下載的ttf字型檔案，再點「Download」的按鈕進行下載。
 
-## 使用 WebFont
+## 網頁字型(Web Font)服務
 
-網路字型(Web Font)，用於網頁上的字型顯示，使用者的用戶端不需預先安裝字型檔，一樣能夠看到特殊的字型效果。實現該功能的原理是在瀏覽時才下載字型檔。
+網頁字型用於網頁上的字型顯示，訪客不需預先安裝字型檔，一樣能夠看到特殊的字型效果。不只是電腦，在智慧型手機和平板裝置的瀏覽器上也可正常顯示。實現該功能的原理是在瀏覽時才下載字型檔。
 
 可以服用下面的css:
 ```
@@ -48,7 +50,6 @@
   , url(https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.0/WebFont/CJK%20TC/SweiGothicCJKtc-Regular.woff) format("woff");
 }
 ```
-您也可以透過從CDN引入在GitHub上woff2檔案的網址，再把上方的url()內容置換成CDN快取後的網址，將可大幅加快網頁載入。推薦使用 jsDelivr 的服務，在速度上挺不錯的，參考看看： www.cdnperf.com/#!performance,Asia 。
 
 ## 已知問題
 
@@ -73,34 +74,43 @@
     
 ## 相關網頁
 
-* 獅尾腿圓 Swei.Gothic.Leg
-https://max-everyday.com/2020/08/swei-gothic-leg/
-* 獅尾彩虹腿 Swei.Rainbow.Leg
-https://max-everyday.com/2020/08/swei-rainbow-leg/
-* 花園肉丸
-https://max-everyday.com/2020/08/hana-meatball/
-* B2花園
+花園家族：
+* B2花園 B2 Hana
 https://max-everyday.com/2020/08/b2-hana-font/
-* 獅尾XD珍珠 Swei.XD.Pearl
-https://max-everyday.com/2020/07/swei-xd-pearl/
+* 花園肉丸 Hana Meatball
+https://max-everyday.com/2020/08/hana-meatball/
+
+獅尾黑體家族：
+* 獅尾B2腿黑體 Swei B2 Leg
+https://github.com/max32002/swei-b2-leg
 * 獅尾B2黑體 Swei B2 Sans
 https://max-everyday.com/2020/07/swei-b2-sans/
-* 獅尾B2宋朝 Swei B2 Serif
-https://max-everyday.com/2020/07/swei-b2-serif/
+* 獅尾腿圓 Swei Gothic Leg
+https://max-everyday.com/2020/08/swei-gothic-leg/
+* 獅尾彩虹腿 Swei Rainbow Leg
+https://max-everyday.com/2020/08/swei-rainbow-leg/
+* 獅尾XD珍珠 Swei XD Pearl
+https://max-everyday.com/2020/07/swei-xd-pearl/
 * 獅尾D露西 Swei D Lucy
 https://max-everyday.com/2020/07/swei-d-lucy/
-* 台灣圓體 TaiwanPearl
-https://max-everyday.com/2020/06/taiwanpearl/
-* 獅尾肉丸 Swei Meatball
-https://max-everyday.com/2020/06/swei-meatball/
-* 獅尾四季春字體 Swei Spring
-https://max-everyday.com/2020/04/swei-spring/
 * 獅尾半月字體 Swei Gothic
 https://max-everyday.com/2020/04/swei-half-moon/
+* 台灣圓體 TaiwanPearl
+https://max-everyday.com/2020/06/taiwanpearl/
 * 獅尾圓體 Swei Gothic
 https://max-everyday.com/2020/04/swei-gothic/
 * 獅尾黑體 Swei Sans
 https://max-everyday.com/2020/03/swei-sans/
+
+獅尾宋體家族：
+* 獅尾B2宋朝 Swei B2 Serif
+https://max-everyday.com/2020/07/swei-b2-serif/
+* 獅尾肉丸 Swei Meatball
+https://max-everyday.com/2020/06/swei-meatball/
+* 獅尾四季春字體 Swei Spring
+https://max-everyday.com/2020/04/swei-spring/
+
+其他類：
 * 內海字體 (NaikaiFont) 
 https://max-everyday.com/2020/03/naikaifont/
 * 莫大毛筆字體 (Bakudai)
@@ -109,18 +119,12 @@ https://max-everyday.com/2020/03/bakudaifont/
 https://max-everyday.com/2020/05/masafont/
 * 清松手寫體 (JasonHandWriting)
 https://jasonfonts.max-everyday.com/
-* 源泉圓體
-https://github.com/ButTaiwan/gensen-font
-* jf open 粉圓
-https://github.com/justfont/open-huninn-font
 * 假粉圓體
 https://github.com/max32002/FakePearl
 * 俊羽圓體
 https://github.com/max32002/YuPearl
-* 二點之間內縮後坐標
-https://max-everyday.com/2020/04/two-point-extend/
-* 筆畫交叉的判斷
-https://max-everyday.com/2020/04/stroke-join-check/
+* Max學習字體相關的筆記
+https://codereview.max-everyday.com/font-readme/
 
 ## 贊助Max
 
