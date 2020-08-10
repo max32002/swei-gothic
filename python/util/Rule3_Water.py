@@ -341,6 +341,11 @@ class Rule(Rule.Rule):
                         is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
 
+                    # for RAINBOW
+                    if self.config.PROCESS_MODE in ["RAINBOW"]:
+                        is_match_d_base_rule, fail_code = self.going_rainbow_up(format_dict_array,idx)
+                        is_goto_apply_round = is_match_d_base_rule
+
                     #print("is_goto_apply_round:",is_goto_apply_round)
                     if is_goto_apply_round:
                         center_x,center_y = self.apply_round_transform(format_dict_array,idx)

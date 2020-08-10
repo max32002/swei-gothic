@@ -130,12 +130,13 @@ class Rule(Rule.Rule):
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
 
                 # use more close coordinate.
-                if format_dict_array[(idx+0)%nodes_length]['code']=='c':
-                    x0 = format_dict_array[(idx+0)%nodes_length]['x2']
-                    y0 = format_dict_array[(idx+0)%nodes_length]['y2']
-                if format_dict_array[(idx+2)%nodes_length]['code']=='c':
-                    x2 = format_dict_array[(idx+0)%nodes_length]['x1']
-                    y2 = format_dict_array[(idx+0)%nodes_length]['y1']
+                # PS: 下面這2個if, 在很多之前的版本，都沒有被執行，效果也很好，也許可以直接註解掉。
+                if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                    x0 = format_dict_array[(idx+1)%nodes_length]['x2']
+                    y0 = format_dict_array[(idx+1)%nodes_length]['y2']
+                if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                    x2 = format_dict_array[(idx+2)%nodes_length]['x1']
+                    y2 = format_dict_array[(idx+2)%nodes_length]['y1']
 
                 previous_x,previous_y=0,0
                 next_x,next_y=0,0
@@ -297,6 +298,15 @@ class Rule(Rule.Rule):
                     if is_match_pattern:
                         is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
                         is_match_pattern = is_match_d_base_rule
+
+                # for RAINBOW
+                if self.config.PROCESS_MODE in ["RAINBOW"]:
+                    fail_code = 133
+                    #print("before is_match_pattern:", is_match_pattern)
+                    if is_match_pattern:
+                        is_match_d_base_rule, fail_code = self.going_rainbow_up(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
+                    #print("after is_match_pattern:", is_match_pattern)
 
                 inside_stroke_flag = False
                 # B2,B4 skip check image.

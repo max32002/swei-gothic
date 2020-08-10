@@ -9,6 +9,7 @@ from . import Rule
 # PS: 因為 array size change, so need redo.
 # PS: 這個已知，會造成錯誤，當新切出來的區塊為clockwise, 有問題的字，「躉」uni8E89. 
 #      解法：需要先判斷新的二點之間，為 in stroke.
+# PS: 「垮」uni57AE, 會造成誤判，因為沒有判斷 in stroke.
 class Rule(Rule.Rule):
     def __init__(self):
         pass
@@ -16,7 +17,7 @@ class Rule(Rule.Rule):
     def apply(self, spline_dict, resume_idx):
         redo_travel=False
 
-        TOO_CLOSE_DISTANCE = 16
+        TOO_CLOSE_DISTANCE = 8
 
         # clone
         format_dict_array=[]

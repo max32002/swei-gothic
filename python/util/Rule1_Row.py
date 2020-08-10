@@ -149,7 +149,7 @@ class Rule(Rule.Rule):
 
                 # for XD
                 # XD 不在 Rule1 處理水平的case.
-                if self.config.PROCESS_MODE in ["XD"]:
+                if self.config.PROCESS_MODE in ["XD","RAINBOW"]:
                     if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
                         is_match_pattern = False
                     if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
@@ -355,6 +355,11 @@ class Rule(Rule.Rule):
                     # for XD
                     if self.config.PROCESS_MODE in ["XD"]:
                         is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
+                        is_goto_apply_round = is_match_d_base_rule
+
+                    # for RAINBOW
+                    if self.config.PROCESS_MODE in ["RAINBOW"]:
+                        is_match_d_base_rule, fail_code = self.going_rainbow_up(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
 
                     if is_goto_apply_round:

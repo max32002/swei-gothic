@@ -2,13 +2,14 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.082"
+    VERSION = "2.084"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
     #PROCESS_MODE = "B2"
     #PROCESS_MODE = "B4"
     #PROCESS_MODE = "XD"
+    #PROCESS_MODE = "RAINBOW"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
@@ -140,7 +141,7 @@ class TtfConfig():
         if self.PROCESS_MODE=="HALFMOON":
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
-        if self.PROCESS_MODE in ["D","XD"]:
+        if self.PROCESS_MODE in ["D","XD","RAINBOW"]:
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
     def __init__(self, weight_code):
