@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.084"
+    VERSION = "2.086"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
@@ -10,6 +10,7 @@ class TtfConfig():
     #PROCESS_MODE = "B4"
     #PROCESS_MODE = "XD"
     #PROCESS_MODE = "RAINBOW"
+    #PROCESS_MODE = "T8"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]

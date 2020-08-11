@@ -602,7 +602,7 @@ class Rule():
         return clockwise
 
     # for triangle version, ex: rule#5
-    def make_coner_curve(self,round_offset,format_dict_array,idx,skip_coordinate_rule):
+    def make_coner_curve(self,round_offset,format_dict_array,idx,skip_coordinate_rule,coner_mode="CURVE"):
         nodes_length = len(format_dict_array)
 
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
@@ -849,16 +849,21 @@ class Rule():
         #new_code = ' %d %d %d %d %d %d c 1\n' % (x1, y1, x1, y1, next_x, next_y)
 
         # soft version
-        new_code = ' %d %d %d %d %d %d c 1\n' % (previous_recenter_x, previous_recenter_y, next_recenter_x, next_recenter_y, next_x, next_y)
+        
+        new_code = ' %d %d l 1\n' % (next_x, next_y)
+        if coner_mode == "CURVE":
+            new_code = ' %d %d %d %d %d %d c 1\n' % (previous_recenter_x, previous_recenter_y, next_recenter_x, next_recenter_y, next_x, next_y)
 
         dot_dict={}
-        dot_dict['x1']=previous_recenter_x
-        dot_dict['y1']=previous_recenter_y
-        dot_dict['x2']=next_recenter_x
-        dot_dict['y2']=next_recenter_y
+        dot_dict['t']='l'
+        if coner_mode == "CURVE":
+            dot_dict['x1']=previous_recenter_x
+            dot_dict['y1']=previous_recenter_y
+            dot_dict['x2']=next_recenter_x
+            dot_dict['y2']=next_recenter_y
+            dot_dict['t']='c'
         dot_dict['x']=next_x
         dot_dict['y']=next_y
-        dot_dict['t']='c'
         dot_dict['code']=new_code
 
         insert_idx = (idx+2)%nodes_length

@@ -52,7 +52,7 @@ class Rule(Rule.Rule):
         SLIDE_10_PERCENT_MIN = 0.59
         SLIDE_10_PERCENT_MAX = 1.80
 
-        if self.config.PROCESS_MODE in ["B2","B4"]:
+        if self.config.PROCESS_MODE in ["B2","B4","T8"]:
             SLIDE_10_PERCENT_MIN = 0.10
             # PS: 不要調整太高 SLIDE_10_PERCENT_MAX, 會造成內凹，例如：uni9EBC，麼的幺的左側.
 
@@ -309,9 +309,29 @@ class Rule(Rule.Rule):
                     #print("after is_match_pattern:", is_match_pattern)
 
                 inside_stroke_flag = False
-                # B2,B4 skip check image.
-                if self.config.NEED_LOAD_BMP_IMAGE:
-                    inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
+                if is_match_pattern:
+                    # B2,B4 skip check image.
+                    if self.config.NEED_LOAD_BMP_IMAGE:
+                        inside_stroke_flag,inside_stroke_dict = self.test_inside_coner(x0, y0, x1, y1, x2, y2, self.config.STROKE_WIDTH_MIN, inside_stroke_dict)
+
+                # for T8
+                # 遇到黑色部分，只有長線條才套用效果。
+                if is_match_pattern:
+                    if self.config.PROCESS_MODE in ["T8"]:
+                        if inside_stroke_flag:
+                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.STROKE_WIDTH_MAX * 0.7:
+                                fail_code = 1341
+                                is_match_pattern = False
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.STROKE_WIDTH_MAX * 0.7:
+                                fail_code = 1342
+                                is_match_pattern = False
+                        else:
+                            is_match_pattern = False
+
+                # for 攩裡的黑裡的點。
+                # [TODO]: 也許可以使用Rule#12,13 來解，或使用 clockwise + counter clockwise, 或 instoke
+                if is_match_pattern:
+                    pass
 
                 round_offset = self.config.ROUND_OFFSET
                 if not inside_stroke_flag:
@@ -478,7 +498,11 @@ class Rule(Rule.Rule):
                     skip_coordinate_rule.append(generated_code)
 
                     # make coner curve
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule)
+                    coner_mode = "CURVE"
+                    if self.config.PROCESS_MODE in ["T8"]:
+                        coner_mode = "STRAIGHT"
+
+                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule,coner_mode=coner_mode)
 
                     # cache transformed nodes.
                     # we generated nodes

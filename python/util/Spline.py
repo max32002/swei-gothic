@@ -665,7 +665,7 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","HALFMOON"]:
+        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","HALFMOON","T8"]:
             is_common_enable = False
 
         if is_common_enable:
@@ -682,7 +682,7 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
-        if self.config.PROCESS_MODE in ["B2","B4"]:
+        if self.config.PROCESS_MODE in ["B2","B4","T8"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
@@ -704,7 +704,9 @@ class Spline():
         #print("start Rule # 99...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+        # [TODO]:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，暫時先註解，等有空再開啟Rule#99
+        if self.config.PROCESS_MODE in ["B2","B4","T8"]:
+            redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
@@ -760,7 +762,7 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","HALFMOON"]:
+        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","HALFMOON","T8"]:
             is_common_enable = False
 
         if is_common_enable:
@@ -784,7 +786,7 @@ class Spline():
         idx=-1
         redo_travel=False   # Disable
         redo_travel=True    # Enable
-        if self.config.PROCESS_MODE in ["B2","B4"]:
+        if self.config.PROCESS_MODE in ["B2","B4","T8"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
@@ -809,7 +811,11 @@ class Spline():
         #print("start Rule # 99...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+
+        # [TODO]:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，暫時先註解，等有空再開啟Rule#99
+        if self.config.PROCESS_MODE in ["B2","B4","T8"]:
+            redo_travel=True    # Enable
+
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
