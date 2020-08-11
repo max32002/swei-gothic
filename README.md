@@ -2,7 +2,7 @@
 
 獅尾圓體基於[思源黑體](https://github.com/adobe-fonts/source-han-sans)的拔腳和加圓改造，更加簡明現代化的字體。支援简体中文、繁體中文、韓文與日文。
 
-「獅尾腿圓體」和「獅尾圓體」差別有有沒有拔腳。「有拔腳」的字會較圓，但是會造成有些字因直接去掉腿後左右不平衡、左右不對襯的「懸空」問題。使用「腿」系列就比較不會有問題。
+「獅尾腿圓體」和「獅尾圓體」差別在有沒有拔腳，「拔腳」就是會有較少的筆畫，例如移除「口」字的左右下角會多出的短線條。有拔腳的字會較圓，但是會造成有些字因直接去掉腿後左右不平衡、左右不對襯的「懸空」問題。改使用「腿」系列字體就不會有這個問題。
 
 和思源黑體一樣，支援7種的字重：
 ![字重比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_style.png)
@@ -110,19 +110,21 @@ https://max-everyday.com/2020/06/swei-meatball/
 * 獅尾四季春字體 Swei Spring
 https://max-everyday.com/2020/04/swei-spring/
 
-其他類：
-* 內海字體 (NaikaiFont) 
+其他字體：
+* 內海字體  Naikai Font
 https://max-everyday.com/2020/03/naikaifont/
-* 莫大毛筆字體 (Bakudai)
+* 莫大毛筆字體 Bakudai Font
 https://max-everyday.com/2020/03/bakudaifont/
-* 正風毛筆字體 (MasaFont)
+* 正風毛筆字體 Masa Font
 https://max-everyday.com/2020/05/masafont/
-* 清松手寫體 (JasonHandWriting)
+* 假粉圓體 Fake Pearl 
+https://max-everyday.com/2020/03/open-huninn-font/
+* 俊羽圓體 Yu Pearl 
+https://max-everyday.com/2020/03/yupearl/
+
+其他網站：
+* 清松手寫體 JasonHandWriting
 https://jasonfonts.max-everyday.com/
-* 假粉圓體
-https://github.com/max32002/FakePearl
-* 俊羽圓體
-https://github.com/max32002/YuPearl
 * Max學習字體相關的筆記
 https://codereview.max-everyday.com/font-readme/
 
