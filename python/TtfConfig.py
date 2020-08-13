@@ -10,7 +10,7 @@ class TtfConfig():
     #PROCESS_MODE = "B4"
     #PROCESS_MODE = "XD"
     #PROCESS_MODE = "RAINBOW"
-    #PROCESS_MODE = "T8"
+    #PROCESS_MODE = "NUT8"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
@@ -42,6 +42,7 @@ class TtfConfig():
     INSIDE_ROUND_OFFSET = 19
 
     NEED_LOAD_BMP_IMAGE = True
+
     if PROCESS_MODE in ["B2"]:
         NEED_LOAD_BMP_IMAGE = False
         INSIDE_ROUND_OFFSET = 30
@@ -113,17 +114,17 @@ class TtfConfig():
 
 
         if self.STYLE=="Black":
-            self.ROUND_OFFSET = 38
+            self.ROUND_OFFSET = 48
         if self.STYLE=="Bold":
-            self.ROUND_OFFSET = 36
+            self.ROUND_OFFSET = 41
         if self.STYLE=="Medium":
-            self.ROUND_OFFSET = 33
+            self.ROUND_OFFSET = 37
         if self.STYLE=="DemiLight":
             self.ROUND_OFFSET = 30
         if self.STYLE=="Light":
             self.ROUND_OFFSET = 27
         if self.STYLE=="Thin":
-            self.ROUND_OFFSET = 20
+            self.ROUND_OFFSET = 24
 
         if self.STYLE=="Black":
             self.OUTSIDE_ROUND_OFFSET = 65
@@ -139,10 +140,7 @@ class TtfConfig():
             self.OUTSIDE_ROUND_OFFSET = 28
 
         # 只需要大彎.
-        if self.PROCESS_MODE=="HALFMOON":
-            self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
-
-        if self.PROCESS_MODE in ["D","XD","RAINBOW"]:
+        if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8"]:
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
     def __init__(self, weight_code):

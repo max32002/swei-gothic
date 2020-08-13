@@ -77,7 +77,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[123,299]]
+                    debug_coordinate_list = [[421,644]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -361,6 +361,13 @@ class Rule(Rule.Rule):
                     if self.config.PROCESS_MODE in ["RAINBOW"]:
                         is_match_d_base_rule, fail_code = self.going_rainbow_up(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
+
+                    # NUT8, alway do nothing but record the history.
+                    if self.config.PROCESS_MODE in ["NUT8"]:
+                        is_goto_apply_round = False
+                        generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                        #print("hello rule#1, added code+1:", generated_code)
+                        skip_coordinate_rule.append(generated_code)
 
                     if is_goto_apply_round:
                         center_x,center_y = self.apply_round_transform(format_dict_array,idx)

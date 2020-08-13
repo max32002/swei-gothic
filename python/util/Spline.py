@@ -671,7 +671,7 @@ class Spline():
         if is_common_enable:
             is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
         else:
-            if self.config.PROCESS_MODE in ["XD","RAINBOW","HALFMOON"]:
+            if self.config.PROCESS_MODE in ["XD","RAINBOW","HALFMOON","NUT8"]:
                 base_is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
                 if base_is_modified:
                     is_modified = True
@@ -768,7 +768,7 @@ class Spline():
         if is_common_enable:
             is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
         else:
-            if self.config.PROCESS_MODE in ["XD","RAINBOW","HALFMOON"]:
+            if self.config.PROCESS_MODE in ["XD","RAINBOW","HALFMOON","NUT8"]:
                 base_is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, skip_coordinate, skip_coordinate_rule)
                 if base_is_modified:
                     is_modified = True
@@ -821,7 +821,7 @@ class Spline():
         while redo_travel:
             redo_count+=1
             if redo_count==200:
-                print("occure bug at rule#9!")
+                print("occure bug at rule#99!")
 
             black_mode = True
             redo_travel,idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule=ru99.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule, black_mode)

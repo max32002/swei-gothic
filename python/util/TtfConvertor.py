@@ -214,7 +214,7 @@ class Convertor():
 
         return stroke_dict
 
-    def convet_font(self, filename_input, readonly=False):
+    def convet_font(self, filename_input, bmp_path, readonly=False):
         ret = False
 
         unicode_int = 0
@@ -224,6 +224,11 @@ class Convertor():
         encoding_string = None
         stroke_dict, encoding_string, width_string = self.load_to_memory(filename_input)
         
+        final_bmp_path = self.config.BMP_PATH
+        # overwrite bmp path by command line.
+        if len(bmp_path) > 0:
+            final_bmp_path = bmp_path
+
         unicode_int = -1
         if not encoding_string is None:
             if ' ' in encoding_string:
@@ -237,16 +242,16 @@ class Convertor():
                     if unicode_int <= 0:
                         is_need_load_bmp = False
 
-                    if self.config.BMP_PATH is None:
+                    if final_bmp_path is None:
                         is_need_load_bmp = False
                     else:
-                        if len(self.config.BMP_PATH)<=1:
+                        if len(final_bmp_path)<=1:
                             is_need_load_bmp = False
 
                 if is_need_load_bmp:
                     filename = "U_%s.bmp" % (unicode_int)
-                    bmp_path = os.path.join(self.config.BMP_PATH, filename)
-                    #print("bmp:", bmp_path, filename_input)
+                    bmp_path = os.path.join(final_bmp_path, filename)
+                    #print("bmp:", bmp_path, ", current gylph:", filename_input)
                     if os.path.exists(bmp_path):
                         #PIL
                         bmp_image = Image.open(bmp_path)
@@ -305,7 +310,7 @@ class Convertor():
 
         return ret
 
-    def convert(self, path, config):
+    def convert(self, path, config, bmp_path):
         self.config = config
         readonly = True     #debug
         readonly = False    #online
@@ -326,7 +331,7 @@ class Convertor():
                 #continue
 
             is_convert = False
-            is_convert = self.convet_font(name,readonly)
+            is_convert = self.convet_font(name,bmp_path,readonly)
             if is_convert:
                 convert_count+=1
                 #print("convert list:", name)

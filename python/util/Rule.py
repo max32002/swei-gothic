@@ -679,6 +679,8 @@ class Rule():
         format_dict_array[(idx+1)%nodes_length]['x']= previous_x
         format_dict_array[(idx+1)%nodes_length]['y']= previous_y
 
+        is_middle_dot_in_skip_rule = False
+
         old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
         old_code_array = old_code_string.split(' ')
         
@@ -734,6 +736,7 @@ class Rule():
         if old_code_string in skip_coordinate_rule:
             #print("+1 old code in rule:", old_code_string)
             #print("+1 update as new code in rule:", new_code)
+            is_middle_dot_in_skip_rule = True
             skip_coordinate_rule.append(new_code)
 
         # update [next next curve]
@@ -816,7 +819,7 @@ class Rule():
                         
                         # 需要夠長的空間，都做 offset
                         # PS: 如果 virtual_x1y1_distance_remain 夠長都offset, 會造成筆畫變細。
-                        #     參考看看 uni9773 的斤.
+                        #     參考看看 uni9773,靳的斤.
                         if virtual_x1y1_distance_remain >= offset_distance * 3:
                             is_virtual_dot_need_offset = True
 
@@ -869,6 +872,11 @@ class Rule():
         insert_idx = (idx+2)%nodes_length
         format_dict_array.insert(insert_idx, dot_dict)
         nodes_length = len(format_dict_array)
+
+        # for fix uni5E3D 帽的冒的右上角，因為套用 coner curve 後，原本 rule#2 的 skip recode 被洗掉。
+        if is_middle_dot_in_skip_rule:
+            skip_coordinate_rule.append(new_code)
+            
 
         # 因為較短邊 <= round_offset, 需要合併節點。
         if idx >= insert_idx:
