@@ -714,8 +714,8 @@ class Spline():
         redo_travel=False   # Disable
         
         # [TODO]:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，暫時先註解，等有空再開啟Rule#99
-        if self.config.PROCESS_MODE in ["B2","B4","NUT8"]:
-            redo_travel=True    # Enable
+        #if self.config.PROCESS_MODE in ["B2","B4","NUT8"]:
+        redo_travel=True    # Enable
 
         if DISABLE_ALL_RULE:
             redo_travel=False
