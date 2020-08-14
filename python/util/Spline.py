@@ -362,6 +362,14 @@ class Spline():
         #DISABLE_ALL_RULE = True    # debug specific rule.
 
         # start process here.
+        #print("key:", key)
+        # for debug target key.
+        debug_key = -1
+        # put debug key here.
+        debug_key = -1
+        if debug_key > -1:
+            if key != debug_key:
+                return is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule
         spline_dict = stroke_dict[key]
 
         from . import Rule1_Row
@@ -505,7 +513,7 @@ class Spline():
             redo_count+=1
             if redo_count==100:
                 print("occure bug at rule#12!")
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru12.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru12.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate,skip_coordinate_rule)
             if redo_travel:
                 is_modified = True
         ru12 = None
@@ -525,7 +533,7 @@ class Spline():
             redo_count+=1
             if redo_count==100:
                 print("occure bug at rule#13!")
-            redo_travel,idx, inside_stroke_dict,skip_coordinate=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate)
+            redo_travel,idx, inside_stroke_dict,skip_coordinate,skip_coordinate_rule=ru13.apply(spline_dict, idx, inside_stroke_dict, skip_coordinate,skip_coordinate_rule)
             if redo_travel:
                 is_modified = True
         ru13 = None
@@ -704,9 +712,11 @@ class Spline():
         #print("start Rule # 99...")
         idx=-1
         redo_travel=False   # Disable
+        
         # [TODO]:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，暫時先註解，等有空再開啟Rule#99
         if self.config.PROCESS_MODE in ["B2","B4","NUT8"]:
             redo_travel=True    # Enable
+
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
@@ -811,9 +821,11 @@ class Spline():
         #print("start Rule # 99...")
         idx=-1
         redo_travel=False   # Disable
+        
         # [TODO]:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，暫時先註解，等有空再開啟Rule#99
-        if self.config.PROCESS_MODE in ["B2","B4","NUT8"]:
-            redo_travel=True    # Enable
+        #if self.config.PROCESS_MODE in ["B2","B4","NUT8"]:
+        redo_travel=True    # Enable
+        
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass

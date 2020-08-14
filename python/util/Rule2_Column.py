@@ -31,6 +31,7 @@ class Rule(Rule.Rule):
         #print("orig nodes_length:", len(spline_dict['dots']))
         #print("format nodes_length:", nodes_length)
         #print("resume_idx:", resume_idx)
+        #print("Welcome to Rule#2")
 
         rule_need_lines = 4
         fail_code = -1
@@ -104,6 +105,19 @@ class Rule(Rule.Rule):
                     is_match_pattern = False
                     if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
                         is_match_pattern = True
+
+                # because Rule#2 run before Rule#1, but this case should apply Rule#1 instead of Rule#2
+                # special case for uni9750 靐 的雷的一
+                # for prefer 橫線.(雖然也會match直線)
+                if nodes_length == 4:
+                    if is_match_pattern:
+                        if format_dict_array[(idx+1)%nodes_length]['distance'] > format_dict_array[(idx+0)%nodes_length]['distance']:
+                            if format_dict_array[(idx+3)%nodes_length]['distance'] > format_dict_array[(idx+2)%nodes_length]['distance']:
+                                if format_dict_array[(idx+1)%nodes_length]['distance'] > format_dict_array[(idx+2)%nodes_length]['distance']:
+                                    if format_dict_array[(idx+3)%nodes_length]['distance'] > format_dict_array[(idx+0)%nodes_length]['distance']:
+                                        if format_dict_array[(idx+1)%nodes_length]['distance'] > self.config.ROUND_OFFSET:
+                                            # pass to let Rule#1 match.
+                                            break
 
                 if is_match_pattern:
                     fail_code = 200

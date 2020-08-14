@@ -947,11 +947,14 @@ class Rule():
 
             # 己忘記什麼情況下需要使用到這一段code, 
             # 但加了之後，會讓 uni7345 獅的帀裡的一個轉角沒套用到效果.
+            # 目前先設為False不跑，不跑也有問題，就會可能會多套用效果。
             
             # [TODO]:找到為什麼加這段code,是 uni7D93 經的幺，
             # 在「沒有」做 offset 的情況下，會發生一連串的重覆套用，
+            
             # 因為第一點產生完是 clockwise, 第二點原本是 counter clockwise,
             # Rule5/Rule99, 會先用 virtual dot 做比對，會變成銳角。
+            
             # 解法，是遇到第二段edge=='c'時，clockwise + counter clockwise, 
             # 這個情況下，做skip_coordinate_rule.append() 
             if False:

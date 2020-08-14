@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule):
         redo_travel=False
 
         # clone
@@ -167,6 +167,12 @@ class Rule(Rule.Rule):
                         for debug_idx in range(6):
                             print(debug_idx-2,": values for rule13:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'],'-(',format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['distance'],')')
 
+                    # to avoid same code apply twice.
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+0)%nodes_length]['code']
+                    #print("generated_code:", generated_code)
+                    skip_coordinate_rule.append(generated_code)
+
                     # generate small coner.
                     # 這是較佳的長度，但是可能會「深入」筆畫裡。
                     previous_x,previous_y=spline_util.two_point_extend(x1,y1,x2,y2,-1 * self.config.ROUND_OFFSET)
@@ -212,6 +218,13 @@ class Rule(Rule.Rule):
                     # only need update code, let formater to re-compute.
                     format_dict_array[(idx+2)%nodes_length]['code'] = new_code
                     #print("rule13 update +2 code:", new_code)
+
+
+                    # for Rule#99 to avoid same code apply twice.
+                    #print("generated_code:", new_code)
+                    skip_coordinate_rule.append(new_code)
+                    # 不確定下面這行是否會造成什麼問題。
+                    skip_coordinate_rule.append(format_dict_array[(idx+1)%nodes_length]['code'])
 
                     # append new #2
                     
@@ -270,4 +283,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate
+        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule

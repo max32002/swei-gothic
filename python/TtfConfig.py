@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.086"
+    VERSION = "2.088"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
@@ -23,7 +23,7 @@ class TtfConfig():
 
     # 有些筆劃很細，有些很粗，設太細似乎又會誤判。
     # 雖然字變重，但因為筆畫複雜時，還是有細的線條。
-    STROKE_MIN = 34
+    STROKE_MIN = 30
 
     # for X,Y axis equal compare.
     # each 100 px, +- 7 px.
@@ -93,15 +93,15 @@ class TtfConfig():
             self.STROKE_MAX = 49
 
         if self.STYLE=="Black":
-            self.STROKE_MIN = 36
-        if self.STYLE=="Bold":
-            self.STROKE_MIN = 36
-        if self.STYLE=="Medium":
             self.STROKE_MIN = 34
-        if self.STYLE=="DemiLight":
+        if self.STYLE=="Bold":
+            self.STROKE_MIN = 34
+        if self.STYLE=="Medium":
             self.STROKE_MIN = 30
+        if self.STYLE=="DemiLight":
+            self.STROKE_MIN = 27
         if self.STYLE=="Light":
-            self.STROKE_MIN = 28
+            self.STROKE_MIN = 26
         if self.STYLE=="Thin":
             self.STROKE_MIN = 24
 
