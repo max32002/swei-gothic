@@ -108,11 +108,17 @@ class Rule(Rule.Rule):
 
                 # for uni6529 攩，的黑的點, 問題是 clockwise + counter clockwise ，解法之一是直接停掉Rule#99.
                 # 
-                if format_dict_array[(idx+1)%nodes_length]['code'] in skip_coordinate_rule:
-                    if is_debug_mode:
-                        print("match skip skip_coordinate_rule +1:",format_dict_array[(idx+1)%nodes_length]['code'])
-                        pass
-                    continue
+                check_idx_1_code = True
+                # 有一個例外，不要檢查這一個Rule, 就是 nut8, 因為 nut8 裡的 Rule#1 會和 Rule#99 的點共用.
+                # ex: uni5E3D 帽的最右上角。
+                if self.config.PROCESS_MODE in ["NUT8"]:
+                    check_idx_1_code = False
+                if check_idx_1_code:
+                    if format_dict_array[(idx+1)%nodes_length]['code'] in skip_coordinate_rule:
+                        if is_debug_mode:
+                            print("match skip skip_coordinate_rule +1:",format_dict_array[(idx+1)%nodes_length]['code'])
+                            pass
+                        continue
 
 
                 is_debug_mode = False
@@ -328,10 +334,15 @@ class Rule(Rule.Rule):
                 if is_match_pattern:
                     if self.config.PROCESS_MODE in ["NUT8"]:
                         if inside_stroke_flag:
-                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
+                            # for uni87BA 螺的虫的丶，必需>=1.4, 不然會套到效果. 
+                            remain_rate = 1.4   # for black mode.
+                            if not black_mode:
+                                # for uni9ED1 黑裡的點，希望可以保留，不套用效果。
+                                remain_rate = 1.7   # for black mode.
+                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET * remain_rate:
                                 fail_code = 1341
                                 is_match_pattern = False
-                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET * remain_rate:
                                 fail_code = 1342
                                 is_match_pattern = False
                         else:

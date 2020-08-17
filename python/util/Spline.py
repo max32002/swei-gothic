@@ -456,8 +456,6 @@ class Spline():
         #print("Rule#1 redo_count:", redo_count)
         ru1 = None
 
-
-
         return is_modified, inside_stroke_dict, skip_coordinate, skip_coordinate_rule
 
     # run both in clockwise and counter clockwise.
