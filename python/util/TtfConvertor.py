@@ -249,8 +249,12 @@ class Convertor():
                             is_need_load_bmp = False
 
                 if is_need_load_bmp:
+                    # due to the file count too large.
+                    profix_folder = str(unicode_int)[:1]
+                    target_folder = os.path.join(final_bmp_path,profix_folder)
+
                     filename = "U_%s.bmp" % (unicode_int)
-                    bmp_path = os.path.join(final_bmp_path, filename)
+                    bmp_path = os.path.join(target_folder, filename)
                     #print("bmp:", bmp_path, ", current gylph:", filename_input)
                     if os.path.exists(bmp_path):
                         #PIL

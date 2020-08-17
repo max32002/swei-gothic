@@ -328,10 +328,10 @@ class Rule(Rule.Rule):
                 if is_match_pattern:
                     if self.config.PROCESS_MODE in ["NUT8"]:
                         if inside_stroke_flag:
-                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.OUTSIDE_ROUND_OFFSET:
+                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
                                 fail_code = 1341
                                 is_match_pattern = False
-                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.OUTSIDE_ROUND_OFFSET:
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET:
                                 fail_code = 1342
                                 is_match_pattern = False
                         else:
