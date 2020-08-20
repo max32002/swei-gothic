@@ -26,7 +26,7 @@
 * 雨、身、戶、舟、北、㕣、酋字寫法不同。
 
 ### 「CJK TC」和「CJK JP」的比較：
-![TC和SC比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_tc_jp.png)
+![TC和JP比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_tc_jp.png)
 * 在「肉」、「糸」、「女」、「辶」、「食」的筆畫不同，CJK JP 「肉字旁部首」變成「月」。 
 * 在「草」部的筆畫，CJK JP 中間連起來。
 * 雨、言、青、兌、賣、直、真、曾、戶、北、㕣、酋字寫法不同。其他[常見與日系字型的差異](https://max-everyday.com/2020/06/taiwanpearl/#diff)。
