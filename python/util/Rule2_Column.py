@@ -359,7 +359,12 @@ class Rule(Rule.Rule):
                         skip_coordinate_rule.append(generated_code)
 
                     if is_goto_apply_round:
-                        center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                        center_x,center_y = -9999,-9999
+                        #print("self.config.PROCESS_MODE:", self.config.PROCESS_MODE)
+                        if not self.config.PROCESS_MODE in ["3TSANS"]:
+                            center_x,center_y = self.apply_round_transform(format_dict_array,idx)
+                        else:
+                            center_x,center_y = self.apply_3t_transform(format_dict_array,idx,skip_coordinate_rule)
                         #print("center_x,center_y:",center_x,center_y)
                         
                         # we generated nodes
