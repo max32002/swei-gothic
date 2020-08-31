@@ -120,3 +120,28 @@ def field_left(s, first, is_include_symbol=False):
         return s[:start]
     except ValueError:
         return ""
+
+def two_point_extend_next(x1,y1,x2,y2):
+    new_x, new_y = x2,y2
+    for distance_offset in range(2,12):
+        new_x,new_y=two_point_extend(x1,y1,x2,y2,distance_offset)
+        if not new_x == x2:
+            break
+        if not new_y == y2:
+            break
+    return new_x, new_y
+
+# for test functions.
+if __name__ == '__main__':
+    x1,y1=1,1
+    x2,y2=10,10
+    
+    distance_offset = 15
+    distance = get_distance(x1,y1,x2,y2)
+    print("distance:",distance)
+    #distance_offset = distance
+    new_x,new_y=two_point_extend(x2,y2,x1,y1,-1*distance_offset)
+    print("new x,y:",new_x,new_y)
+    
+    #new_x,new_y=two_point_extend_next(x1,y1,x2,y2)
+    #print("new x,y:",new_x,new_y)

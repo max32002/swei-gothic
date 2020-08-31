@@ -11,7 +11,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, skip_coordinate):
+    def apply(self, spline_dict, resume_idx, apply_rule_log, generate_rule_log):
         redo_travel=False
 
         CAP_HEIGHT_DISTANCE = 30
@@ -43,7 +43,13 @@ class Rule(Rule.Rule):
                     # skip traveled nodes.
                     continue
 
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
+                is_debug_mode = False
+                #is_debug_mode = True
+
+                if format_dict_array[(idx+0)%nodes_length]['code'] in apply_rule_log:
+                    if is_debug_mode:
+                        print("match skip apply_rule_log +0:",[format_dict_array[(idx+0)%nodes_length]['code']])
+                        pass
                     continue
 
                 is_debug_mode = False
@@ -272,25 +278,13 @@ class Rule(Rule.Rule):
                                 format_dict_array[target_index]['code'] = new_code
                                 #print("old code+4:", old_code_string)
                                 #print("new code+4:", new_code)
-                            
-
-                        # cache transformed nodes.
-                        # 加了，會造成其他的誤判，因為「點」共用。
-                        # don't add below line, will cuase others rule fail!
-                        #skip_coordinate.append([format_dict_array[idx]['x'],format_dict_array[idx]['y']])
-
-                        # we generated nodes
-                        #skip_coordinate.append([new_x2,new_y2])
-
                     else:
                         # 乙，模式。
                         #center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
                         #center_y = int((format_dict_array[(idx+1)%nodes_length]['y']+format_dict_array[(idx+2)%nodes_length]['y'])/2)
                         
                         del format_dict_array[(idx+2)%nodes_length]
-                        center_x,center_y = self.apply_round_transform(format_dict_array,idx)
-                        # we generated nodes
-                        skip_coordinate.append([center_x,center_y])
+                        self.apply_round_transform(format_dict_array,idx, apply_rule_log, generate_rule_log)
                         
                     redo_travel=True
                     #resume_idx = -1
@@ -302,4 +296,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, skip_coordinate
+        return redo_travel, resume_idx, apply_rule_log, generate_rule_log

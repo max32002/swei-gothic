@@ -142,9 +142,13 @@ class Rule(Rule.Rule):
                 SKIP_TOO_LONG_LINE_MERGE = SKIP_TOO_LONG_LINE_MERGE_DEFAULT
                 if is_match_pattern:
                     # for 㜷, 的「女」斜邊，放大可以變成直線的長度。
+                    # PS: 這個曲線變直線的解法不好！
+                    #      應該可以無視 l+l 規則，直接在 c 上取點。
                     if format_dict_array[(idx+0)%nodes_length]['t'] == 'l':
                         if format_dict_array[(idx+2+nodes_length)%nodes_length]['t'] == 'l':
-                            SKIP_TOO_LONG_LINE_MERGE = 280
+                            # 超過 200 真的會影響到其他正常的字。例如 uni97DB 的曲線。
+                            # 㜷 需要 length 280, 但 uni97DB 才 250 就讓線條線變粗。
+                            SKIP_TOO_LONG_LINE_MERGE = 210
                 
                 # 太長會出問題，例如：的，絢 字。
                 # PS: to dot+1, distance in +0

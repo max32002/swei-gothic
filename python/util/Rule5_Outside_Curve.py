@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log):
         redo_travel=False
         check_first_point = False
 
@@ -86,30 +86,24 @@ class Rule(Rule.Rule):
                 # 這個效果滿好玩的，「口」會變成二直，二圓。
                 if self.config.PROCESS_MODE in ["HALFMOON"]:
                     idx_previuos = (idx -1 + nodes_length) % nodes_length
-                    if [format_dict_array[idx_previuos]['x'],format_dict_array[idx_previuos]['y']] in skip_coordinate:
+                    if format_dict_array[idx_previuos]['code'] in apply_rule_log:
                         continue
 
-                if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
+                detect_code = format_dict_array[(idx+0)%nodes_length]['code']
+                if detect_code in apply_rule_log:
                     if is_debug_mode:
-                        print("match skip dot +0:",[format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']])
+                        print("match skip apply_rule_log +0:",detect_code)
                         pass
                     continue
 
-                if format_dict_array[(idx+0)%nodes_length]['code'] in skip_coordinate_rule:
-                    if is_debug_mode:
-                        print("match skip skip_coordinate_rule +0:",[format_dict_array[(idx+0)%nodes_length]['code']])
-                        pass
-                    continue
-
-                # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
+                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
                 # for case.3122 上面的點。
-                # PS: 由於 half-moon 不套用 #1,2,3
-                if self.config.PROCESS_MODE in ["GOTHIC"]:
-                    if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
-                        if is_debug_mode:
-                            print("match skip dot +2:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
-                            pass
-                        continue
+                detect_code = format_dict_array[(idx+2)%nodes_length]['code']
+                if detect_code in generate_rule_log:
+                    if is_debug_mode:
+                        print("match skip generate_rule_log +2:",detect_code)
+                        pass
+                    continue
 
                 is_debug_mode = False
                 #is_debug_mode = True
@@ -497,6 +491,14 @@ class Rule(Rule.Rule):
                 # [IMPORTANT] 這條線以下，不要增追加可能的 case, 開始做排除
                 # =============================================
 
+                # 對太短邊做處理會出問題。
+                if is_match_pattern:
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= 2:
+                        is_match_pattern = False
+                if is_match_pattern:
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= 2:
+                        is_match_pattern = False
+
                 # for D.Lucy
                 if self.config.PROCESS_MODE in ["D"]:
                     fail_code = 131
@@ -716,7 +718,7 @@ class Rule(Rule.Rule):
                     nodes_length = len(format_dict_array)
                     generated_code = format_dict_array[(idx+0)%nodes_length]['code']
                     #print("generated_code:", generated_code)
-                    skip_coordinate_rule.append(generated_code)
+                    apply_rule_log.append(generated_code)
 
                     # make coner curve
                     round_offset = self.config.OUTSIDE_ROUND_OFFSET
@@ -734,14 +736,23 @@ class Rule(Rule.Rule):
                     if not is_apply_large_corner:
                         round_offset = self.config.INSIDE_ROUND_OFFSET
 
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule)
+                    is_goto_apply_round = True
+                    center_x,center_y = -9999,-9999
+                    next_x, next_y = -9999,-9999
 
-                    # cache transformed nodes.
+                    if self.config.PROCESS_MODE in ["TOOTHPASTE"]:
+                        is_match_direction_base_rule, fail_code = self.going_toothpaste(format_dict_array,idx)
+                        is_goto_apply_round = is_match_direction_base_rule
+
+                    if is_goto_apply_round:
+                        format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,apply_rule_log, generate_rule_log)
+
                     # we generated nodes
+                    # skip_coordinate 決定都拿掉，改用 apply_rule_log
                     # 因為只有作用在2個coordinate.
                     if self.config.PROCESS_MODE in ["HALFMOON"]:
                         # 加了這行，會讓「口」的最後一個角，無法套到。
-                        skip_coordinate.append([previous_x,previous_y])
+                        #skip_coordinate.append([previous_x,previous_y])
                         pass
 
 
@@ -778,4 +789,4 @@ class Rule(Rule.Rule):
             # check close path.
             self.reset_first_point(format_dict_array, spline_dict)
 
-        return redo_travel, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule
+        return redo_travel, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log

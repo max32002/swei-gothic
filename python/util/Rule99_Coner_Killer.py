@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule, black_mode):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode):
         redo_travel=False
         check_first_point = False
 
@@ -85,24 +85,26 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 #print("code#99,idx:",idx,format_dict_array[(idx+0)%nodes_length]['code'])
-
-                if [format_dict_array[idx]['x'],format_dict_array[idx]['y']] in skip_coordinate:
-                    if is_debug_mode:
-                        print("match skip idx+0:",format_dict_array[(idx+0)%nodes_length]['code'])
-                        pass
-                    continue
                     
-                # 要轉換的原來的角，第4點，不能就是我們產生出來的曲線結束點。
+                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
                 # for case.3122 上面的點。
-                if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
-                    if is_debug_mode:
-                        print("match skip idx+2:",format_dict_array[(idx+2)%nodes_length]['code'])
-                        pass
-                    continue
+                # 這個規則，在 gothic 是對的。但是不能套在 gothic 以外，例如halfmoon，不然會lost.
+                # PS: 理論上 gohtic 系列(rainbow/D/XD)，應該都會有相同問題，
+                is_check_idx_2_code = True
+                
+                if self.config.PROCESS_MODE in ["HALFMOON","TOOTHPASTE"]:
+                    is_check_idx_2_code = False
 
-                if format_dict_array[idx]['code'] in skip_coordinate_rule:
+                if is_check_idx_2_code:
+                    if format_dict_array[(idx+2)%nodes_length]['code'] in apply_rule_log:
+                        if is_debug_mode:
+                            print("match skip dot +2:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
+                            pass
+                        continue
+
+                if format_dict_array[idx]['code'] in apply_rule_log:
                     if is_debug_mode:
-                        print("match skip skip_coordinate_rule +0:",format_dict_array[idx]['code'])
+                        print("match skip apply_rule_log +0:",format_dict_array[idx]['code'])
                         pass
                     continue
 
@@ -111,12 +113,12 @@ class Rule(Rule.Rule):
                 check_idx_1_code = True
                 # 有一個例外，不要檢查這一個Rule, 就是 nut8, 因為 nut8 裡的 Rule#1 會和 Rule#99 的點共用.
                 # ex: uni5E3D 帽的最右上角。
-                if self.config.PROCESS_MODE in ["NUT8"]:
+                if self.config.PROCESS_MODE in ["NUT8","TOOTHPASTE"]:
                     check_idx_1_code = False
                 if check_idx_1_code:
-                    if format_dict_array[(idx+1)%nodes_length]['code'] in skip_coordinate_rule:
+                    if format_dict_array[(idx+1)%nodes_length]['code'] in apply_rule_log:
                         if is_debug_mode:
-                            print("match skip skip_coordinate_rule +1:",format_dict_array[(idx+1)%nodes_length]['code'])
+                            print("match skip apply_rule_log +1:",format_dict_array[(idx+1)%nodes_length]['code'])
                             pass
                         continue
 
@@ -158,6 +160,14 @@ class Rule(Rule.Rule):
 
                 is_match_pattern = True
 
+                # 對太短邊做處理會出問題。
+                if is_match_pattern:
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= 2:
+                        is_match_pattern = False
+                if is_match_pattern:
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= 2:
+                        is_match_pattern = False
+
                 #PS:需要檢查, 對太短的邊做處理，目前的code會有「很多」問題。
                 if is_match_pattern:
                     fail_code = 111
@@ -166,7 +176,8 @@ class Rule(Rule.Rule):
                     if nodes_length <= 3:
                         is_nodes_enough_to_merge = False
 
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                    # PS: merge node 在 halfmoon + toothpaste mode 下可能會出錯，因為有點重疊的問題。
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT and format_dict_array[(idx+0)%nodes_length]['distance'] > 1:
                         if not is_nodes_enough_to_merge:
                             fail_code = 120
                             is_match_pattern = False
@@ -200,7 +211,7 @@ class Rule(Rule.Rule):
                     if nodes_length <= 3:
                         is_nodes_enough_to_merge = False
 
-                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                    if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT and format_dict_array[(idx+1)%nodes_length]['distance'] > 1:
                         if not is_nodes_enough_to_merge:
                             fail_code = 130
                             is_match_pattern = False
@@ -233,7 +244,7 @@ class Rule(Rule.Rule):
                             #print("idx:",idx)
                             #print("nodes_length:",nodes_length)
                             self.apply_code(format_dict_array,(idx+1)%nodes_length)
-                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT:
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT and format_dict_array[(idx+1)%nodes_length]['distance'] > 1:
                                 fail_code = 131
                                 is_match_pattern = False
 
@@ -514,21 +525,29 @@ class Rule(Rule.Rule):
                     nodes_length = len(format_dict_array)
                     generated_code = format_dict_array[(idx+0)%nodes_length]['code']
                     #print("generated_code to rule:", generated_code)
-                    skip_coordinate_rule.append(generated_code)
+                    apply_rule_log.append(generated_code)
 
                     # make coner curve
                     coner_mode = "CURVE"
                     if self.config.PROCESS_MODE in ["NUT8"]:
                         coner_mode = "STRAIGHT"
 
-                    format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,skip_coordinate_rule,coner_mode=coner_mode)
+                    is_goto_apply_round = True
+                    center_x,center_y = -9999,-9999
+                    next_x, next_y = -9999,-9999
 
-                    # cache transformed nodes.
-                    # we generated nodes
-                    # 因為只有作用在2個coordinate. 
+                    if self.config.PROCESS_MODE in ["TOOTHPASTE"]:
+                        is_match_direction_base_rule, fail_code = self.going_toothpaste(format_dict_array,idx)
+                        is_goto_apply_round = is_match_direction_base_rule
+
+                    if is_goto_apply_round:
+                        format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,apply_rule_log,generate_rule_log,coner_mode=coner_mode)
+
+                    # skip_coordinate 決定都拿掉，改用 apply_rule_log
+                    # 因為只有作用在2個coordinate.
                     if self.config.PROCESS_MODE in ["HALFMOON"]:
                         # 加了這行，會讓「口」的最後一個角，無法套到。
-                        skip_coordinate.append([previous_x,previous_y])
+                        #skip_coordinate.append([previous_x,previous_y])
                         pass
 
                     check_first_point = True
@@ -548,4 +567,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule
+        return redo_travel, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log

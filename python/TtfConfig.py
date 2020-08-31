@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.088"
+    VERSION = "2.090"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
@@ -11,6 +11,7 @@ class TtfConfig():
     #PROCESS_MODE = "XD"
     #PROCESS_MODE = "RAINBOW"
     #PROCESS_MODE = "NUT8"
+    #PROCESS_MODE = "TOOTHPASTE"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
@@ -64,6 +65,11 @@ class TtfConfig():
             INSIDE_ROUND_OFFSET = 35
         if STYLE=="Medium":
             INSIDE_ROUND_OFFSET = 30
+
+    # for Regular
+    if PROCESS_MODE in ["TOOTHPASTE"]:
+        OUTSIDE_ROUND_OFFSET = 65
+        INSIDE_ROUND_OFFSET = 25
 
     # some inside block not able to fill 2 curve coner, use small one.
     INSIDE_SMALL_ROUND_OFFSET=15
@@ -137,10 +143,26 @@ class TtfConfig():
         if self.STYLE=="Light":
             self.OUTSIDE_ROUND_OFFSET = 40
         if self.STYLE=="Thin":
-            self.OUTSIDE_ROUND_OFFSET = 28
+            self.OUTSIDE_ROUND_OFFSET = 30
+
+        # bigger curve.
+        if self.PROCESS_MODE in ["TOOTHPASTE"]:
+            if self.STYLE=="Black":
+                self.OUTSIDE_ROUND_OFFSET = 75
+            if self.STYLE=="Bold":
+                self.OUTSIDE_ROUND_OFFSET = 70
+            if self.STYLE=="Medium":
+                self.OUTSIDE_ROUND_OFFSET = 65
+            if self.STYLE=="DemiLight":
+                self.OUTSIDE_ROUND_OFFSET = 60
+            if self.STYLE=="Light":
+                self.OUTSIDE_ROUND_OFFSET = 50
+            if self.STYLE=="Thin":
+                self.OUTSIDE_ROUND_OFFSET = 35
+
 
         # 只需要大彎.
-        if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8"]:
+        if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8","TOOTHPASTE"]:
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
     def __init__(self, weight_code):

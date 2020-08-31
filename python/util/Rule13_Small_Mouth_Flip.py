@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict, skip_coordinate, skip_coordinate_rule):
+    def apply(self, spline_dict, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log):
         redo_travel=False
 
         # clone
@@ -38,17 +38,20 @@ class Rule(Rule.Rule):
                 is_debug_mode = False
                 #is_debug_mode = True
 
-                if [format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in skip_coordinate:
-                    continue
-
                 # [IMPORTANT]:
                 # dead lock will appear, if redo this rule on same point.
                 # new point added at +3.
-                if [format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y']] in skip_coordinate:
+                if format_dict_array[(idx+3)%nodes_length]['code'] in apply_rule_log:
+                    if is_debug_mode:
+                        print("match skip apply_rule_log +3:",[format_dict_array[(idx+3)%nodes_length]['code']])
+                        pass
                     continue
 
                 # 隨手亂加的，沒有去思考。
-                if [format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y']] in skip_coordinate:
+                if format_dict_array[(idx+2)%nodes_length]['code'] in apply_rule_log:
+                    if is_debug_mode:
+                        print("match skip apply_rule_log +2:",[format_dict_array[(idx+2)%nodes_length]['code']])
+                        pass
                     continue
 
                 if is_debug_mode:
@@ -171,7 +174,7 @@ class Rule(Rule.Rule):
                     nodes_length = len(format_dict_array)
                     generated_code = format_dict_array[(idx+0)%nodes_length]['code']
                     #print("generated_code:", generated_code)
-                    skip_coordinate_rule.append(generated_code)
+                    apply_rule_log.append(generated_code)
 
                     # generate small coner.
                     # 這是較佳的長度，但是可能會「深入」筆畫裡。
@@ -222,9 +225,9 @@ class Rule(Rule.Rule):
 
                     # for Rule#99 to avoid same code apply twice.
                     #print("generated_code:", new_code)
-                    skip_coordinate_rule.append(new_code)
+                    apply_rule_log.append(new_code)
                     # 不確定下面這行是否會造成什麼問題。
-                    skip_coordinate_rule.append(format_dict_array[(idx+1)%nodes_length]['code'])
+                    apply_rule_log.append(format_dict_array[(idx+1)%nodes_length]['code'])
 
                     # append new #2
                     
@@ -246,26 +249,26 @@ class Rule(Rule.Rule):
 
                     format_dict_array.insert((idx+3)%nodes_length,dot_dict)
                     #print("rule13 appdend +3 new_code:", new_code)
-
-                    # we generated nodes
-                    #skip_coordinate.append([previous_x,previous_x])
-                    skip_coordinate.append([next_x,next_y])
-                    # 說明：[next_x,next_y]會是共用的點
+                    apply_rule_log.append(new_code)
 
                     # 由於"點共用"，for skip_coordinate，所以要增加新的點, 
-                    mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,-1 * (self.config.ROUND_OFFSET+3))
-                    if idx > (idx+3)%nodes_length:
-                        idx +=1
-                    nodes_length = len(format_dict_array)
-                    new_code = ' %d %d l 1\n' % (mouth_next_x_deep, mouth_next_y_deep)
+                    # PS: 目前已全部刪掉 skip_coordinate，改用 apply_rule_log.
+                    #     等程式都沒問題後，下一版會刪掉這一個block 的code.
+                    if False:
+                        mouth_next_x_deep,mouth_next_y_deep=spline_util.two_point_extend(x3,y3,x2,y2,-1 * (self.config.ROUND_OFFSET+3))
+                        if idx > (idx+3)%nodes_length:
+                            idx +=1
+                        nodes_length = len(format_dict_array)
+                        new_code = ' %d %d l 1\n' % (mouth_next_x_deep, mouth_next_y_deep)
 
-                    dot_dict={}
-                    dot_dict['x']=mouth_next_x_deep
-                    dot_dict['y']=mouth_next_y_deep
-                    dot_dict['t']='.'
-                    dot_dict['code']=new_code
+                        dot_dict={}
+                        dot_dict['x']=mouth_next_x_deep
+                        dot_dict['y']=mouth_next_y_deep
+                        dot_dict['t']='.'
+                        dot_dict['code']=new_code
 
-                    format_dict_array.insert((idx+4)%nodes_length,dot_dict)
+                        format_dict_array.insert((idx+4)%nodes_length,dot_dict)
+                        apply_rule_log.append(new_code)
 
                     redo_travel=True
 
@@ -283,4 +286,4 @@ class Rule(Rule.Rule):
             self.reset_first_point(format_dict_array, spline_dict)
 
 
-        return redo_travel, resume_idx, inside_stroke_dict,skip_coordinate, skip_coordinate_rule
+        return redo_travel, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log
