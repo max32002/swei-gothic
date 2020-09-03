@@ -300,20 +300,23 @@ class Spline():
         # ==================================================
 
         # 也許 #6, 非必需。
-        #if self.config.PROCESS_MODE in ["GOTHIC","D","XD","RAINBOW","NUT8","TOOTHPASTE"]:
-        if self.config.PROCESS_MODE in ["GOTHIC"]:
-            # format code.
-            # start to travel nodes for [RULE #6]
-            # format curve coner as l conver
-            #print("start Rule # 6...")
-            idx=-1
-            redo_travel=False   # Disable
-            redo_travel=True    # Enable
-            while redo_travel:
-                redo_travel,idx=ru6.apply(spline_dict, idx)
-                if redo_travel:
-                    is_modified = True
-            ru6 = None
+        # PS: 在 Bold/Black 的角(uni89D2)和過(uni904E)筆觸會增加內凹的圓弧。
+        #     會造成程式無法判斷。
+        # start to travel nodes for [RULE #6]
+        # format curve coner as l conver
+        #print("start Rule # 6...")
+        idx=-1
+        redo_travel=False   # Disable
+        redo_travel=True    # Enable
+        
+        if self.config.PROCESS_MODE in ["B2","B4"]:
+            redo_travel=False
+
+        while redo_travel:
+            redo_travel,idx=ru6.apply(spline_dict, idx)
+            if redo_travel:
+                is_modified = True
+        ru6 = None
 
         # start to travel nodes for [RULE #10]
         # format curve coner as l conver

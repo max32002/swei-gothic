@@ -11,6 +11,7 @@ class TtfConfig():
     #PROCESS_MODE = "XD"
     #PROCESS_MODE = "RAINBOW"
     #PROCESS_MODE = "NUT8"
+    #PROCESS_MODE = "3TSANS"
     #PROCESS_MODE = "TOOTHPASTE"
 
     STYLE_INDEX = 5
