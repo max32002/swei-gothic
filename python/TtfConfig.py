@@ -2,7 +2,7 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.090"
+    VERSION = "2.094"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
@@ -20,7 +20,7 @@ class TtfConfig():
     DEFAULT_COORDINATE_VALUE = -9999
 
     # for Regular
-    STROKE_MAX = 99
+    STROKE_MAX = 102
 
     # 有些筆劃很細，有些很粗，設太細似乎又會誤判。
     # 雖然字變重，但因為筆畫複雜時，還是有細的線條。
@@ -88,15 +88,15 @@ class TtfConfig():
         if self.STYLE=="Black":
             self.STROKE_MAX = 165
         if self.STYLE=="Bold":
-            self.STROKE_MAX = 137
+            self.STROKE_MAX = 139
         if self.STYLE=="Medium":
-            self.STROKE_MAX = 109
+            self.STROKE_MAX = 115
         if self.STYLE=="DemiLight":
-            self.STROKE_MAX = 86
+            self.STROKE_MAX = 96
         if self.STYLE=="Light":
-            self.STROKE_MAX = 70
+            self.STROKE_MAX = 80
         if self.STYLE=="Thin":
-            self.STROKE_MAX = 49
+            self.STROKE_MAX = 59
 
         if self.STYLE=="Black":
             self.STROKE_MIN = 34
@@ -159,7 +159,6 @@ class TtfConfig():
                 self.OUTSIDE_ROUND_OFFSET = 50
             if self.STYLE=="Thin":
                 self.OUTSIDE_ROUND_OFFSET = 35
-
 
         # 只需要大彎.
         if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8","TOOTHPASTE"]:

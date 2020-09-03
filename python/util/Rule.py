@@ -10,6 +10,10 @@ import numpy as np
 class Rule():
     config = None
     unicode_int = -1
+    is_Latin_Flag = False
+    is_Hangul_Flag = False
+    is_Before_CJK_Flag = False
+
     bmp_image = None
     bmp_x_offset = 0
     bmp_y_offset = 0
@@ -19,6 +23,9 @@ class Rule():
 
     def assign_unicode(self, val):
         self.unicode_int = val
+        self.is_Latin_Flag = self.is_Latin()
+        self.is_Hangul_Flag = self.is_Hangul()
+        self.is_Before_CJK_Flag = self.is_Before_CJK()
 
     # 0-24F
     def is_Latin(self):
@@ -33,6 +40,14 @@ class Rule():
         ret = False
         if self.unicode_int > 0:
             if self.unicode_int >= 44032 and self.unicode_int <= 55215:
+                ret = True
+        return ret
+
+    # 0-2E7F, before "CJK Radicals Supplement"
+    def is_Before_CJK(self):
+        ret = False
+        if self.unicode_int > 0:
+            if self.unicode_int <= 11903:
                 ret = True
         return ret
 
@@ -559,21 +574,34 @@ class Rule():
 
             distance = format_dict_array[idx]['distance']
 
-            format_dict_array[idx]['match_stroke_width'] = False
-            if distance >= self.config.STROKE_WIDTH_MIN and distance <= self.config.STROKE_WIDTH_MAX:
-                format_dict_array[idx]['match_stroke_width'] = True
+            match_stroke_width_flag = False
+            if distance >= self.config.STROKE_WIDTH_MIN:
+                allowed_max_width = self.config.STROKE_WIDTH_MAX
 
-            format_dict_array[idx]['x_direction']=0
+                # for _Kappa, Greek Small Letter Kappa
+                # under Unicode Block “CJK Radicals Supplement”
+                if self.is_Before_CJK_Flag:
+                    # allow more 1.10(default) * 1.05(extra) for non-chinese glyph.
+                    allowed_max_width *= 1.05
+                    #print("allowed_max_width:", allowed_max_width)
+
+                if distance <= allowed_max_width:
+                    match_stroke_width_flag = True
+            format_dict_array[idx]['match_stroke_width'] = match_stroke_width_flag
+
+            x_direction_value = 0
             if next_x > current_x:
-                format_dict_array[idx]['x_direction']=1
+                x_direction_value=1
             if next_x < current_x:
-                format_dict_array[idx]['x_direction']=-1
+                x_direction_value=-1
+            format_dict_array[idx]['x_direction']=x_direction_value
 
-            format_dict_array[idx]['y_direction']=0
+            y_direction_value=0
             if next_y > current_y:
-                format_dict_array[idx]['y_direction']=1
+                y_direction_value=1
             if next_y < current_y:
-                format_dict_array[idx]['y_direction']=-1
+                y_direction_value=-1
+            format_dict_array[idx]['y_direction']=y_direction_value
 
             # 有誤差地判斷，與下一個點是否為平行線。
             EQUAL_ACCURACY = self.config.EQUAL_ACCURACY_PERCENT * distance

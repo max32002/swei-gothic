@@ -231,25 +231,29 @@ class Rule(Rule.Rule):
                                 if slide_percent_2 >= SLIDE_2_PERCENT_MIN and slide_percent_2 <= SLIDE_2_PERCENT_MAX:
                                     is_match_pattern = True
 
-                # 做例外排除，滿神奇的，會剛好被match.
+                # 做例外排除.
+                # PS: 請不要判斷 (idx+2) and (idx+3), 因為超過矩形範圍。
                 if is_match_pattern:
+                    fail_code = 250
                     if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
                         if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
+                            fail_code = 251
                             is_match_pattern = False
                     if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
                         if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                            fail_code = 252
                             is_match_pattern = False
                     if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
                         if format_dict_array[(idx+3)%nodes_length]['y_equal_fuzzy']:
+                            fail_code = 253
                             is_match_pattern = False
                     if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
                         if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
+                            fail_code = 254
                             is_match_pattern = False
                     if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
                         if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
-                            is_match_pattern = False
-                    if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
-                        if format_dict_array[(idx+3)%nodes_length]['x_equal_fuzzy']:
+                            fail_code = 255
                             is_match_pattern = False
 
                 # compare NEXT_DISTANCE_MIN

@@ -240,9 +240,9 @@ class Rule(Rule.Rule):
                     if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.NEXT_DISTANCE_MIN:
                         is_match_pattern = True
 
-                
                 # for case "加" 的力的右上角。
-                # 做例外排除，滿神奇的，會剛好被match.
+                # 做例外排除.
+                # PS: 請不要判斷 (idx+2) and (idx+3), 因為超過矩形範圍。
                 if is_match_pattern:
                     if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
                         if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
@@ -258,9 +258,6 @@ class Rule(Rule.Rule):
                             is_match_pattern = False
                     if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
                         if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
-                            is_match_pattern = False
-                    if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
-                        if format_dict_array[(idx+3)%nodes_length]['x_equal_fuzzy']:
                             is_match_pattern = False
 
                 # compare direction
