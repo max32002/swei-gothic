@@ -581,8 +581,8 @@ class Rule():
                 # for _Kappa, Greek Small Letter Kappa
                 # under Unicode Block “CJK Radicals Supplement”
                 if self.is_Before_CJK_Flag:
-                    # allow more 1.10(default) * 1.05(extra) for non-chinese glyph.
-                    allowed_max_width *= 1.05
+                    # allow more 1.10(default) * 1.15(extra) for non-chinese glyph.
+                    allowed_max_width *= 1.15
                     #print("allowed_max_width:", allowed_max_width)
 
                 if distance <= allowed_max_width:
