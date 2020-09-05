@@ -59,7 +59,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[764,94]]
+                    debug_coordinate_list = [[427,766]]
                     if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
 
@@ -72,7 +72,10 @@ class Rule(Rule.Rule):
 
                 # for:脚 811A「月」slide_percent_1: 0.84
                 SLIDE_1_PERCENT_MIN = 0.50
-                SLIDE_1_PERCENT_MAX = 1.80
+                # for:蝙(uni8759)的戶，slide_percent_1: 1.81
+                SLIDE_1_PERCENT_MAX = 1.86
+
+                #TODO: 應該要檢查 SLIDE_1 + SLIDE_2 total max value.
 
                 slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
                 slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
@@ -187,14 +190,22 @@ class Rule(Rule.Rule):
                 # check slide#1
                 # 去除部份情況
                 if is_match_pattern:
+                    fail_code = 220
                     if slide_percent_1 < SLIDE_1_PERCENT_MIN:
                         is_match_pattern = False
+                        if is_debug_mode:
+                            print("slide_percent_1:",slide_percent_1)
+                            print("SLIDE_1_PERCENT_MIN:",SLIDE_1_PERCENT_MIN)
                     if slide_percent_1 > SLIDE_1_PERCENT_MAX:
                         is_match_pattern = False
+                        if is_debug_mode:
+                            print("slide_percent_1:",slide_percent_1)
+                            print("SLIDE_1_PERCENT_MAX:",SLIDE_1_PERCENT_MAX)
 
                 # 做例外排除.
                 # PS: 請不要判斷 (idx+2) and (idx+3), 因為超過矩形範圍。
                 if is_match_pattern:
+                    fail_code = 230
                     if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
                         if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
                             is_match_pattern = False
