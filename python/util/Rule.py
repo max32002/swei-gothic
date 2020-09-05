@@ -75,7 +75,6 @@ class Rule():
 
         poly_array=[[bmp_x1,bmp_y1],[bmp_x2,bmp_y2],[bmp_x3,bmp_y3]]
 
-
         bmp_x4 = None
         bmp_y4 = None
         if not x4 is None and not y4 is None:
@@ -1045,6 +1044,7 @@ class Rule():
         if format_dict_array[(idx+2)%nodes_length]['distance'] < self.config.ROUND_OFFSET:
             round_length_2 = format_dict_array[(idx+2)%nodes_length]['distance']
 
+        # default apply inside direction.
         is_apply_inside_direction = True
         if self.config.PROCESS_MODE in ["BAT"]:
             is_apply_inside_direction = False
@@ -1365,13 +1365,13 @@ class Rule():
                     # not is 'c'
                     old_code_array[1] = str(new_x1)
                     old_code_array[2] = str(new_y1)
-
                 new_code = ' '.join(old_code_array)
                 target_index = (idx+1)%nodes_length
                 format_dict_array[target_index]['code'] = new_code
                 self.apply_code(format_dict_array,(idx+1)%nodes_length)
             else:
                 # bat mode.
+                # disable to use now, due to not smooth.
                 new_code = ' %d %d l 1\n' % (new_x1,new_y1)
                 dot_dict={}
                 dot_dict['x']=new_x1
@@ -1408,7 +1408,7 @@ class Rule():
             dot_dict['y2']=y1
 
             dot_dict['code']=new_code
-            
+
             #if is_apply_inside_direction:
             if True:
                 target_index = (idx+2)%nodes_length

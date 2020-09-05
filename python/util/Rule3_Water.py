@@ -59,7 +59,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[427,766]]
+                    debug_coordinate_list = [[829,-73]]
                     if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
 
@@ -75,7 +75,9 @@ class Rule(Rule.Rule):
                 # for:蝙(uni8759)的戶，slide_percent_1: 1.81
                 SLIDE_1_PERCENT_MAX = 1.86
 
+
                 #TODO: 應該要檢查 SLIDE_1 + SLIDE_2 total max value.
+                #  PS: 目前還沒有檢查。
 
                 slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
                 slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
@@ -92,6 +94,7 @@ class Rule(Rule.Rule):
                                 if (format_dict_array[(idx+1)%nodes_length]['distance']+format_dict_array[(idx+2)%nodes_length]['distance']) >= 30:
                                     if (format_dict_array[(idx+1)%nodes_length]['distance']+format_dict_array[(idx+2)%nodes_length]['distance']) <= 120:
                                         check_more_merge_stroke_condition = True
+
                 #print("check_more_merge_stroke_condition 1:", check_more_merge_stroke_condition)
                 if check_more_merge_stroke_condition:
                     check_more_merge_stroke_condition = False
@@ -120,6 +123,7 @@ class Rule(Rule.Rule):
                         # for:脚 811A「月」slide_percent_2: 1.98
                         if slide_percent_2 >= 1.96:
                             check_more_merge_stroke_condition = True
+
                 #print("check_more_merge_stroke_condition 5:", check_more_merge_stroke_condition)
                 if check_more_merge_stroke_condition:
                     # start to merge line.
@@ -227,9 +231,37 @@ class Rule(Rule.Rule):
                     fail_code = 400
                     #print(idx,"debug rule3:",format_dict_array[idx]['code'])
                     is_match_pattern = False
+
+                    #print("0 x_direction:",format_dict_array[(idx+0)%nodes_length]['x_direction'])
+                    #print("2 x_direction:",format_dict_array[(idx+2)%nodes_length]['x_direction'])
                     if format_dict_array[(idx+0)%nodes_length]['x_direction'] == -1 * format_dict_array[(idx+2)%nodes_length]['x_direction']:
-                        if format_dict_array[(idx+0)%nodes_length]['y_direction'] == -1 * format_dict_array[(idx+2)%nodes_length]['y_direction']:
-                            is_match_pattern = True
+                        if not is_match_pattern:
+                            fail_code = 410
+                            # for normal case.
+                            if format_dict_array[(idx+0)%nodes_length]['y_direction'] == -1 * format_dict_array[(idx+2)%nodes_length]['y_direction']:
+                                is_match_pattern = True
+
+                        # for uni89D2,角 Black Style ... start.
+                        if not is_match_pattern:
+                            fail_code = 420
+                            # best case, but not every time is lucky.
+                            if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy'] and format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                                is_match_pattern = True
+                        if not is_match_pattern:
+                            fail_code = 430
+                            # +2 水平，檢查 +0 是否貼齊。
+                            #print("+2 y_equal_fuzzy:", format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy'])
+                            if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                                if format_dict_array[(idx+1)%nodes_length]['t']=='c':
+                                    if abs(format_dict_array[(idx+1)%nodes_length]['y']-format_dict_array[(idx+1)%nodes_length]['y2'])<=3:
+                                        is_match_pattern = True
+                            # +0 水平，檢查 +2 是否貼齊。
+                            #print("+0 y_equal_fuzzy:", format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy'])
+                            if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                                if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                                    if abs(format_dict_array[(idx+2)%nodes_length]['y']-format_dict_array[(idx+1)%nodes_length]['y1'])<=3:
+                                        is_match_pattern = True
+                        # for uni89D2,角 ... end.
 
                     # 追加例外：源 的下面小的水平腳
                     # 下面的 code, 直接讓 match=True, 需要小心處理！
@@ -353,6 +385,12 @@ class Rule(Rule.Rule):
                     if self.config.PROCESS_MODE in ["RAINBOW"]:
                         is_match_d_base_rule, fail_code = self.going_rainbow_up(format_dict_array,idx)
                         is_goto_apply_round = is_match_d_base_rule
+
+                    # for BOW
+                    if self.config.PROCESS_MODE in ["BOW"]:
+                        generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                        apply_rule_log.append(generated_code)
+                        is_goto_apply_round = False
 
                     # NUT8, alway do nothing but record the history.
                     if self.config.PROCESS_MODE in ["NUT8"]:

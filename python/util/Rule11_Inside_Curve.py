@@ -127,7 +127,7 @@ class Rule(Rule.Rule):
 
 
                 # for RAINBOW
-                if self.config.PROCESS_MODE in ["RAINBOW"]:
+                if self.config.PROCESS_MODE in ["RAINBOW","BOW"]:
                     fail_code = 133
                     #print("before is_match_pattern:", is_match_pattern)
                     if is_match_pattern:
