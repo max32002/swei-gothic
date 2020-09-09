@@ -650,13 +650,13 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE"]:
+        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE"]:
             is_common_enable = False
 
         if is_common_enable:
             is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
         else:
-            if self.config.PROCESS_MODE in ["XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE"]:
+            if self.config.PROCESS_MODE in ["XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE"]:
                 base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
                 if base_is_modified:
                     is_modified = True
@@ -752,13 +752,13 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE"]:
+        if self.config.PROCESS_MODE in ["B2","B4","XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE"]:
             is_common_enable = False
 
         if is_common_enable:
             is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
         else:
-            if self.config.PROCESS_MODE in ["XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE"]:
+            if self.config.PROCESS_MODE in ["XD","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE"]:
                 base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
                 if base_is_modified:
                     is_modified = True
