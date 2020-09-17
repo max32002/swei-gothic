@@ -19,6 +19,12 @@
 * 和「源泉圓體TW」的差異之一，是Regular 的字重有調整了部份的常用字，因為拔腳之後，不平衡的問題。
 ![字體比較](https://github.com/max32002/swei-gothic/raw/master/preview/fix_balance.png)
 
+## 字體後面的 SC,JP,TC是什意思？
+* SC是 Simplified Chinese 简体中文，代表大陸習慣字形。
+* TC是 Traditional Chinese 繁体中文，代表港台習慣的字形。
+* JP是 Japanese 日文，代表日本習慣字形。
+* 相同一個字，在不地區的書寫方式可能會略有不同。
+
 ### 「CJK TC」和「CJK SC」的比較：
 ![TC和SC比較](https://github.com/max32002/swei-gothic/raw/master/preview/compare_tc_sc.png)
 * 在「肉」、「糸」、「女」、「辶」、「食」的筆畫不同，CJK SC 「肉字旁部首」變成「月」。 
