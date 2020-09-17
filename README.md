@@ -19,7 +19,7 @@
 * 和「源泉圓體TW」的差異之一，是Regular 的字重有調整了部份的常用字，因為拔腳之後，不平衡的問題。
 ![字體比較](https://github.com/max32002/swei-gothic/raw/master/preview/fix_balance.png)
 
-## 字體後面的 SC,JP,TC是什意思？
+### 字體後面的 SC,JP,TC是什意思？
 * SC是 Simplified Chinese 简体中文，代表大陸習慣字形。
 * TC是 Traditional Chinese 繁体中文，代表港台習慣的字形。
 * JP是 Japanese 日文，代表日本習慣字形。
