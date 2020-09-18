@@ -500,7 +500,7 @@ class Rule(Rule.Rule):
                         is_match_pattern = False
 
                 # for D.Lucy
-                if self.config.PROCESS_MODE in ["D"]:
+                if self.config.PROCESS_MODE in ["D","DEL"]:
                     fail_code = 131
                     if is_match_pattern:
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
