@@ -356,12 +356,21 @@ class Rule(Rule.Rule):
                     if is_goto_apply_round:
                         center_x,center_y = -9999,-9999
                         #print("self.config.PROCESS_MODE:", self.config.PROCESS_MODE)
-                        if not self.config.PROCESS_MODE in ["3TSANS"]:
-                            center_x,center_y = self.apply_round_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
-                        else:
+
+                        is_special_round_format = False
+                        if self.config.PROCESS_MODE in ["3TSANS"]:
+                            is_special_round_format = True
                             center_x,center_y = self.apply_3t_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
+                        if self.config.PROCESS_MODE in ["GOSPEL"]:
+                            is_special_round_format = True
+                            center_x,center_y = self.apply_gospel_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
+
+                        # default use round.                       
+                        if not is_special_round_format:
+                            center_x,center_y = self.apply_round_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
                         #print("center_x,center_y:",center_x,center_y)
-                        
+
+
                     redo_travel=True
                     check_first_point = True
                     #resume_idx = idx

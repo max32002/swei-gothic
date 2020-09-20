@@ -2,17 +2,22 @@
 #encoding=utf-8
 
 class TtfConfig():
-    VERSION = "2.099"
+    VERSION = "2.110"
     PROCESS_MODE = "GOTHIC"
     #PROCESS_MODE = "HALFMOON"
     #PROCESS_MODE = "D"
+    #PROCESS_MODE = "DEL"
     #PROCESS_MODE = "B2"
     #PROCESS_MODE = "B4"
     #PROCESS_MODE = "XD"
     #PROCESS_MODE = "RAINBOW"
+    #PROCESS_MODE = "BOW"
     #PROCESS_MODE = "NUT8"
     #PROCESS_MODE = "3TSANS"
     #PROCESS_MODE = "TOOTHPASTE"
+    #PROCESS_MODE = "BAT"
+    #PROCESS_MODE = "CURVE"
+    PROCESS_MODE = "GOSPEL"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
@@ -44,33 +49,6 @@ class TtfConfig():
     INSIDE_ROUND_OFFSET = 19
 
     NEED_LOAD_BMP_IMAGE = True
-
-    if PROCESS_MODE in ["B2"]:
-        NEED_LOAD_BMP_IMAGE = False
-        INSIDE_ROUND_OFFSET = 30
-
-        if STYLE=="Black":
-            INSIDE_ROUND_OFFSET = 45
-        if STYLE=="Bold":
-            INSIDE_ROUND_OFFSET = 40
-        if STYLE=="Medium":
-            INSIDE_ROUND_OFFSET = 35
-
-    if PROCESS_MODE in ["B4"]:
-        NEED_LOAD_BMP_IMAGE = False
-        INSIDE_ROUND_OFFSET = 25
-
-        if STYLE=="Black":
-            INSIDE_ROUND_OFFSET = 40
-        if STYLE=="Bold":
-            INSIDE_ROUND_OFFSET = 35
-        if STYLE=="Medium":
-            INSIDE_ROUND_OFFSET = 30
-
-    # for Regular
-    if PROCESS_MODE in ["TOOTHPASTE"]:
-        OUTSIDE_ROUND_OFFSET = 65
-        INSIDE_ROUND_OFFSET = 25
 
     # some inside block not able to fill 2 curve coner, use small one.
     INSIDE_SMALL_ROUND_OFFSET=15
@@ -120,6 +98,7 @@ class TtfConfig():
         #print("STROKE_MIN:", STROKE_WIDTH_MIN)
 
 
+        # 客製化 ROUND_OFFSET
         if self.STYLE=="Black":
             self.ROUND_OFFSET = 48
         if self.STYLE=="Bold":
@@ -133,6 +112,7 @@ class TtfConfig():
         if self.STYLE=="Thin":
             self.ROUND_OFFSET = 24
 
+        # 客製化 OUTSIDE_ROUND_OFFSET
         if self.STYLE=="Black":
             self.OUTSIDE_ROUND_OFFSET = 65
         if self.STYLE=="Bold":
@@ -164,6 +144,48 @@ class TtfConfig():
         # 只需要大彎.
         if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8","TOOTHPASTE"]:
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
+
+        # 客製化 INSIDE_ROUND_OFFSET
+        if self.STYLE=="Black":
+            self.INSIDE_ROUND_OFFSET = 29
+        if self.STYLE=="Bold":
+            self.INSIDE_ROUND_OFFSET = 26
+        if self.STYLE=="Medium":
+            self.INSIDE_ROUND_OFFSET = 23
+        if self.STYLE=="DemiLight":
+            self.INSIDE_ROUND_OFFSET = 19
+        if self.STYLE=="Light":
+            self.INSIDE_ROUND_OFFSET = 19
+        if self.STYLE=="Thin":
+            self.INSIDE_ROUND_OFFSET = 19
+
+        if self.PROCESS_MODE in ["B2"]:
+            self.NEED_LOAD_BMP_IMAGE = False
+            self.INSIDE_ROUND_OFFSET = 30
+
+            if self.STYLE=="Black":
+                self.INSIDE_ROUND_OFFSET = 45
+            if self.STYLE=="Bold":
+                self.INSIDE_ROUND_OFFSET = 40
+            if self.STYLE=="Medium":
+                self.INSIDE_ROUND_OFFSET = 35
+
+        if self.PROCESS_MODE in ["B4"]:
+            self.NEED_LOAD_BMP_IMAGE = False
+            self.INSIDE_ROUND_OFFSET = 25
+
+            if self.STYLE=="Black":
+                self.INSIDE_ROUND_OFFSET = 40
+            if self.STYLE=="Bold":
+                self.INSIDE_ROUND_OFFSET = 35
+            if self.STYLE=="Medium":
+                self.INSIDE_ROUND_OFFSET = 30
+
+
+        # for Regular
+        if self.PROCESS_MODE in ["TOOTHPASTE"]:
+            self.OUTSIDE_ROUND_OFFSET = 65
+            self.INSIDE_ROUND_OFFSET = 25
 
     def __init__(self, weight_code):
         import datetime
