@@ -650,13 +650,13 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL"]:
+        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR"]:
             is_common_enable = False
 
         if is_common_enable:
             is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
         else:
-            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL"]:
+            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR"]:
                 base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
                 if base_is_modified:
                     is_modified = True
@@ -668,7 +668,7 @@ class Spline():
         redo_travel=False   # Disable
         redo_travel=True    # Enable
         
-        if self.config.PROCESS_MODE in ["B2","B4","NUT8","3TSANS","TOOTHPASTE","GOSPEL"]:
+        if self.config.PROCESS_MODE in ["B2","B4","NUT8","3TSANS","TOOTHPASTE","GOSPEL","SHEAR"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
@@ -695,7 +695,7 @@ class Spline():
         # PS:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，
         #    如果遇到問題，可以先暫時先註解，等有空再開啟Rule#99
 
-        if self.config.PROCESS_MODE in ["3TSANS","GOSPEL"]:
+        if self.config.PROCESS_MODE in ["3TSANS","GOSPEL","SHEAR"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
@@ -752,13 +752,13 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL"]:
+        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR"]:
             is_common_enable = False
 
         if is_common_enable:
             is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
         else:
-            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL"]:
+            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR"]:
                 base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
                 if base_is_modified:
                     is_modified = True
@@ -777,7 +777,7 @@ class Spline():
         redo_travel=False   # Disable
         redo_travel=True    # Enable
         
-        if self.config.PROCESS_MODE in ["B2","B4","NUT8","3TSANS","TOOTHPASTE","GOSPEL"]:
+        if self.config.PROCESS_MODE in ["B2","B4","NUT8","3TSANS","TOOTHPASTE","GOSPEL","SHEAR"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:
@@ -807,7 +807,7 @@ class Spline():
         # PS:攩，的黑的點，因為 Rule#12,13 與 Rule#99 會交互作作，
         #    如果遇到問題，可以先暫時先註解，等有空再開啟Rule#99
         
-        if self.config.PROCESS_MODE in ["3TSANS","GOSPEL"]:
+        if self.config.PROCESS_MODE in ["3TSANS","GOSPEL","SHEAR"]:
             redo_travel = False
 
         if DISABLE_ALL_RULE:

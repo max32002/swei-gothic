@@ -407,7 +407,7 @@ class Rule(Rule.Rule):
                         if self.config.PROCESS_MODE in ["3TSANS"]:
                             is_special_round_format = True
                             center_x,center_y = self.apply_3t_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
-                        if self.config.PROCESS_MODE in ["GOSPEL"]:
+                        if self.config.PROCESS_MODE in ["GOSPEL","SHEAR"]:
                             is_special_round_format = True
                             center_x,center_y = self.apply_gospel_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
 

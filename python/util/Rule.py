@@ -1562,6 +1562,9 @@ class Rule():
         #     但由於code 想要共用，所以暫時以常數來解決code共用問題.
         is_apply_inside_direction = True
 
+        if self.config.PROCESS_MODE in ["SHEAR"]:
+            is_apply_inside_direction = False
+
         nodes_length = len(format_dict_array)
 
         center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
@@ -1623,17 +1626,22 @@ class Rule():
         gospel_x, gospel_y = spline_util.two_point_extend(x2,y2,x1,y1, self.config.INSIDE_ROUND_OFFSET)
 
         # update #2
-        new_code = ' %d %d l 1\n' % (gospel_x, gospel_y)
-        dot_dict={}
-        dot_dict['x']=gospel_x
-        dot_dict['y']=gospel_y
-        dot_dict['t']='l'
-        dot_dict['code']=new_code
-        format_dict_array.insert((idx+2)%nodes_length,dot_dict)
-        #format_dict_array[(idx+2)%nodes_length]=dot_dict
-        self.apply_code(format_dict_array,(idx+2)%nodes_length)
-        apply_rule_log.append(new_code)
-        generate_rule_log.append(new_code)
+        is_append_node = True
+        if self.config.PROCESS_MODE in ["SHEAR"]:
+            is_append_node = False
+
+        if is_append_node:
+            new_code = ' %d %d l 1\n' % (gospel_x, gospel_y)
+            dot_dict={}
+            dot_dict['x']=gospel_x
+            dot_dict['y']=gospel_y
+            dot_dict['t']='l'
+            dot_dict['code']=new_code
+            format_dict_array.insert((idx+2)%nodes_length,dot_dict)
+            #format_dict_array[(idx+2)%nodes_length]=dot_dict
+            self.apply_code(format_dict_array,(idx+2)%nodes_length)
+            apply_rule_log.append(new_code)
+            generate_rule_log.append(new_code)
 
         return center_x,center_y
 
