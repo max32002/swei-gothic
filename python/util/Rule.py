@@ -1192,6 +1192,52 @@ class Rule():
             print("is_prefer_y1_straight:", is_prefer_y1_straight)
             print("+1 idx:%d, code:%s" % (target_index, new_code))
 
+    #purpose: 移動 round 的 idx+2 x,y 坐標。
+    def move_round_idx_2_position(self,new_x2,new_y2,format_dict_array,idx,apply_rule_log,generate_rule_log):
+        nodes_length = len(format_dict_array)
+
+        if format_dict_array[(idx+3)%nodes_length]['t']=='c':
+            new_distance = spline_util.get_distance(new_x2,new_y2,format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+
+            is_convert_to_l = False
+
+            if new_distance <= 35:
+                is_convert_to_l = True
+
+            if is_convert_to_l:
+                # change type.
+                format_dict_array[(idx+3)%nodes_length]['t']="l"
+                # change code.
+                tmp_code_string = ' %d %d l 1\n' % (format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+                format_dict_array[(idx+3)%nodes_length]['code'] = tmp_code_string
+                self.apply_code(format_dict_array,(idx+3)%nodes_length)
+
+        old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
+        old_code_array = old_code_string.split(' ')
+
+        if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+            old_code_array[5] = str(new_x2)
+            old_code_array[6] = str(new_y2)
+        else:
+            # not is 'c'
+            old_code_array[1] = str(new_x2)
+            old_code_array[2] = str(new_y2)
+        new_code = ' '.join(old_code_array)
+        format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+        self.apply_code(format_dict_array,(idx+2)%nodes_length)
+
+        # 增加內縮後的點，為不處理的項目。
+        # PS: idx+2 是共用點，不能直接加入為不處理節點！
+        if old_code_string in apply_rule_log:
+            apply_rule_log.append(new_code)
+            generate_rule_log.append(new_code)
+
+        #if True:
+        if False:
+            print("old_code_string:", old_code_string)
+            print("is_prefer_y1_straight:", is_prefer_y1_straight)
+            print("+1 idx:%d, code:%s" % (target_index, new_code))
+
     # for rectangel version. ex: rule#1,#2,#3
     def apply_round_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
@@ -1625,10 +1671,49 @@ class Rule():
 
         gospel_x, gospel_y = spline_util.two_point_extend(x2,y2,x1,y1, self.config.INSIDE_ROUND_OFFSET)
 
+
         # update #2
         is_append_node = True
         if self.config.PROCESS_MODE in ["SHEAR"]:
             is_append_node = False
+
+        is_move_idx_2_position = False
+        if self.config.PROCESS_MODE in ["SHEAR"]:
+            is_move_idx_2_position = True
+
+        if is_move_idx_2_position:
+            round_length_2 = self.config.INSIDE_ROUND_OFFSET
+            if format_dict_array[(idx+2)%nodes_length]['distance'] < round_length_2:
+                round_length_2 = format_dict_array[(idx+2)%nodes_length]['distance']
+
+            new_x2, new_y2 = 0,0
+            if format_dict_array[(idx+3)%nodes_length]['t']=='c':
+                x_from = x3
+                y_from = y3
+                x_center = format_dict_array[(idx+3)%nodes_length]['x1']
+                y_center = format_dict_array[(idx+3)%nodes_length]['y1']
+                #print("x_from,y_from,x_center,y_center,x2,y2,round_length_2:",x_from,y_from,x_center,y_center,x2,y2,round_length_2)
+                x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x2,y2,round_length_2)
+                #print("x3,y3:",x3,y3)
+                # 應該是可以直接使用 x3,y3才對，但目前還有問題。
+                #new_x2, new_y2 = x3, y3
+
+                #if is_apply_inside_direction:
+                # always move to inside.
+                if True:
+                    new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2,-1 * round_length_2)
+                else:
+                    new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2, round_length_2)
+            else:
+                #if is_apply_inside_direction:
+                # always move to inside.
+                if True:
+                    new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2,-1 * round_length_2)
+                else:
+                    new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2, round_length_2)
+
+            #print("new_x2, new_y2:", new_x2, new_y2)
+            self.move_round_idx_2_position(new_x2,new_y2,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
         if is_append_node:
             new_code = ' %d %d l 1\n' % (gospel_x, gospel_y)

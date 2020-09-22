@@ -39,20 +39,29 @@ class Spline():
             h,w = bmp_image.height,bmp_image.width
 
             is_match_data = False
-            for y in range(h-2):
-                if y==0:
-                    continue
-                if y>=h-3:
-                    continue
+            if h > 5 and w > 5:
+                for y in range(h-2):
+                    if y==0:
+                        continue
+                    if y>=h-3:
+                        continue
 
-                for x in range(w):
-                    if bmp_image.getpixel((x, y)) == threshold and bmp_image.getpixel((x, y+1)) == threshold and bmp_image.getpixel((x, y-1)) == threshold:
-                       #print("bingo:", x, y-1, bmp_image[x, y])
-                       is_match_data = True
-                       data_top=y-1
-                       break
-                if is_match_data:
-                    break
+                    for x in range(w):
+                        center_pixel = bmp_image.getpixel((x, y))
+                        if center_pixel == threshold:
+                            next_pixel = bmp_image.getpixel((x, y+1))
+                            if next_pixel == threshold 
+                                previous_pixel = bmp_image.getpixel((x, y-1))
+                                if previous_pixel == threshold:
+                                    # only this condiftion to break.
+                                    
+                                    #print("bingo:", x, y-1, bmp_image[x, y])
+                                    is_match_data = True
+                                    data_top=y-1
+                                    break
+
+                    if is_match_data:
+                        break
 
         #print("data_top:", data_top)
         return data_top
