@@ -50,11 +50,11 @@ class Spline():
                         center_pixel = bmp_image.getpixel((x, y))
                         if center_pixel == threshold:
                             next_pixel = bmp_image.getpixel((x, y+1))
-                            if next_pixel == threshold 
+                            if next_pixel == threshold:
                                 previous_pixel = bmp_image.getpixel((x, y-1))
                                 if previous_pixel == threshold:
                                     # only this condiftion to break.
-                                    
+
                                     #print("bingo:", x, y-1, bmp_image[x, y])
                                     is_match_data = True
                                     data_top=y-1
