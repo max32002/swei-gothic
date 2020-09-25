@@ -109,7 +109,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[431,284]]
+                    debug_coordinate_list = [[828,107]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -573,32 +573,43 @@ class Rule(Rule.Rule):
                         print("slide_percent 1:", slide_percent_1)
                         print("data end:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
                         print("data virtual:",x0,y0,x1,y1,x2,y2)
+                        print("SLIDE_10_PERCENT_MIN:", SLIDE_10_PERCENT_MIN)
+                        print("SLIDE_10_PERCENT_MAX:", SLIDE_10_PERCENT_MAX)
 
                     if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:
                         is_match_pattern = True
-                    else:
+                    #else:
+                    # 暫時沒有找到當初要解決的字是那一個。
+                    # 但這段 code 會讓線條產生內凹，參考看看 𫣆 u2B8C6 的 思 裡的心。
+                    if False:
                         # try real point.
-                        # for case 「加」字的力的右上角。
-                        # PS: 「加」字算是例外，一般的字，不應檢查到這裡。
+                        # for case 「_」(忘記是那一個字）字的力的右上角。
+                        # PS: 「加」(忘記是那一個字）字算是例外，一般的字，不應檢查到這裡。
                         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
                             if format_dict_array[(idx+1)%nodes_length]['x2']==format_dict_array[(idx+1)%nodes_length]['x1'] and format_dict_array[(idx+1)%nodes_length]['y2']==format_dict_array[(idx+1)%nodes_length]['y1']:
                                 pass
                             else:
-                                # 這個情況，滿特別的，就允許例外看看。
-                                x0 = format_dict_array[(idx+0)%nodes_length]['x']
-                                y0 = format_dict_array[(idx+0)%nodes_length]['y']
-                        x1 = format_dict_array[(idx+1)%nodes_length]['x']
-                        y1 = format_dict_array[(idx+1)%nodes_length]['y']
+                                # x1 != x2
+                                # 這個「不相等」的情況，滿特別，允許例外。
+                                # PS: 後來發現，沒有很特別，還滿常見的，如果使用下面註解裡的值，幾乎都會套用到效果。
+                                #x0 = format_dict_array[(idx+0)%nodes_length]['x']
+                                #y0 = format_dict_array[(idx+0)%nodes_length]['y']
+                                pass
                         
                         if format_dict_array[(idx+2)%nodes_length]['t']=='c':
                             if format_dict_array[(idx+2)%nodes_length]['x2']==format_dict_array[(idx+2)%nodes_length]['x1'] and format_dict_array[(idx+2)%nodes_length]['y2']==format_dict_array[(idx+2)%nodes_length]['y1']:
                                 pass
                             else:
-                                # 這個情況，滿特別的，就允許例外看看。
-                                x2 = format_dict_array[(idx+2)%nodes_length]['x']
-                                y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                                # x1 != x2
+                                # 這個「不相等」的情況，滿特別，允許例外。
+                                # PS: 後來發現，沒有很特別，還滿常見的，如果使用下面註解裡的值，幾乎都會套用到效果。
+                                #x2 = format_dict_array[(idx+2)%nodes_length]['x']
+                                #y2 = format_dict_array[(idx+2)%nodes_length]['y']
+                                pass
 
                         slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
+                        #print("slide_percent_1 - B:", slide_percent_1)
+                        #print("1-B data:", x0,y0,x1,y1,x2,y2)
                         if slide_percent_1 >= SLIDE_10_PERCENT_MIN and slide_percent_1 <= SLIDE_10_PERCENT_MAX:
                             is_match_pattern = True
                     

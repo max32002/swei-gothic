@@ -449,15 +449,20 @@ class Rule(Rule.Rule):
         
                     if slide_percent_10 >= SLIDE_10_PERCENT_MIN and slide_percent_10 <= SLIDE_10_PERCENT_MAX:
                         is_match_pattern = True
-                    else:
+                    #else:
+                    # 暫時沒有找到當初要解決的字是那一個。
+                    # 但這段 code 會讓線條產生內凹，參考看看 𫣆 u2B8C6 的 思 裡的心。
+                    if False:
                         # try real point.
-                        # for case 「加」字的力的右上角。
-                        # PS: 「加」字算是例外，一般的字，不應檢查到這裡。
+                        # for case 「_」(忘記是那一個字）字的力的右上角。
+                        # PS: 「加」(忘記是那一個字）字算是例外，一般的字，不應檢查到這裡。
                         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
                             if format_dict_array[(idx+1)%nodes_length]['x2']==format_dict_array[(idx+1)%nodes_length]['x1'] and format_dict_array[(idx+1)%nodes_length]['y2']==format_dict_array[(idx+1)%nodes_length]['y1']:
                                 pass
                             else:
+                                # x1 != x2
                                 # 這個「不相等」的情況，滿特別，允許例外。
+                                # PS: 後來發現，沒有很特別，還滿常見的，如果使用下面註解裡的值，幾乎都會套用到效果。
                                 x0 = format_dict_array[(idx+0)%nodes_length]['x']
                                 y0 = format_dict_array[(idx+0)%nodes_length]['y']
                         x1 = format_dict_array[(idx+1)%nodes_length]['x']
@@ -467,7 +472,9 @@ class Rule(Rule.Rule):
                             if format_dict_array[(idx+2)%nodes_length]['x2']==format_dict_array[(idx+2)%nodes_length]['x1'] and format_dict_array[(idx+2)%nodes_length]['y2']==format_dict_array[(idx+2)%nodes_length]['y1']:
                                 pass
                             else:
+                                # x1 != x2
                                 # 這個「不相等」的情況，滿特別，允許例外。
+                                # PS: 後來發現，沒有很特別，還滿常見的，如果使用下面註解裡的值，幾乎都會套用到效果。
                                 x2 = format_dict_array[(idx+2)%nodes_length]['x']
                                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
                         
