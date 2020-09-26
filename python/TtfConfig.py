@@ -17,7 +17,7 @@ class TtfConfig():
     #PROCESS_MODE = "TOOTHPASTE"
     #PROCESS_MODE = "BAT"
     #PROCESS_MODE = "CURVE"
-    PROCESS_MODE = "GOSPEL"
+    #PROCESS_MODE = "GOSPEL"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]
