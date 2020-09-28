@@ -311,6 +311,8 @@ class Rule(Rule.Rule):
                     #bmp_y3 = bmp_y4 + (5 * format_dict_array[(idx+0)%nodes_length]['y_direction'])
 
                     # full rectangle compare.
+                    # PS: opencv solution.
+                    # PS: not used now.
                     #inside_stroke_flag = self.is_inside_stroke(bmp_x1, bmp_y1, bmp_x2, bmp_y2, bmp_x3, bmp_y3, bmp_x4, bmp_y4)
 
                     # compact triangle compare,

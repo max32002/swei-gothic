@@ -4,8 +4,9 @@
 from . import spline_util
 
 import os
-import cv2
-import numpy as np
+
+#import cv2
+#import numpy as np
 
 class Rule():
     config = None
@@ -65,6 +66,8 @@ class Rule():
         top = FF_TOP - self.bmp_y_offset
         return top + (y * -1)
 
+    # PS: opencv solution.
+    # PS: not used now.
     def get_mask_array(self, x1, y1, x2, y2, x3, y3, x4=None, y4=None):
         bmp_x1 = self.ff_x_to_bmp_x(x1)
         bmp_y1 = self.ff_y_to_bmp_y(y1)
@@ -157,6 +160,8 @@ class Rule():
         return ret
 
     # for triangle
+    # PS: opencv solution.
+    # PS: not used now.
     def is_inside_triangle_cv(self, x1, y1, x2, y2, x3, y3):
         ret = True
 
@@ -188,6 +193,8 @@ class Rule():
         return ret
 
     # for rectangle
+    # PS: opencv solution.
+    # PS: not used now.
     # threshold more lower, means more easy to become stroke, maybe for thin or extra-light style.
     def is_inside_stroke(self, x1, y1, x2, y2, x3, y3, x4, y4, threshold=0.5):
         ret = False
