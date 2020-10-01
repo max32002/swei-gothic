@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log):
+    def apply(self, stroke_dict, key, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log):
         redo_travel=False
         check_first_point = False
 
@@ -24,6 +24,8 @@ class Rule(Rule.Rule):
         SLIDE_1_PERCENT_MAX = ALMOST_LINE_RATE
 
         MIN_DISTANCE = 12
+
+        spline_dict = stroke_dict[key]
 
         # clone
         format_dict_array=[]
@@ -273,7 +275,7 @@ class Rule(Rule.Rule):
                         is_goto_apply_round = is_match_direction_base_rule
 
                     if is_goto_apply_round:
-                        format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,apply_rule_log, generate_rule_log)
+                        format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,apply_rule_log, generate_rule_log, stroke_dict, key)
 
                     # skip_coordinate 決定都拿掉，改用 apply_rule_log
                     # 因為只有作用在2個coordinate. 

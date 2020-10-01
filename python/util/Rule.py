@@ -551,6 +551,47 @@ class Rule():
         distance = spline_util.get_distance(current_x,current_y,next_x,next_y)
         format_dict_array[idx]['distance']=distance
 
+        match_stroke_width_flag = False
+        if distance >= self.config.STROKE_WIDTH_MIN:
+            allowed_max_width = self.config.STROKE_WIDTH_MAX
+
+            # for _Kappa, Greek Small Letter Kappa
+            # under Unicode Block “CJK Radicals Supplement”
+            if self.is_Before_CJK_Flag:
+                # allow more 1.10(default) * 1.15(extra) for non-chinese glyph.
+                allowed_max_width *= 1.15
+                #print("allowed_max_width:", allowed_max_width)
+
+            if distance <= allowed_max_width:
+                match_stroke_width_flag = True
+        format_dict_array[idx]['match_stroke_width'] = match_stroke_width_flag
+
+        x_direction_value = 0
+        if next_x > current_x:
+            x_direction_value=1
+        if next_x < current_x:
+            x_direction_value=-1
+        format_dict_array[idx]['x_direction']=x_direction_value
+
+        y_direction_value=0
+        if next_y > current_y:
+            y_direction_value=1
+        if next_y < current_y:
+            y_direction_value=-1
+        format_dict_array[idx]['y_direction']=y_direction_value
+
+        # 有誤差地判斷，與下一個點是否為平行線。
+        EQUAL_ACCURACY = self.config.EQUAL_ACCURACY_PERCENT * distance
+        if EQUAL_ACCURACY <= self.config.EQUAL_ACCURACY_MIN:
+            EQUAL_ACCURACY = self.config.EQUAL_ACCURACY_MIN
+        format_dict_array[idx]['x_equal_fuzzy']=False
+        if abs(next_x - current_x) <= EQUAL_ACCURACY:
+            format_dict_array[idx]['x_equal_fuzzy']=True
+
+        format_dict_array[idx]['y_equal_fuzzy']=False
+        if abs(next_y - current_y) <= EQUAL_ACCURACY:
+            format_dict_array[idx]['y_equal_fuzzy']=True
+
     # purpose: get current index distance,
     #        : for only update specific index only.
     def current_distance(self, format_dict_array, idx):
@@ -572,55 +613,6 @@ class Rule():
             # restore value from code.
             self.apply_code(format_dict_array,idx)
 
-            current_x = format_dict_array[idx]['x']
-            current_y = format_dict_array[idx]['y']
-
-            next_x = format_dict_array[next_index]['x']
-            next_y = format_dict_array[next_index]['y']
-
-            distance = format_dict_array[idx]['distance']
-
-            match_stroke_width_flag = False
-            if distance >= self.config.STROKE_WIDTH_MIN:
-                allowed_max_width = self.config.STROKE_WIDTH_MAX
-
-                # for _Kappa, Greek Small Letter Kappa
-                # under Unicode Block “CJK Radicals Supplement”
-                if self.is_Before_CJK_Flag:
-                    # allow more 1.10(default) * 1.15(extra) for non-chinese glyph.
-                    allowed_max_width *= 1.15
-                    #print("allowed_max_width:", allowed_max_width)
-
-                if distance <= allowed_max_width:
-                    match_stroke_width_flag = True
-            format_dict_array[idx]['match_stroke_width'] = match_stroke_width_flag
-
-            x_direction_value = 0
-            if next_x > current_x:
-                x_direction_value=1
-            if next_x < current_x:
-                x_direction_value=-1
-            format_dict_array[idx]['x_direction']=x_direction_value
-
-            y_direction_value=0
-            if next_y > current_y:
-                y_direction_value=1
-            if next_y < current_y:
-                y_direction_value=-1
-            format_dict_array[idx]['y_direction']=y_direction_value
-
-            # 有誤差地判斷，與下一個點是否為平行線。
-            EQUAL_ACCURACY = self.config.EQUAL_ACCURACY_PERCENT * distance
-            if EQUAL_ACCURACY <= self.config.EQUAL_ACCURACY_MIN:
-                EQUAL_ACCURACY = self.config.EQUAL_ACCURACY_MIN
-            format_dict_array[idx]['x_equal_fuzzy']=False
-            if abs(next_x - current_x) <= EQUAL_ACCURACY:
-                format_dict_array[idx]['x_equal_fuzzy']=True
-
-            format_dict_array[idx]['y_equal_fuzzy']=False
-            if abs(next_y - current_y) <= EQUAL_ACCURACY:
-                format_dict_array[idx]['y_equal_fuzzy']=True
-
         return format_dict_array
 
     def check_clockwise(self, spline_array):
@@ -636,7 +628,7 @@ class Rule():
         return clockwise
 
     # for triangle version, ex: rule#5
-    def make_coner_curve(self,round_offset,format_dict_array,idx,apply_rule_log,generate_rule_log,coner_mode="CURVE"):
+    def make_coner_curve(self,round_offset,format_dict_array,idx,apply_rule_log,generate_rule_log,stroke_dict,key,coner_mode="CURVE"):
         nodes_length = len(format_dict_array)
 
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
@@ -718,8 +710,6 @@ class Rule():
         format_dict_array[(idx+1)%nodes_length]['x']= previous_x
         format_dict_array[(idx+1)%nodes_length]['y']= previous_y
 
-        is_middle_dot_in_skip_rule = False
-
         old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
         old_code_array = old_code_string.split(' ')
 
@@ -772,11 +762,15 @@ class Rule():
         #print("old +1 code:", old_code_string)
         #print("update +1 code:", new_code)
 
+        #PS: 好像是可以直接加入。
+        #    因為 previous x,y 是新產生出來的點。
+        apply_rule_log.append(new_code)
+
+        # purpose: 原本的 middle dot 是否在 skip rule 裡。
+        is_middle_dot_in_skip_rule = False
+
         if old_code_string in apply_rule_log:
-            #print("+1 old code in rule:", old_code_string)
-            #print("+1 update as new code in rule:", new_code)
             is_middle_dot_in_skip_rule = True
-            apply_rule_log.append(new_code)
 
 
         # update [next next curve]
@@ -891,12 +885,10 @@ class Rule():
         # strong version
         #new_code = ' %d %d %d %d %d %d c 1\n' % (x1, y1, x1, y1, next_x, next_y)
 
-
         # coner_mode == "CURVE"
         new_code = ' %d %d %d %d %d %d c 1\n' % (previous_recenter_x, previous_recenter_y, next_recenter_x, next_recenter_y, next_x, next_y)
         if coner_mode in ["STRAIGHT","ALIAS","SPIKE"]:
             new_code = ' %d %d l 1\n' % (next_x, next_y)
-            
 
         dot_dict={}
         dot_dict['t']='l'
@@ -913,13 +905,13 @@ class Rule():
         insert_idx = (idx+2)%nodes_length
         format_dict_array.insert(insert_idx, dot_dict)
         nodes_length = len(format_dict_array)
-
         if idx >= insert_idx:
             idx += 1
+        self.apply_code(format_dict_array,(idx+2)%nodes_length)
 
-        # for fix uni5E3D 帽的冒的右上角，因為套用 coner curve 後，
-        # 原本 rule#2 的 skip recode 被洗掉。
+        # middle dot in skip rule list.
         if is_middle_dot_in_skip_rule:
+            # 由於middle dot 從一個 dot 變成多個，所以新產生出來的dot 也算是 skip rule.
             apply_rule_log.append(new_code)
 
         # new dot for SPIKE
@@ -949,23 +941,102 @@ class Rule():
             insert_idx = (idx+2)%nodes_length
             format_dict_array.insert(insert_idx, dot_dict)
             nodes_length = len(format_dict_array)
-
             if idx >= insert_idx:
                 idx += 1
+            self.apply_code(format_dict_array,(idx+2)%nodes_length)
+
 
         # new dot for ALIAS
         if coner_mode in ["ALIAS"]:
             near_middle_x = int((previous_x + next_x) / 2)
             near_middle_y = int((previous_y + next_y) / 2)
 
-            distance_to_middle = spline_util.get_distance(x1,y1,near_middle_x,near_middle_y)
+            #distance_to_middle = spline_util.get_distance(x1,y1,near_middle_x,near_middle_y)
             
             #default_near_x, default_near_y = x1,y1
             #default_near_x, default_near_y = near_middle_x, near_middle_y
-            default_near_x, default_near_y = spline_util.two_point_extend(near_middle_x,near_middle_y,x1,y1,distance_to_middle)
+
+            # PS: 下面副程式沒寫好，會有問題...。
+            #default_near_x, default_near_y = spline_util.two_point_extend(x1,y1,near_middle_x,near_middle_y,distance_to_middle)
+            # 使用替代寫法.
+            near_x_offset = x1 - near_middle_x
+            near_y_offset = y1 - near_middle_y
+            
+            default_near_x = near_middle_x - near_x_offset
+            default_near_y = near_middle_y - near_y_offset
 
             near_x = default_near_x
             near_y = default_near_y
+
+            default_near_pos = [default_near_x,default_near_y]
+            exclude_list = [[x1,y1],[previous_x,previous_y],[next_x,next_y],[orig_x0,orig_y0],[orig_x2,orig_y2]]
+            near_x,near_y = self.find_best_alias_xy(default_near_pos,exclude_list,stroke_dict)
+
+            # let alias more sharp.
+            # for -
+            if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
+                old_code_array = old_code_string.split(' ')
+                if format_dict_array[(idx+1)%nodes_length]['t']=="c":
+                    old_code_array[5] = str(near_x)
+                else:
+                    # l
+                    old_code_array[1] = str(near_x)
+                new_code = ' '.join(old_code_array)
+                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
+                self.apply_code(format_dict_array,(idx+1)%nodes_length)
+
+                if old_code_string in apply_rule_log:
+                    apply_rule_log.append(new_code)
+
+            # for |
+            if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                old_code_string = format_dict_array[(idx+1)%nodes_length]['code']
+                old_code_array = old_code_string.split(' ')
+                if format_dict_array[(idx+1)%nodes_length]['t']=="c":
+                    old_code_array[6] = str(near_y)
+                else:
+                    # l
+                    old_code_array[2] = str(near_y)
+                new_code = ' '.join(old_code_array)
+                format_dict_array[(idx+1)%nodes_length]['code'] = new_code
+                self.apply_code(format_dict_array,(idx+1)%nodes_length)
+
+                if old_code_string in apply_rule_log:
+                    apply_rule_log.append(new_code)
+
+            # for -
+            if format_dict_array[(idx+2)%nodes_length]['y_equal_fuzzy']:
+                old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
+                old_code_array = old_code_string.split(' ')
+                if format_dict_array[(idx+2)%nodes_length]['t']=="c":
+                    old_code_array[5] = str(near_x)
+                else:
+                    # l
+                    old_code_array[1] = str(near_x)
+                new_code = ' '.join(old_code_array)
+                format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+                self.apply_code(format_dict_array,(idx+2)%nodes_length)
+
+                if old_code_string in apply_rule_log:
+                    apply_rule_log.append(new_code)
+
+            # for |
+            if format_dict_array[(idx+2)%nodes_length]['x_equal_fuzzy']:
+                old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
+                old_code_array = old_code_string.split(' ')
+                if format_dict_array[(idx+2)%nodes_length]['t']=="c":
+                    old_code_array[6] = str(near_y)
+                else:
+                    # l
+                    old_code_array[2] = str(near_y)
+                new_code = ' '.join(old_code_array)
+                format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+                self.apply_code(format_dict_array,(idx+2)%nodes_length)
+
+                if old_code_string in apply_rule_log:
+                    apply_rule_log.append(new_code)
+
 
             new_code = ' %d %d l 1\n' % (near_x, near_y)
 
@@ -980,103 +1051,137 @@ class Rule():
             insert_idx = (idx+2)%nodes_length
             format_dict_array.insert(insert_idx, dot_dict)
             nodes_length = len(format_dict_array)
-
             if idx >= insert_idx:
                 idx += 1
+            self.apply_code(format_dict_array,(idx+2)%nodes_length)
 
         # 因為較短邊 <= round_offset, 需要合併節點。
         # PS: 已忘記是那一個字，會用到下面合併節點的 code, 似乎大部份的字應該不會需要用到。
+        is_merge_short_edge = True
         MIN_DISTANCE_TO_MERGE = 10
 
-        self.apply_code(format_dict_array,(idx+2)%nodes_length)
-        if format_dict_array[(idx+2)%nodes_length]['distance'] <= 0:
-            del format_dict_array[(idx+3)%nodes_length]
+        if coner_mode in ["STRAIGHT","ALIAS","SPIKE"]:
+            is_merge_short_edge = False
 
-            if idx >= (idx+3)%nodes_length:
-                idx -= 1
-            nodes_length = len(format_dict_array)
-            #print("match is_need_redo_current_dot:", format_dict_array[(idx+0)%nodes_length]['code'])
-        else:
-
-            # merge short edge.
-            if format_dict_array[(idx+2)%nodes_length]['distance'] <= MIN_DISTANCE_TO_MERGE:
-                #print("extend +2 to +3.")
-                #print("old +2 code:", format_dict_array[(idx+2)%nodes_length]['code'])
-                #print("old +3 code:", format_dict_array[(idx+3)%nodes_length]['code'])
-                old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
-                old_code_array = old_code_string.split(' ')
-                new_x = str(format_dict_array[(idx+3)%nodes_length]['x'])
-                new_y = str(format_dict_array[(idx+3)%nodes_length]['y'])
-                if format_dict_array[(idx+2)%nodes_length]['t']=='c':
-                    old_code_array[5] = new_x
-                    old_code_array[6] = new_y
-                else:
-                    # l
-                    old_code_array[1] = new_x
-                    old_code_array[2] = new_y
-                new_code = ' '.join(old_code_array)
-                # only need update code, let formater to re-compute.
-                format_dict_array[(idx+2)%nodes_length]['code'] = new_code
-                #print("new +2 code:", format_dict_array[(idx+2)%nodes_length]['code'])
-
+        if is_merge_short_edge:
+            if format_dict_array[(idx+2)%nodes_length]['distance'] <= 0:
                 del format_dict_array[(idx+3)%nodes_length]
 
-                if idx > (idx+3)%nodes_length:
-                    idx -=1
+                if idx >= (idx+3)%nodes_length:
+                    idx -= 1
                 nodes_length = len(format_dict_array)
-                self.apply_code(format_dict_array,(idx+2)%nodes_length)
+                #print("match is_need_redo_current_dot:", format_dict_array[(idx+0)%nodes_length]['code'])
+            else:
 
-        self.apply_code(format_dict_array,(idx+0)%nodes_length)
-        if format_dict_array[(idx+0)%nodes_length]['distance'] <= 0:
-            del format_dict_array[(idx+1)%nodes_length]
+                # merge short edge.
+                if format_dict_array[(idx+2)%nodes_length]['distance'] <= MIN_DISTANCE_TO_MERGE:
+                    #print("extend +2 to +3.")
+                    #print("old +2 code:", format_dict_array[(idx+2)%nodes_length]['code'])
+                    #print("old +3 code:", format_dict_array[(idx+3)%nodes_length]['code'])
+                    old_code_string = format_dict_array[(idx+2)%nodes_length]['code']
+                    old_code_array = old_code_string.split(' ')
+                    new_x = str(format_dict_array[(idx+3)%nodes_length]['x'])
+                    new_y = str(format_dict_array[(idx+3)%nodes_length]['y'])
+                    if format_dict_array[(idx+2)%nodes_length]['t']=='c':
+                        old_code_array[5] = new_x
+                        old_code_array[6] = new_y
+                    else:
+                        # l
+                        old_code_array[1] = new_x
+                        old_code_array[2] = new_y
+                    new_code = ' '.join(old_code_array)
+                    # only need update code, let formater to re-compute.
+                    format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+                    #print("new +2 code:", format_dict_array[(idx+2)%nodes_length]['code'])
 
-            if idx >= (idx+1)%nodes_length:
-                idx -= 1
-            nodes_length = len(format_dict_array)
-        else:
-            # dot+1 is our generated position. skip to transform.
-            # to avoid same code apply twice.
+                    del format_dict_array[(idx+3)%nodes_length]
 
-            # merge short edge.
-            if format_dict_array[(idx+0)%nodes_length]['distance'] <= MIN_DISTANCE_TO_MERGE:
-                #print("extend +1 to +0.")
-                #print("old +0 code:", format_dict_array[(idx+0)%nodes_length]['code'])
-                #print("old +1 code:", format_dict_array[(idx+1)%nodes_length]['code'])
+                    if idx > (idx+3)%nodes_length:
+                        idx -=1
+                    nodes_length = len(format_dict_array)
+                    self.apply_code(format_dict_array,(idx+2)%nodes_length)
 
+            self.apply_code(format_dict_array,(idx+0)%nodes_length)
+            if format_dict_array[(idx+0)%nodes_length]['distance'] <= 0:
                 del format_dict_array[(idx+1)%nodes_length]
 
                 if idx >= (idx+1)%nodes_length:
                     idx -= 1
                 nodes_length = len(format_dict_array)
+            else:
+                # dot+1 is our generated position. skip to transform.
+                # to avoid same code apply twice.
 
-            # 己忘記什麼情況下需要使用到這一段code,
-            # 但加了之後，會讓 uni7345 獅的帀裡的一個轉角沒套用到效果.
-            # 目前先設為False不跑，不跑也有問題，就會可能會多套用效果。
+                # merge short edge.
+                if format_dict_array[(idx+0)%nodes_length]['distance'] <= MIN_DISTANCE_TO_MERGE:
+                    #print("extend +1 to +0.")
+                    #print("old +0 code:", format_dict_array[(idx+0)%nodes_length]['code'])
+                    #print("old +1 code:", format_dict_array[(idx+1)%nodes_length]['code'])
 
-            # [TODO]:找到為什麼加這段code,是 uni7D93 經的幺，
-            # 在「沒有」做 offset 的情況下，會發生一連串的重覆套用，
+                    del format_dict_array[(idx+1)%nodes_length]
 
-            # 因為第一點產生完是 clockwise, 第二點原本是 counter clockwise,
-            # Rule5/Rule99, 會先用 virtual dot 做比對，會變成銳角。
+                    if idx >= (idx+1)%nodes_length:
+                        idx -= 1
+                    nodes_length = len(format_dict_array)
 
-            # 解法，是遇到第二段edge=='c'時，clockwise + counter clockwise,
-            # 這個情況下，做apply_rule_log.append()
-            if False:
-                nodes_length = len(format_dict_array)
-                generated_code = format_dict_array[(idx+1)%nodes_length]['code']
-                #print("generated_code+1 to rule:", generated_code)
-                apply_rule_log.append(generated_code)
+                # 己忘記什麼情況下需要使用到這一段code,
+                # 但加了之後，會讓 uni7345 獅的帀裡的一個轉角沒套用到效果.
+                # 目前先設為False不跑，不跑也有問題，就會可能會多套用效果。
 
-        #print("insert to index:",insert_idx)
-        #print("appdend +3 new_code:", new_code)
+                # [TODO]:找到為什麼加這段code,是 uni7D93 經的幺，
+                # 在「沒有」做 offset 的情況下，會發生一連串的重覆套用，
 
-        #if True:
-        if False:
-            print("-" * 20)
-            for debug_idx in range(6):
-                print(debug_idx-2,": values for rule1:",format_dict_array[(idx+debug_idx+nodes_length-2)%nodes_length]['code'])
+                # 因為第一點產生完是 clockwise, 第二點原本是 counter clockwise,
+                # Rule5/Rule99, 會先用 virtual dot 做比對，會變成銳角。
+
+                # 解法，是遇到第二段edge=='c'時，clockwise + counter clockwise,
+                # 這個情況下，做apply_rule_log.append()
+                if False:
+                    nodes_length = len(format_dict_array)
+                    generated_code = format_dict_array[(idx+1)%nodes_length]['code']
+                    #print("generated_code+1 to rule:", generated_code)
+                    apply_rule_log.append(generated_code)
+
 
         return format_dict_array, previous_x, previous_y, next_x, next_y
+
+    def find_best_alias_xy(self, default_near_pos, exclude_list, stroke_dict):
+        default_near_x = default_near_pos[0]
+        default_near_y = default_near_pos[1]
+
+        shortest_x = default_near_x
+        shortest_y = default_near_y
+
+        # 在 black style 效果很慘烈。
+        #ALLOW_ALIAS_RANGE = self.config.STROKE_WIDTH_MAX * 0.8
+        ALLOW_ALIAS_RANGE = 40
+        last_distance = 100
+        for key in stroke_dict.keys():
+            tmp_spline_dict = stroke_dict[key]
+            
+            tmp_format_dict_array=[]
+            tmp_format_dict_array = tmp_spline_dict['dots'][1:]
+
+            nodes_length = len(tmp_format_dict_array)
+            
+            # 只有 3個點也是夠的，因為會跨 spline
+            rule_need_lines = 3
+            fail_code = -1
+            if nodes_length >= rule_need_lines:
+                for idx in range(nodes_length):
+                    current_x = tmp_format_dict_array[idx]['x']
+                    current_y = tmp_format_dict_array[idx]['y']
+                    if [current_x,current_y] in exclude_list:
+                        continue
+                    if abs(default_near_x - current_x) <= ALLOW_ALIAS_RANGE:
+                        if abs(default_near_y - current_y) <= ALLOW_ALIAS_RANGE:
+                            current_distance = spline_util.get_distance(default_near_x,default_near_y,current_x,current_y)
+                            if current_distance < last_distance:
+                                last_distance = current_distance
+                                shortest_x = current_x
+                                shortest_y = current_y
+
+        return shortest_x, shortest_y
 
     #purpose: 針對 apply round 的 idx+3 == 'curve' 做調整。
     def adjust_round_idx_3_curve(self,new_x2,new_y2,x2_offset,y2_offset,orig_x3,orig_y3,format_dict_array,idx,apply_rule_log,generate_rule_log):

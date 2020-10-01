@@ -688,7 +688,7 @@ class Spline():
             redo_count+=1
             if redo_count==200:
                 print("occure bug at rule#11!")
-            redo_travel,idx, inside_stroke_dict, apply_rule_log, generate_rule_log=ru11.apply(spline_dict, idx, inside_stroke_dict, apply_rule_log, generate_rule_log)
+            redo_travel,idx, inside_stroke_dict, apply_rule_log, generate_rule_log=ru11.apply(stroke_dict, key, idx, inside_stroke_dict, apply_rule_log, generate_rule_log)
             if redo_travel:
                 is_modified = True
         ru11 = None
@@ -712,7 +712,7 @@ class Spline():
             pass
         while redo_travel:
             black_mode = False
-            redo_travel,idx, inside_stroke_dict, apply_rule_log, generate_rule_log =ru99.apply(spline_dict, idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode)
+            redo_travel,idx, inside_stroke_dict, apply_rule_log, generate_rule_log =ru99.apply(stroke_dict, key, idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode)
             if redo_travel:
                 is_modified = True
         ru99 = None
@@ -799,7 +799,7 @@ class Spline():
             redo_count+=1
             if redo_count==200:
                 print("occure bug at rule#5!")
-            redo_travel,idx, inside_stroke_dict,apply_rule_log, generate_rule_log=ru5.apply(spline_dict, idx, inside_stroke_dict, apply_rule_log, generate_rule_log)
+            redo_travel,idx, inside_stroke_dict,apply_rule_log, generate_rule_log=ru5.apply(stroke_dict, key, idx, inside_stroke_dict, apply_rule_log, generate_rule_log)
             if redo_travel:
                 is_modified = True
         ru5 = None
@@ -829,7 +829,7 @@ class Spline():
                 print("occure bug at rule#99!")
 
             black_mode = True
-            redo_travel,idx, inside_stroke_dict, apply_rule_log, generate_rule_log=ru99.apply(spline_dict, idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode)
+            redo_travel,idx, inside_stroke_dict, apply_rule_log, generate_rule_log=ru99.apply(stroke_dict, key, idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode)
             if redo_travel:
                 is_modified = True
         ru99 = None

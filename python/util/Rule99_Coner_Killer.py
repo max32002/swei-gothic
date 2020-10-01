@@ -12,7 +12,7 @@ class Rule(Rule.Rule):
     def __init__(self):
         pass
 
-    def apply(self, spline_dict, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode):
+    def apply(self, stroke_dict, key, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log, black_mode):
         redo_travel=False
         check_first_point = False
 
@@ -55,6 +55,8 @@ class Rule(Rule.Rule):
         if self.config.PROCESS_MODE in ["B2","B4","NUT8","ALIAS"]:
             SLIDE_10_PERCENT_MIN = 0.10
             # PS: 不要調整太高 SLIDE_10_PERCENT_MAX, 會造成內凹，例如：uni9EBC，麼的幺的左側.
+
+        spline_dict = stroke_dict[key]
 
         # clone
         format_dict_array=[]
@@ -363,10 +365,28 @@ class Rule(Rule.Rule):
                             is_match_pattern = False
 
                 if is_match_pattern:
-                    # PS: ALIAS 和 NUT8 的差別，在 black mode 時，允許直接套用效果。
-                    if self.config.PROCESS_MODE in ["ALIAS","SPIKE"]:
+                    # PS: SPIKE 和 NUT8 的差別，在 black mode 時，允許直接套用效果。
+                    if self.config.PROCESS_MODE in ["SPIKE"]:
                         if inside_stroke_flag:
                             pass
+                        else:
+                            is_match_pattern = False
+
+                if is_match_pattern:
+                    # PS: ALIAS 和 NUT8 的差別，在 black mode 時，允許直接套用效果。
+                    if self.config.PROCESS_MODE in ["ALIAS"]:
+                        if inside_stroke_flag:
+                            # for uni9797 鞗的革的廿 
+                            remain_rate = 1.1   # for black mode.
+                            if not black_mode:
+                                # for uni9ED1 黑裡的點，希望可以保留，不套用效果。
+                                remain_rate = 1.7   # for black mode.
+                            if format_dict_array[(idx+0)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET * remain_rate:
+                                fail_code = 1341
+                                is_match_pattern = False
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] <= self.config.OUTSIDE_ROUND_OFFSET * remain_rate:
+                                fail_code = 1342
+                                is_match_pattern = False
                         else:
                             is_match_pattern = False
 
@@ -564,7 +584,7 @@ class Rule(Rule.Rule):
                         is_goto_apply_round = is_match_direction_base_rule
 
                     if is_goto_apply_round:
-                        format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,apply_rule_log,generate_rule_log,coner_mode=coner_mode)
+                        format_dict_array, previous_x, previous_y, next_x, next_y = self.make_coner_curve(round_offset,format_dict_array,idx,apply_rule_log,generate_rule_log,stroke_dict,key,coner_mode=coner_mode)
 
                     # skip_coordinate 決定都拿掉，改用 apply_rule_log
                     # 因為只有作用在2個coordinate.
