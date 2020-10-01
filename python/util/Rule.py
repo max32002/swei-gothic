@@ -891,11 +891,12 @@ class Rule():
         # strong version
         #new_code = ' %d %d %d %d %d %d c 1\n' % (x1, y1, x1, y1, next_x, next_y)
 
-        # soft version
 
-        new_code = ' %d %d l 1\n' % (next_x, next_y)
-        if coner_mode == "CURVE":
-            new_code = ' %d %d %d %d %d %d c 1\n' % (previous_recenter_x, previous_recenter_y, next_recenter_x, next_recenter_y, next_x, next_y)
+        # coner_mode == "CURVE"
+        new_code = ' %d %d %d %d %d %d c 1\n' % (previous_recenter_x, previous_recenter_y, next_recenter_x, next_recenter_y, next_x, next_y)
+        if coner_mode in ["STRAIGHT","ALIAS","SPIKE"]:
+            new_code = ' %d %d l 1\n' % (next_x, next_y)
+            
 
         dot_dict={}
         dot_dict['t']='l'
@@ -913,16 +914,78 @@ class Rule():
         format_dict_array.insert(insert_idx, dot_dict)
         nodes_length = len(format_dict_array)
 
+        if idx >= insert_idx:
+            idx += 1
+
         # for fix uni5E3D 帽的冒的右上角，因為套用 coner curve 後，
         # 原本 rule#2 的 skip recode 被洗掉。
         if is_middle_dot_in_skip_rule:
             apply_rule_log.append(new_code)
 
+        # new dot for SPIKE
+        if coner_mode in ["SPIKE"]:
+            near_middle_x = int((previous_x + next_x) / 2)
+            near_middle_y = int((previous_y + next_y) / 2)
+
+            distance_to_middle = spline_util.get_distance(x1,y1,near_middle_x,near_middle_y)
+            
+            #default_near_x, default_near_y = x1,y1
+            #default_near_x, default_near_y = near_middle_x, near_middle_y
+            default_near_x, default_near_y = spline_util.two_point_extend(near_middle_x,near_middle_y,x1,y1,distance_to_middle)
+
+            near_x = default_near_x
+            near_y = default_near_y
+
+            new_code = ' %d %d l 1\n' % (near_x, near_y)
+
+            dot_dict={}
+            dot_dict['t']='l'
+            dot_dict['x']=near_x
+            dot_dict['y']=near_y
+            dot_dict['code']=new_code
+
+            apply_rule_log.append(new_code)
+
+            insert_idx = (idx+2)%nodes_length
+            format_dict_array.insert(insert_idx, dot_dict)
+            nodes_length = len(format_dict_array)
+
+            if idx >= insert_idx:
+                idx += 1
+
+        # new dot for ALIAS
+        if coner_mode in ["ALIAS"]:
+            near_middle_x = int((previous_x + next_x) / 2)
+            near_middle_y = int((previous_y + next_y) / 2)
+
+            distance_to_middle = spline_util.get_distance(x1,y1,near_middle_x,near_middle_y)
+            
+            #default_near_x, default_near_y = x1,y1
+            #default_near_x, default_near_y = near_middle_x, near_middle_y
+            default_near_x, default_near_y = spline_util.two_point_extend(near_middle_x,near_middle_y,x1,y1,distance_to_middle)
+
+            near_x = default_near_x
+            near_y = default_near_y
+
+            new_code = ' %d %d l 1\n' % (near_x, near_y)
+
+            dot_dict={}
+            dot_dict['t']='l'
+            dot_dict['x']=near_x
+            dot_dict['y']=near_y
+            dot_dict['code']=new_code
+
+            apply_rule_log.append(new_code)
+
+            insert_idx = (idx+2)%nodes_length
+            format_dict_array.insert(insert_idx, dot_dict)
+            nodes_length = len(format_dict_array)
+
+            if idx >= insert_idx:
+                idx += 1
 
         # 因為較短邊 <= round_offset, 需要合併節點。
-        if idx >= insert_idx:
-            idx += 1
-
+        # PS: 已忘記是那一個字，會用到下面合併節點的 code, 似乎大部份的字應該不會需要用到。
         MIN_DISTANCE_TO_MERGE = 10
 
         self.apply_code(format_dict_array,(idx+2)%nodes_length)
@@ -1003,7 +1066,6 @@ class Rule():
                 generated_code = format_dict_array[(idx+1)%nodes_length]['code']
                 #print("generated_code+1 to rule:", generated_code)
                 apply_rule_log.append(generated_code)
-
 
         #print("insert to index:",insert_idx)
         #print("appdend +3 new_code:", new_code)

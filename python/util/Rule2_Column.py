@@ -348,7 +348,7 @@ class Rule(Rule.Rule):
                         is_goto_apply_round = False
 
                     # NUT8, alway do nothing but record the history.
-                    if self.config.PROCESS_MODE in ["NUT8"]:
+                    if self.config.PROCESS_MODE in ["NUT8","ALIAS","SPIKE"]:
                         is_goto_apply_round = False
                         generated_code = format_dict_array[(idx+1)%nodes_length]['code']
                         apply_rule_log.append(generated_code)

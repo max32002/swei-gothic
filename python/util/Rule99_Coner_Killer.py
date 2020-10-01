@@ -52,7 +52,7 @@ class Rule(Rule.Rule):
         SLIDE_10_PERCENT_MIN = 0.59
         SLIDE_10_PERCENT_MAX = 1.80
 
-        if self.config.PROCESS_MODE in ["B2","B4","NUT8"]:
+        if self.config.PROCESS_MODE in ["B2","B4","NUT8","ALIAS"]:
             SLIDE_10_PERCENT_MIN = 0.10
             # PS: 不要調整太高 SLIDE_10_PERCENT_MAX, 會造成內凹，例如：uni9EBC，麼的幺的左側.
 
@@ -92,7 +92,8 @@ class Rule(Rule.Rule):
                 # PS: 理論上 gohtic 系列(rainbow/D/XD)，應該都會有相同問題，
                 is_check_idx_2_code = True
                 
-                if self.config.PROCESS_MODE in ["HALFMOON","TOOTHPASTE"]:
+                # 因為 nut8 裡的 Rule#1 並不會產生內縮後的點，所以會和 Rule#99 的點共用.
+                if self.config.PROCESS_MODE in ["HALFMOON","NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
                     is_check_idx_2_code = False
 
                 if is_check_idx_2_code:
@@ -111,10 +112,12 @@ class Rule(Rule.Rule):
                 # for uni6529 攩，的黑的點, 問題是 clockwise + counter clockwise ，解法之一是直接停掉Rule#99.
                 # 
                 check_idx_1_code = True
-                # 有一個例外，不要檢查這一個Rule, 就是 nut8, 因為 nut8 裡的 Rule#1 會和 Rule#99 的點共用.
+                # 有一個例外，不要檢查這一個Rule, 就是 nut8, 
+                # 因為 nut8 裡的 Rule#1 並不會產生內縮後的點，所以會和 Rule#99 的點共用.
                 # ex: uni5E3D 帽的最右上角。
-                if self.config.PROCESS_MODE in ["NUT8","TOOTHPASTE"]:
+                if self.config.PROCESS_MODE in ["NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
                     check_idx_1_code = False
+                    pass
                 if check_idx_1_code:
                     if format_dict_array[(idx+1)%nodes_length]['code'] in apply_rule_log:
                         if is_debug_mode:
@@ -359,6 +362,14 @@ class Rule(Rule.Rule):
                         else:
                             is_match_pattern = False
 
+                if is_match_pattern:
+                    # PS: ALIAS 和 NUT8 的差別，在 black mode 時，允許直接套用效果。
+                    if self.config.PROCESS_MODE in ["ALIAS","SPIKE"]:
+                        if inside_stroke_flag:
+                            pass
+                        else:
+                            is_match_pattern = False
+
                 # for 攩裡的黑裡的點。
                 if is_match_pattern:
                     pass
@@ -536,8 +547,13 @@ class Rule(Rule.Rule):
 
                     # make coner curve
                     coner_mode = "CURVE"
+
                     if self.config.PROCESS_MODE in ["NUT8"]:
                         coner_mode = "STRAIGHT"
+                    if self.config.PROCESS_MODE in ["ALIAS"]:
+                        coner_mode = "ALIAS"
+                    if self.config.PROCESS_MODE in ["SPIKE"]:
+                        coner_mode = "SPIKE"
 
                     is_goto_apply_round = True
                     center_x,center_y = -9999,-9999
