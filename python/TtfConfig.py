@@ -142,7 +142,7 @@ class TtfConfig():
                 self.OUTSIDE_ROUND_OFFSET = 35
 
         # 只需要大彎.
-        if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8","TOOTHPASTE"]:
+        if self.PROCESS_MODE in ["D","XD","HALFMOON","NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
             self.ROUND_OFFSET=self.OUTSIDE_ROUND_OFFSET
 
         # 客製化 INSIDE_ROUND_OFFSET

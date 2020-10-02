@@ -972,6 +972,9 @@ class Rule():
             exclude_list = [[x1,y1],[previous_x,previous_y],[next_x,next_y],[orig_x0,orig_y0],[orig_x2,orig_y2]]
             near_x,near_y = self.find_best_alias_xy(default_near_pos,exclude_list,stroke_dict)
 
+            # fix while block disappear.
+            near_x,near_y = spline_util.two_point_extend(x1,y1,near_x,near_y,-2)
+
             # let alias more sharp.
             # for -
             if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
