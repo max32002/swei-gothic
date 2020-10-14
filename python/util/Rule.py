@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 #encoding=utf-8
 
+import bezier
+import numpy as np
 from . import spline_util
 
 import os
@@ -662,23 +664,21 @@ class Rule():
         # use more close coordinate.
         previous_x,previous_y=0,0
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            x_from = x0
-            y_from = y0
+            x_from = x1
+            y_from = y1
             x_center = format_dict_array[(idx+1)%nodes_length]['x2']
             y_center = format_dict_array[(idx+1)%nodes_length]['y2']
-            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x1,y1,round_length_1)
-            previous_x,previous_y=x0,y0
+            previous_x,previous_y=self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x0,y0,round_length_1)
         else:
             previous_x,previous_y=spline_util.two_point_extend(x0,y0,x1,y1,-1 * round_length_1)
 
         next_x,next_y=0,0
         if format_dict_array[(idx+2)%nodes_length]['t']=='c':
-            x_from = x2
-            y_from = y2
+            x_from = x1
+            y_from = y1
             x_center = format_dict_array[(idx+2)%nodes_length]['x1']
             y_center = format_dict_array[(idx+2)%nodes_length]['y1']
-            x2,y2 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x1,y1,round_length_2)
-            next_x,next_y=x2,y2
+            next_x,next_y= self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x2,y2,round_length_2)
         else:
             next_x,next_y=spline_util.two_point_extend(x2,y2,x1,y1,-1 * round_length_2)
 
@@ -893,14 +893,15 @@ class Rule():
         dot_dict={}
         dot_dict['t']='l'
         if coner_mode == "CURVE":
+            dot_dict['t']='c'
             dot_dict['x1']=previous_recenter_x
             dot_dict['y1']=previous_recenter_y
             dot_dict['x2']=next_recenter_x
             dot_dict['y2']=next_recenter_y
-            dot_dict['t']='c'
         dot_dict['x']=next_x
         dot_dict['y']=next_y
         dot_dict['code']=new_code
+        #print("idx+2 new_code:", new_code)
 
         insert_idx = (idx+2)%nodes_length
         format_dict_array.insert(insert_idx, dot_dict)
@@ -1361,7 +1362,9 @@ class Rule():
 
         # 增加內縮後的點，為不處理的項目。
         apply_rule_log.append(new_code)
-        generate_rule_log.append(new_code)
+        
+        # PS: 千萬不可以把這個 idx+1 內縮後的點列為 generate rule log 裡，會造成 rule#5 fail.
+        #generate_rule_log.append(new_code)
 
         #if True:
         if False:
@@ -1437,11 +1440,6 @@ class Rule():
         orig_x3 = x3
         orig_y3 = y3
 
-        # PS: in this rule, the value is fixed.
-        #     but in Rule5, this value will be change.
-        orig_x2 = x2
-        orig_y2 = y2
-
         # 使用較短的邊。
         round_length_1 = self.config.ROUND_OFFSET
         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_length_1:
@@ -1458,15 +1456,14 @@ class Rule():
         # use more close coordinate.
         new_x1, new_y1 = 0,0
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            x_from = x0
-            y_from = y0
+            x_from = x1
+            y_from = y1
             x_center = format_dict_array[(idx+1)%nodes_length]['x2']
             y_center = format_dict_array[(idx+1)%nodes_length]['y2']
-            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x1,y1,round_length_1)
-            # 應該是可以直接使用 x0,y0才對，但目前還有問題。
-            #new_x1, new_y1 = x0, y0
+            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,round_length_1)
             if is_apply_inside_direction:
-                new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1,-1 * round_length_1)
+                # 應該是可以直接使用 x0,y0才對。
+                new_x1, new_y1 = x0, y0
             else:
                 new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1, round_length_1)
         else:
@@ -1477,17 +1474,15 @@ class Rule():
 
         new_x2, new_y2 = 0,0
         if format_dict_array[(idx+3)%nodes_length]['t']=='c':
-            x_from = x3
-            y_from = y3
+            x_from = x2
+            y_from = y2
             x_center = format_dict_array[(idx+3)%nodes_length]['x1']
             y_center = format_dict_array[(idx+3)%nodes_length]['y1']
             #print("x_from,y_from,x_center,y_center,x2,y2,round_length_2:",x_from,y_from,x_center,y_center,x2,y2,round_length_2)
-            x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x2,y2,round_length_2)
-            #print("x3,y3:",x3,y3)
-            # 應該是可以直接使用 x3,y3才對，但目前還有問題。
-            #new_x2, new_y2 = x3, y3
+            x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x3,y3,round_length_2)
             if is_apply_inside_direction:
-                new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2,-1 * round_length_2)
+                # 應該是可以直接使用 x3,y3才對。
+                new_x2, new_y2 = x3, y3
             else:
                 new_x2, new_y2 = spline_util.two_point_extend(x3,y3,x2,y2, round_length_2)
         else:
@@ -1499,7 +1494,7 @@ class Rule():
         # compute edge 1 prefer.
         prefer_orig_1 = False
         if False:
-            clockwise1 = self.check_clockwise([[orig_x0,orig_y0],[x1,y1],[orig_x2,orig_y2]])
+            clockwise1 = self.check_clockwise([[orig_x0,orig_y0],[x1,y1],[x2,y2]])
             clockwise1V = None
             if format_dict_array[(idx+1)%nodes_length]['t']=='l':
                 clockwise1V = clockwise1
@@ -1517,14 +1512,14 @@ class Rule():
         # compute edge 3 prefer.
         prefer_orig_3 = False
         if False:
-            clockwise3 = self.check_clockwise([[x1,y1],[orig_x2,orig_y2],[orig_x3,orig_y3]])
+            clockwise3 = self.check_clockwise([[x1,y1],[x2,y2],[orig_x3,orig_y3]])
             clockwise3V = None
             if format_dict_array[(idx+3)%nodes_length]['t']=='l':
                 clockwise3V = clockwise3
             else:
                 x_center = format_dict_array[(idx+3)%nodes_length]['x1']
                 y_center = format_dict_array[(idx+3)%nodes_length]['y1']
-                clockwise3V = self.check_clockwise([[orig_x2,orig_y2],[orig_x3,orig_y3],[x_center,y_center]])
+                clockwise3V = self.check_clockwise([[x2,y2],[orig_x3,orig_y3],[x_center,y_center]])
             if clockwise3V == clockwise3:
                 prefer_orig_3 = True
 
@@ -1570,7 +1565,6 @@ class Rule():
                     #print("dot+3 middle:x1,y1:", x_center, y_center)
                 new_x_center, new_y_center = spline_util.two_point_extend(x_center,y_center,x2,y2,-1 * round_length_2)
                 #print("x2,y2:",x2,y2)
-                #print("orig_x2,orig_y2:",orig_x2,orig_y2)
                 #print("new_x_center, new_y_center:",new_x_center, new_y_center)
                 new_x2, new_y2 = int((new_x_center+new_x2)/2) , int((new_y_center+new_y2)/2)
                 #print("new_x2, new_y2(after):",new_x2, new_y2)
@@ -1689,11 +1683,6 @@ class Rule():
         orig_x3 = x3
         orig_y3 = y3
 
-        # PS: in this rule, the value is fixed.
-        #     but in Rule5, this value will be change.
-        orig_x2 = x2
-        orig_y2 = y2
-
         # 使用較短的邊。
         round_length_1 = self.config.ROUND_OFFSET
         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_length_1:
@@ -1704,19 +1693,19 @@ class Rule():
 
         # use more close coordinate.
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            x_from = x0
-            y_from = y0
+            x_from = x1
+            y_from = y1
             x_center = format_dict_array[(idx+1)%nodes_length]['x2']
             y_center = format_dict_array[(idx+1)%nodes_length]['y2']
-            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x1,y1,round_length_1)
+            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,round_length_1)
 
         if format_dict_array[(idx+3)%nodes_length]['t']=='c':
-            x_from = x3
-            y_from = y3
+            x_from = x2
+            y_from = y2
             x_center = format_dict_array[(idx+3)%nodes_length]['x1']
             y_center = format_dict_array[(idx+3)%nodes_length]['y1']
             #print("x_from,y_from,x_center,y_center,x2,y2,round_length_2:",x_from,y_from,x_center,y_center,x2,y2,round_length_2)
-            x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x2,y2,round_length_2)
+            x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x3,y3,round_length_2)
             #print("x3,y3:",x3,y3)
 
         new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1,-1 * round_length_1)
@@ -1811,11 +1800,6 @@ class Rule():
         orig_x3 = x3
         orig_y3 = y3
 
-        # PS: in this rule, the value is fixed.
-        #     but in Rule5, this value will be change.
-        orig_x2 = x2
-        orig_y2 = y2
-
         # 使用較短的邊。
         round_length_1 = self.config.INSIDE_ROUND_OFFSET
         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_length_1:
@@ -1824,15 +1808,14 @@ class Rule():
         # use more close coordinate.
         new_x1, new_y1 = 0,0
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
-            x_from = x0
-            y_from = y0
+            x_from = x1
+            y_from = y1
             x_center = format_dict_array[(idx+1)%nodes_length]['x2']
             y_center = format_dict_array[(idx+1)%nodes_length]['y2']
-            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x1,y1,round_length_1)
-            # 應該是可以直接使用 x0,y0才對，但目前還有問題。
-            #new_x1, new_y1 = x0, y0
+            x0,y0 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,round_length_1)
             if is_apply_inside_direction:
-                new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1,-1 * round_length_1)
+                # 應該是可以直接使用 x0,y0才對。
+                new_x1, new_y1 = x0, y0
             else:
                 new_x1, new_y1 = spline_util.two_point_extend(x0,y0,x1,y1, round_length_1)
         else:
@@ -1847,7 +1830,6 @@ class Rule():
         self.move_round_idx_1_position(is_apply_inside_direction,new_x1,new_y1,x1_offset,y1_offset,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
         gospel_x, gospel_y = spline_util.two_point_extend(x2,y2,x1,y1, self.config.INSIDE_ROUND_OFFSET)
-
 
         # update #2
         is_append_node = True
@@ -1865,12 +1847,12 @@ class Rule():
 
             new_x2, new_y2 = 0,0
             if format_dict_array[(idx+3)%nodes_length]['t']=='c':
-                x_from = x3
-                y_from = y3
+                x_from = x2
+                y_from = y2
                 x_center = format_dict_array[(idx+3)%nodes_length]['x1']
                 y_center = format_dict_array[(idx+3)%nodes_length]['y1']
                 #print("x_from,y_from,x_center,y_center,x2,y2,round_length_2:",x_from,y_from,x_center,y_center,x2,y2,round_length_2)
-                x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x2,y2,round_length_2)
+                x3,y3 = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,x3,y3,round_length_2)
                 #print("x3,y3:",x3,y3)
                 # 應該是可以直接使用 x3,y3才對，但目前還有問題。
                 #new_x2, new_y2 = x3, y3
@@ -1978,49 +1960,32 @@ class Rule():
     # 角度的影響，修改為取決於距離長度。
     def compute_curve_new_xy(self,x_from,y_from,x_center,y_center,x_end,y_end,round_offset):
         distance_full = spline_util.get_distance(x_from,y_from,x_end,y_end)
+        
+        round_offset_rate = 0.5
+        previous_x,previous_y=x_center,y_center
 
-        x_middle = (x_from + x_end) / 2
-        y_middle = (y_from + y_end) / 2
+        if distance_full > 1:
+            if round_offset > distance_full:
+                round_offset = distance_full
+            round_offset_rate = round_offset / distance_full
 
-        # 這個是最高點。
-        new_x_center = int((x_middle + x_center) / 2)
-        new_y_center = int((y_middle + y_center) / 2)
+        nodes = np.asfortranarray([
+            [float(x_from), float(x_center), float(x_end)],
+            [float(y_from), float(y_center), float(y_end)],
+        ])
+        curve = bezier.Curve(nodes, degree=2)
 
-        previous_x,previous_y = new_x_center,new_y_center
+        point_offset = curve.evaluate(round_offset_rate)
+        previous_x,previous_y=int(point_offset[0]),int(point_offset[1])
 
-        # PS: distance_head and distance_tail maybe equal 0.
-        distance_head = spline_util.get_distance(x_from,y_from,x_center,y_center)
-        distance_tail = spline_util.get_distance(x_center,y_center,x_end,y_end)
-        if distance_head > 0 and distance_tail > 0:
-            distance_middle = distance_full * (distance_head/(distance_head+distance_tail))
-
-            # default: use tail part.
-            use_head_part = False
-            if round_offset > distance_middle:
-                use_head_part = True
-            round_offset_tail = distance_full - round_offset
-
-            if not use_head_part:
-                # tail mode: from middlo to end.
-                previous_x,previous_y= self.compute_curve_with_bonus(new_x_center,new_y_center,x_end,y_end,round_offset,x_center,y_center)
-            else:
-                # head mode: from middle to begin.
-                previous_x,previous_y= self.compute_curve_with_bonus(new_x_center,new_y_center,x_from,y_from,round_offset_tail,x_center,y_center)
-
-        #if True:
-        if False:
-            print("use_head_part:",use_head_part)
-            print("x_from,y_from:",x_from,y_from)
-            print("x_end,y_end:",x_end,y_end)
-            print("x_center,y_center:",x_center,y_center)
-            print("x_middle,y_middle:",x_middle,y_middle)
-            print("new_x_center,new_y_center:",new_x_center,new_y_center)
-            print("distance_full:", distance_full)
-            print("distance_middle:",distance_middle)
-            print("round_offset_tail:",round_offset_tail)
+        output_debug_message = False
+        #output_debug_message = True
+        if output_debug_message:
+            print("x_from,y_from,x_center,y_center,x_end,y_end:",x_from,y_from,x_center,y_center,x_end,y_end)
+            print("distance_full:",distance_full)
+            print("round_offset:",round_offset)
+            print("round_offset_rate:",round_offset_rate)
             print("previous_x,previous_y:",previous_x,previous_y)
-
-        previous_x,previous_y=int(previous_x),int(previous_y)
         return previous_x,previous_y
 
 

@@ -17,50 +17,9 @@ class Rule(Rule.Rule):
         check_first_point = False
 
         # default: 1.33(small,inside), 1.49(large,outside)
-        # MIN 的值，設在 0.80 以下，「幺」的內角會套到。
-        SLIDE_10_PERCENT_MIN = 0.79
+        # MIN 的值，若設在 0.80 以下，「幺」的內角會套到。
+        SLIDE_10_PERCENT_MIN = 0.70
         SLIDE_10_PERCENT_MAX = 1.80
-
-        # default: x.x (large 女), x.xx (small 女), 0.30 - 0.53(下半扁女）
-        #SLIDE_0_PERCENT_MIN = 2.0
-        #SLIDE_0_PERCENT_MAX = 1.80
-
-        #SLIDE_20_PERCENT_MIN = 2.0
-        #SLIDE_20_PERCENT_MAX = 1.88
-
-        SLIDE_30_PERCENT_MIN = 0.20
-        SLIDE_30_PERCENT_MAX = 0.80
-
-        # default: x.x - x.x (large 女), x.x (small 女), 0.89-1.15(下半扁女）
-        #SLIDE_1_PERCENT_MIN = 2.0
-        #SLIDE_1_PERCENT_MAX = 1.88
-
-        #SLIDE_21_PERCENT_MIN = 2.0
-        #SLIDE_21_PERCENT_MAX = 1.58
-
-        SLIDE_31_PERCENT_MIN = 0.70
-        SLIDE_31_PERCENT_MAX = 1.35
-
-        # default: x.x - x.x (large 女), x.x (small 女), 0.78-0.97(下半扁女）
-        #SLIDE_2_PERCENT_MIN = 2.0
-        #SLIDE_2_PERCENT_MAX = 1.38
-
-        #SLIDE_22_PERCENT_MIN = 2.0
-        #SLIDE_22_PERCENT_MAX = 1.65
-
-        SLIDE_32_PERCENT_MIN = 0.58
-        SLIDE_32_PERCENT_MAX = 1.17
-
-        # 戶 左上角。因為2邊都被套用 round curve.
-        # default: 1.41
-        SLIDE_40_PERCENT_MIN = 1.88
-        SLIDE_40_PERCENT_MAX = 1.99
-
-        SLIDE_41_PERCENT_MIN = 1.21
-        SLIDE_41_PERCENT_MAX = 1.61
-
-        SLIDE_42_PERCENT_MIN = 1.88
-        SLIDE_42_PERCENT_MAX = 1.99
 
         spline_dict = stroke_dict[key]
 
@@ -99,7 +58,6 @@ class Rule(Rule.Rule):
                     continue
 
                 # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
-                # for case.3122 上面的點。
                 detect_code = format_dict_array[(idx+2)%nodes_length]['code']
                 if detect_code in generate_rule_log:
                     if is_debug_mode:
@@ -111,7 +69,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[828,107]]
+                    debug_coordinate_list = [[372,803]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -132,8 +90,6 @@ class Rule(Rule.Rule):
                 y2 = format_dict_array[(idx+2)%nodes_length]['y']
 
                 # use more close coordinate.
-                #print("orig x0,y0,x2,y2:", x0,y0,x2,y2)
-                # PS: 下面這2個if, 在很多之前的版本，都沒有被執行，效果也很好，也許可以直接註解掉。
                 if format_dict_array[(idx+1)%nodes_length]['t']=='c':
                     x0 = format_dict_array[(idx+1)%nodes_length]['x2']
                     y0 = format_dict_array[(idx+1)%nodes_length]['y2']
@@ -180,6 +136,8 @@ class Rule(Rule.Rule):
 
                 # 成功的情況下，增加例外。
                 # PS: for case. 3180,
+                # for debug.
+                #is_extend_lag = False
                 if is_extend_lag:
                     if format_dict_array[(idx+1)%nodes_length]['x_direction'] !=0:
                         if format_dict_array[(idx+1)%nodes_length]['x_direction'] != format_dict_array[(idx+2)%nodes_length]['x_direction']:
@@ -324,50 +282,21 @@ class Rule(Rule.Rule):
                 LONG_EDGE_DISTANCE=110
 
                 # PS: >= 0.01 很可怕，ex:「叔」系列。
+                # PS: 目前已停用 is_match_convert_l_direction
                 DISTANCE_IN_LINE_ACCURACY = 0.001
 
                 idx_previuos = (idx+nodes_length-1)%nodes_length
                 # converted by our others rule.
                 #if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
 
+                #PS: 舊的code 會在這裡做 convert c to l 的轉換，目的是為了要match llc or cll 之類的 case.
+                #    這段code 
                 is_match_convert_l_direction = False
-                if format_dict_array[(idx+0)%nodes_length]['t'] == 'c':
-                    # converted by our others rule.
-                    #if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
 
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] >= LONG_EDGE_DISTANCE:
-                        if format_dict_array[(idx+1)%nodes_length]['distance'] >= LONG_EDGE_DISTANCE:
-                            # maybe tranformed by our small curve
-                            #if format_dict_array[(idx+2)%nodes_length]['match_stroke_width']:
+                # ... 判斷特定條件，讓 is_match_convert_l_direction = True
+                # 修改為不使用。
+                # 較好的解法，應該是無視 llc or cll , 通通做套用。
 
-                            # for 「㚢」
-                            #if format_dict_array[(idx+2)%nodes_length]['distance'] <= self.config.STROKE_WIDTH_MAX:
-                            if True:
-                                # maybe tranformed by our small curve
-                                #if format_dict_array[idx_previuos]['match_stroke_width']:
-                                # for 「㚢」
-                                if True:
-                                #if format_dict_array[idx_previuos]['distance'] <= self.config.STROKE_WIDTH_MAX:
-
-                                    # go left-top
-                                    if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
-                                        if format_dict_array[(idx+0)%nodes_length]['y_direction'] > 0:
-                                            # go right-top
-                                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
-                                                if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
-                                                    #print("mom I am here.")
-                                                    is_match_convert_l_direction = True
-
-                                    if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
-                                        if format_dict_array[(idx+0)%nodes_length]['y_direction'] < 0:
-                                            # go right-bottom
-                                            if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
-                                                if format_dict_array[(idx+1)%nodes_length]['y_direction'] < 0:
-                                                    #print("mom I am here.")
-                                                    is_match_convert_l_direction = True
-
-
-                #print("is_match_convert_l_direction:", is_match_convert_l_direction)
                 if is_match_convert_l_direction:
                     if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
                         x1=format_dict_array[(idx+0)%nodes_length]['x']
@@ -410,84 +339,7 @@ class Rule(Rule.Rule):
                             check_first_point=True
 
 
-                # match llc(姚) or cll(源), common = ?l?
-                if format_dict_array[(idx+1)%nodes_length]['t'] == 'l':
-                    fail_code = 100
-                    is_match_pattern = True
-
-                # for ?c? 系列的「女」
-                # 比較特別的是 ccl(藪,uni85EA), 大多是 ccc, 有時是 lcc.
-                if not is_match_pattern:
-                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
-                        fail_code = 110.210
-                        #if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
-                        if True:
-                            #fail_code = 110.220
-                            if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
-                                fail_code = 110.230
-                                if format_dict_array[(idx+1)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
-                                    fail_code = 110.240
-
-                                    slide_percent_0 = spline_util.slide_percent(format_dict_array[(idx-1+nodes_length)%nodes_length]['x'],format_dict_array[(idx-1+nodes_length)%nodes_length]['y'],format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
-                                    # PS: 使用 end x,y 可能會有「重覆套用」的問題。
-                                    #slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
-                                    slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
-                                    slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
-
-                                    if is_debug_mode:
-                                    #if False:
-                                        print("slide_percent 0:", slide_percent_0)
-                                        print("data:",format_dict_array[(idx-1+nodes_length)%nodes_length]['x'],format_dict_array[(idx-1+nodes_length)%nodes_length]['y'],format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
-                                        print("slide_percent 1:", slide_percent_1)
-                                        print("data:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
-                                        print("slide_percent 2:", slide_percent_2)
-                                        print("data:",format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
-
-                                    # for 下半扁 女
-                                    if slide_percent_1 >= SLIDE_31_PERCENT_MIN and slide_percent_1 <= SLIDE_31_PERCENT_MAX:
-                                        fail_code = 110.290
-                                        if slide_percent_2 >= SLIDE_32_PERCENT_MIN and slide_percent_2 <= SLIDE_32_PERCENT_MAX:
-                                            fail_code = 110.291
-                                            if slide_percent_0 >= SLIDE_30_PERCENT_MIN and slide_percent_0 <= SLIDE_30_PERCENT_MAX:
-                                                is_match_pattern = True
-
-                                    # for 左上戶
-                                    if format_dict_array[(idx+0)%nodes_length]['distance'] > 150:
-                                        if format_dict_array[(idx+1)%nodes_length]['distance'] > 150:
-                                            if format_dict_array[(idx+0)%nodes_length]['x_direction'] > 0:
-                                                if format_dict_array[(idx+0)%nodes_length]['y_direction'] > 0:
-                                                    if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
-                                                        if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
-                                                            if slide_percent_1 >= SLIDE_41_PERCENT_MIN and slide_percent_1 <= SLIDE_41_PERCENT_MAX:
-                                                                fail_code = 110.290
-                                                                if slide_percent_2 >= SLIDE_42_PERCENT_MIN and slide_percent_2 <= SLIDE_42_PERCENT_MAX:
-                                                                    fail_code = 110.291
-                                                                    if slide_percent_0 >= SLIDE_40_PERCENT_MIN and slide_percent_0 <= SLIDE_40_PERCENT_MAX:
-                                                                        is_match_pattern = True
-
-                # [同時增加處理case] for 丸的尾巴，是  ccl,
-                if not is_match_pattern:
-                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
-                        fail_code = 120
-                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'l':
-                            if format_dict_array[(idx+1)%nodes_length]['y_equal_fuzzy']:
-                                is_match_pattern = True
-
-                            # [同時增加處理case] for 飹的卯，在先套用 rule#1,2,3 後是  ccl,
-                            if format_dict_array[(idx+1)%nodes_length]['x_equal_fuzzy']:
-                                is_match_pattern = True
-
-                            # for:脚 811A「月」slide_percent_41: 1.22
-                            SLIDE_41_PERCENT_MIN = 0.80
-                            SLIDE_41_PERCENT_MAX = 1.60
-                            slide_percent_41 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
-                            if is_debug_mode:
-                                print("slide_percent_41:",slide_percent_41)
-                            if slide_percent_41 >= SLIDE_41_PERCENT_MIN and slide_percent_41 <= SLIDE_41_PERCENT_MAX:
-                                is_match_pattern = True
-                            # for:脚 811A「月」拿掉上面的2個限制。
-                            #is_match_pattern = True
-
+                is_match_pattern = True
 
                 # =============================================
                 # [IMPORTANT] 這條線以下，不要增追加可能的 case, 開始做排除
