@@ -1410,6 +1410,9 @@ class Rule():
         # PS: idx+2 是共用點，不能直接加入為不處理節點！
         if old_code_string in apply_rule_log:
             apply_rule_log.append(new_code)
+
+        if old_code_string in generate_rule_log:
+            # PS: 千萬不可以把這個 idx+2 內縮後的點「直接」列為 generate rule log 裡
             generate_rule_log.append(new_code)
 
         #if True:

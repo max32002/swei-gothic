@@ -54,9 +54,18 @@ class Rule(Rule.Rule):
                     if format_dict_array[idx_previuos]['code'] in apply_rule_log:
                         continue
 
-                if format_dict_array[idx]['code'] in apply_rule_log:
+                detect_code = format_dict_array[(idx+0)%nodes_length]['code']
+                if detect_code in apply_rule_log:
                     if is_debug_mode:
-                        print("match skip apply_rule_log +0:",format_dict_array[idx]['code'])
+                        print("match skip apply_rule_log +0:",detect_code)
+                        pass
+                    continue
+
+                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
+                detect_code = format_dict_array[(idx+2)%nodes_length]['code']
+                if detect_code in generate_rule_log:
+                    if is_debug_mode:
+                        print("match skip generate_rule_log +2:",detect_code)
                         pass
                     continue
 

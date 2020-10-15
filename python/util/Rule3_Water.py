@@ -39,6 +39,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 detect_code = format_dict_array[(idx+0)%nodes_length]['code']
+                #print("detect_code:", detect_code)
                 if detect_code in apply_rule_log:
                     if is_debug_mode:
                         print("match skip apply_rule_log +0:",detect_code)
@@ -59,9 +60,10 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[829,-73]]
+                    debug_coordinate_list = [[837,791]]
                     if not([format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y']] in debug_coordinate_list):
                         continue
+                        #pass
 
                     print("="*30)
                     print("index:", idx)
@@ -75,15 +77,11 @@ class Rule(Rule.Rule):
                 # for:蝙(uni8759)的戶，slide_percent_1: 1.81
                 SLIDE_1_PERCENT_MAX = 1.86
 
-
                 #TODO: 應該要檢查 SLIDE_1 + SLIDE_2 total max value.
                 #  PS: 目前還沒有檢查。
-
-                slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
-                slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
-                if is_debug_mode:
-                    print("slide_percent_1:",slide_percent_1)
-                    print("slide_percent_2:",slide_percent_2)
+                is_compute_slide_value = False
+                slide_percent_1 = 0
+                slide_percent_2 = 0
 
                 # 合併斜線：.uni811A 「脚」月上的斜線，分成二段。
                 check_more_merge_stroke_condition = False
@@ -116,8 +114,16 @@ class Rule(Rule.Rule):
                         if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+3)%nodes_length]['y_direction']:
                             if format_dict_array[(idx+1)%nodes_length]['y_direction'] == format_dict_array[(idx+2)%nodes_length]['y_direction']:
                                 check_more_merge_stroke_condition = True
+                
                 #print("check_more_merge_stroke_condition 4:", check_more_merge_stroke_condition)
                 if check_more_merge_stroke_condition:
+                    is_compute_slide_value = True
+                    slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                    slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+                    if is_debug_mode:
+                        print("slide_percent_1:",slide_percent_1)
+                        print("slide_percent_2:",slide_percent_2)
+
                     check_more_merge_stroke_condition = False
                     if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
                         # for:脚 811A「月」slide_percent_2: 1.98
@@ -176,6 +182,23 @@ class Rule(Rule.Rule):
                         fail_code = 100
                         is_match_pattern = True
 
+                # 追加 match pattern for "ccc" 的情況。
+                if not is_match_pattern:
+                    is_ccc_case = False
+                    if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
+                        if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
+                            if format_dict_array[(idx+3)%nodes_length]['t'] == 'c':
+                                is_ccc_case = True
+                    if is_ccc_case:
+                        # idx+1, must is not longest side.
+                        is_idx_1_longest_side = False
+                        if format_dict_array[(idx+1)%nodes_length]['distance'] > format_dict_array[(idx+0)%nodes_length]['distance']:
+                            if format_dict_array[(idx+1)%nodes_length]['distance'] > format_dict_array[(idx+2)%nodes_length]['distance']:
+                                is_idx_1_longest_side = True
+                        if not is_idx_1_longest_side:
+                            if format_dict_array[(idx+1)%nodes_length]['match_stroke_width']:
+                                is_match_pattern = True
+
                 # compare stroke_width
                 if is_match_pattern:
                     fail_code = 200
@@ -194,6 +217,13 @@ class Rule(Rule.Rule):
                 # check slide#1
                 # 去除部份情況
                 if is_match_pattern:
+                    if not is_compute_slide_value:
+                        slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
+                        slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
+                        if is_debug_mode:
+                            print("slide_percent_1:",slide_percent_1)
+                            print("slide_percent_2:",slide_percent_2)
+
                     fail_code = 220
                     if slide_percent_1 < SLIDE_1_PERCENT_MIN:
                         is_match_pattern = False
@@ -350,6 +380,7 @@ class Rule(Rule.Rule):
                     if inside_stroke_flag1 or inside_stroke_flag2:
                         is_match_pattern = True
 
+                #is_debug_mode = True
                 if is_debug_mode:
                     if not is_match_pattern:
                         print(idx,"debug fail_code #3:", fail_code)

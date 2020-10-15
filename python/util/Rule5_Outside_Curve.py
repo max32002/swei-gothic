@@ -69,7 +69,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[372,803]]
+                    debug_coordinate_list = [[273,269]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -380,8 +380,12 @@ class Rule(Rule.Rule):
                 if is_match_pattern:
                     fail_code = 200
                     is_match_pattern = False
-                    if format_dict_array[(idx+0)%nodes_length]['distance'] >= self.config.OUTSIDE_ROUND_OFFSET:
-                        if format_dict_array[(idx+1)%nodes_length]['distance'] >= self.config.OUTSIDE_ROUND_OFFSET:
+                    #distance_min = self.config.OUTSIDE_ROUND_OFFSET
+                    # PS: 如果是使用 distance_min=OUTSIDE_ROUND_OFFSET, 有一個待解問題。
+                    #     U+5646 噆的「旡」的右邊，有一個角沒有套到效果，不知為何Rule#5 & Rule#99 都沒套到。
+                    distance_min = self.config.ROUND_OFFSET
+                    if format_dict_array[(idx+0)%nodes_length]['distance'] >= distance_min:
+                        if format_dict_array[(idx+1)%nodes_length]['distance'] >= distance_min:
                             is_match_pattern = True
 
                 # data been overwrite by pre-format code.

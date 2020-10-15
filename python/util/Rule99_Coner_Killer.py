@@ -18,36 +18,6 @@ class Rule(Rule.Rule):
 
         RULE_MIN_DISTANCE_REQUIREMENT = 10
         
-        # default: 1.6 (large 女), 1.72 (small 女), 1.79(下半扁女）
-        SLIDE_0_PERCENT_MIN = 1.40
-        SLIDE_0_PERCENT_MAX = 1.80
-
-        SLIDE_20_PERCENT_MIN = 1.52
-        SLIDE_20_PERCENT_MAX = 1.88
-
-        SLIDE_30_PERCENT_MIN = 1.59
-        SLIDE_30_PERCENT_MAX = 1.88
-        
-        # default: 1.65 - 1.75 (large 女), 1.38 (small 女), 1.07(下半扁女）
-        SLIDE_1_PERCENT_MIN = 1.54
-        SLIDE_1_PERCENT_MAX = 1.88
-
-        SLIDE_21_PERCENT_MIN = 1.18
-        SLIDE_21_PERCENT_MAX = 1.58
-
-        SLIDE_31_PERCENT_MIN = 0.87
-        SLIDE_31_PERCENT_MAX = 1.27
-        
-        # default: 0.93 - 1.2 (large 女), 1.45 (small 女), 1.69(下半扁女）
-        SLIDE_2_PERCENT_MIN = 0.73
-        SLIDE_2_PERCENT_MAX = 1.38
-
-        SLIDE_22_PERCENT_MIN = 1.25
-        SLIDE_22_PERCENT_MAX = 1.65
-
-        SLIDE_32_PERCENT_MIN = 1.49
-        SLIDE_32_PERCENT_MAX = 1.88
-
         # 這裡 MIN 的值，需要設小。
         SLIDE_10_PERCENT_MIN = 0.59
         SLIDE_10_PERCENT_MAX = 1.80
@@ -86,28 +56,18 @@ class Rule(Rule.Rule):
                 is_debug_mode = False
                 #is_debug_mode = True
 
-                #print("code#99,idx:",idx,format_dict_array[(idx+0)%nodes_length]['code'])
-                    
-                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
-                # for case.3122 上面的點。
-                # 這個規則，在 gothic 是對的。但是不能套在 gothic 以外，例如halfmoon，不然會lost.
-                # PS: 理論上 gohtic 系列(rainbow/D/XD)，應該都會有相同問題，
-                is_check_idx_2_code = True
-                
-                # 因為 nut8 裡的 Rule#1 並不會產生內縮後的點，所以會和 Rule#99 的點共用.
-                if self.config.PROCESS_MODE in ["HALFMOON","NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
-                    is_check_idx_2_code = False
-
-                if is_check_idx_2_code:
-                    if format_dict_array[(idx+2)%nodes_length]['code'] in apply_rule_log:
-                        if is_debug_mode:
-                            print("match skip dot +2:",[format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y']])
-                            pass
-                        continue
-
-                if format_dict_array[idx]['code'] in apply_rule_log:
+                detect_code = format_dict_array[(idx+0)%nodes_length]['code']
+                if detect_code in apply_rule_log:
                     if is_debug_mode:
-                        print("match skip apply_rule_log +0:",format_dict_array[idx]['code'])
+                        print("match skip apply_rule_log +0:",detect_code)
+                        pass
+                    continue
+
+                # 要轉換的原來的角，第3點，不能就是我們產生出來的曲線結束點。
+                detect_code = format_dict_array[(idx+2)%nodes_length]['code']
+                if detect_code in generate_rule_log:
+                    if is_debug_mode:
+                        print("match skip generate_rule_log +2:",detect_code)
                         pass
                     continue
 
@@ -117,6 +77,8 @@ class Rule(Rule.Rule):
                 # 有一個例外，不要檢查這一個Rule, 就是 nut8, 
                 # 因為 nut8 裡的 Rule#1 並不會產生內縮後的點，所以會和 Rule#99 的點共用.
                 # ex: uni5E3D 帽的最右上角。
+                # PS: 這一個 check_idx_1_code 目前可能非必需，
+                #      因為 ver 2.120 code在 Rule.py 裡修改，造成交互影響。
                 if self.config.PROCESS_MODE in ["NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
                     check_idx_1_code = False
                     pass
@@ -132,7 +94,7 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[64,459]]
+                    debug_coordinate_list = [[323,542]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
 
@@ -252,61 +214,6 @@ class Rule(Rule.Rule):
                             if format_dict_array[(idx+1)%nodes_length]['distance'] <= RULE_MIN_DISTANCE_REQUIREMENT and format_dict_array[(idx+1)%nodes_length]['distance'] > 1:
                                 fail_code = 131
                                 is_match_pattern = False
-
-                # for all "女" 裡的空白。
-                # match ?cc (almost is lcc, some is ccc).
-                if False:
-                #if not black_mode:
-                    #if format_dict_array[(idx+0)%nodes_length]['t'] == 'l':
-                    #fail_code = 200
-                    if True:
-                        if format_dict_array[(idx+1)%nodes_length]['t'] == 'c':
-                            fail_code = 210
-                            if format_dict_array[(idx+2)%nodes_length]['t'] == 'c':
-                                fail_code = 220
-                                if format_dict_array[(idx+0)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
-                                    fail_code = 230
-                                    if format_dict_array[(idx+1)%nodes_length]['distance'] > self.config.STROKE_WIDTH_AVERAGE:
-                                        fail_code = 240
-
-                                        slide_percent_0 = spline_util.slide_percent(format_dict_array[(idx-1+nodes_length)%nodes_length]['x'],format_dict_array[(idx-1+nodes_length)%nodes_length]['y'],format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
-                                        # PS: 使用 end x,y 可能會有「重覆套用」的問題。
-                                        #slide_percent_1 = spline_util.slide_percent(format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
-                                        slide_percent_1 = spline_util.slide_percent(x0,y0,x1,y1,x2,y2)
-                                        slide_percent_2 = spline_util.slide_percent(format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
-
-                                        if is_debug_mode:
-                                        #if False:
-                                            print("slide_percent 0:", slide_percent_0)
-                                            print("data:",format_dict_array[(idx-1+nodes_length)%nodes_length]['x'],format_dict_array[(idx-1+nodes_length)%nodes_length]['y'],format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'])
-                                            print("slide_percent 1:", slide_percent_1)
-                                            print("data:",format_dict_array[(idx+0)%nodes_length]['x'],format_dict_array[(idx+0)%nodes_length]['y'],format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'])
-                                            print("slide_percent 2:", slide_percent_2)
-                                            print("data:",format_dict_array[(idx+1)%nodes_length]['x'],format_dict_array[(idx+1)%nodes_length]['y'],format_dict_array[(idx+2)%nodes_length]['x'],format_dict_array[(idx+2)%nodes_length]['y'],format_dict_array[(idx+3)%nodes_length]['x'],format_dict_array[(idx+3)%nodes_length]['y'])
-
-                                        # for large 女
-                                        if slide_percent_1 >= SLIDE_1_PERCENT_MIN and slide_percent_1 <= SLIDE_1_PERCENT_MAX:
-                                            fail_code = 250
-                                            if slide_percent_2 >= SLIDE_2_PERCENT_MIN and slide_percent_2 <= SLIDE_2_PERCENT_MAX:
-                                                fail_code = 260
-                                                if slide_percent_0 >= SLIDE_0_PERCENT_MIN and slide_percent_0 <= SLIDE_0_PERCENT_MAX:
-                                                    is_match_pattern = True
-
-                                        # for small 女
-                                        if slide_percent_1 >= SLIDE_21_PERCENT_MIN and slide_percent_1 <= SLIDE_21_PERCENT_MAX:
-                                            fail_code = 270
-                                            if slide_percent_2 >= SLIDE_22_PERCENT_MIN and slide_percent_2 <= SLIDE_22_PERCENT_MAX:
-                                                fail_code = 280
-                                                if slide_percent_0 >= SLIDE_20_PERCENT_MIN and slide_percent_0 <= SLIDE_20_PERCENT_MAX:
-                                                    is_match_pattern = True
-
-                                        # for 下半扁 女
-                                        if slide_percent_1 >= SLIDE_31_PERCENT_MIN and slide_percent_1 <= SLIDE_31_PERCENT_MAX:
-                                            fail_code = 290
-                                            if slide_percent_2 >= SLIDE_32_PERCENT_MIN and slide_percent_2 <= SLIDE_32_PERCENT_MAX:
-                                                fail_code = 291
-                                                if slide_percent_0 >= SLIDE_30_PERCENT_MIN and slide_percent_0 <= SLIDE_30_PERCENT_MAX:
-                                                    is_match_pattern = True
 
 
                 x0 = format_dict_array[(idx+0)%nodes_length]['x']

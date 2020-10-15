@@ -507,11 +507,13 @@ class Spline():
         # start to travel nodes for [RULE #12]
         # smooth small coner
         # PS: after Rule#1 process , some l will disappear.
+        # PS: 這個應該用不到了，改用神奇的 Rule#5 or Rule#99 解決。
+        # PS: 如果要啟用這一個Rule, 請先解決 U+56A0 無套到效果，且加入 apply_rule_log list 的問題。
         if DEBUG_CRASH_RULE:
             print("start Rule # 12...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+        #redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
@@ -527,11 +529,13 @@ class Spline():
 
         # start to travel nodes for [RULE #13]
         # smooth small coner
+        # PS: 這個應該用不到了，改用神奇的 Rule#5 or Rule#99 解決。
+        # PS: 如果要啟用這一個Rule, 請先解決 U+56A0 無套到效果，且加入 apply_rule_log list 的問題。
         if DEBUG_CRASH_RULE:
             print("start Rule # 13...")
         idx=-1
         redo_travel=False   # Disable
-        redo_travel=True    # Enable
+        #redo_travel=True    # Enable
         if DISABLE_ALL_RULE:
             redo_travel=False
             pass
