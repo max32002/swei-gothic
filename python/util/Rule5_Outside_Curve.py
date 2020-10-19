@@ -62,6 +62,7 @@ class Rule(Rule.Rule):
                 if detect_code in generate_rule_log:
                     if is_debug_mode:
                         print("match skip generate_rule_log +2:",detect_code)
+                        print("current code:",format_dict_array[(idx+0)%nodes_length]['code'])
                         pass
                     continue
 
@@ -69,9 +70,10 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 if is_debug_mode:
-                    debug_coordinate_list = [[273,269]]
+                    debug_coordinate_list = [[80,198],[82,187]]
                     if not([format_dict_array[idx]['x'],format_dict_array[idx]['y']] in debug_coordinate_list):
                         continue
+                        pass
 
                     print("="*30)
                     print("index:", idx)
@@ -586,7 +588,7 @@ class Rule(Rule.Rule):
                     # to avoid same code apply twice.
                     nodes_length = len(format_dict_array)
                     generated_code = format_dict_array[(idx+0)%nodes_length]['code']
-                    #print("generated_code:", generated_code)
+                    #print("apply_rule_log:", generated_code)
                     apply_rule_log.append(generated_code)
 
                     # make coner curve

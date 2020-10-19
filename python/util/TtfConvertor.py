@@ -149,7 +149,6 @@ class Convertor():
                     #new_code = ' '.join(x_line_array)
                 dot_dict['code'] = new_code
 
-
                 dot_dict['x']=x
                 dot_dict['y']=y
 

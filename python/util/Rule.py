@@ -54,10 +54,14 @@ class Rule():
                 ret = True
         return ret
 
+    # PS: not used now.
     def assign_x_offset(self, offset):
+        #print("assign assign_x_offset:", offset)
         self.bmp_x_offset = offset
 
+    # PS: not used now.
     def assign_y_offset(self, offset):
+        #print("assign bmp_y_offset:", offset)
         self.bmp_y_offset = offset
 
     def ff_x_to_bmp_x(self, x):
@@ -121,6 +125,11 @@ class Rule():
     # only test center point.
     def is_inside_triangle(self, x1, y1, x2, y2, x3, y3, debug_mode=False):
         ret = True
+
+        # force switch to debug mode.
+        #debug_mode = True
+        if debug_mode:
+            print("test FF dots:", x1, y1, x2, y2, x3, y3)
 
         if not self.bmp_image is None:
             h,w = self.bmp_image.height,self.bmp_image.width
@@ -764,6 +773,7 @@ class Rule():
 
         #PS: 好像是可以直接加入。
         #    因為 previous x,y 是新產生出來的點。
+        #print("previous x,y 是新產生出來的點, code:", new_code)
         apply_rule_log.append(new_code)
 
         # purpose: 原本的 middle dot 是否在 skip rule 裡。
@@ -937,6 +947,8 @@ class Rule():
             dot_dict['y']=near_y
             dot_dict['code']=new_code
 
+            # [IMPORTANT]: new node 千萬不要加入 apply_rule_log, 會造成最後一個點無法apply rule.
+            # PS: 但由於是多餘的點，所以可以直接略過新增加。
             apply_rule_log.append(new_code)
 
             insert_idx = (idx+2)%nodes_length
@@ -1050,6 +1062,8 @@ class Rule():
             dot_dict['y']=near_y
             dot_dict['code']=new_code
 
+            # [IMPORTANT]: new node 千萬不要加入 apply_rule_log, 會造成最後一個點無法apply rule.
+            # PS: 但由於是多餘的點，所以可以直接略過新增加。
             apply_rule_log.append(new_code)
 
             insert_idx = (idx+2)%nodes_length

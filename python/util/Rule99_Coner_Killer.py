@@ -24,7 +24,6 @@ class Rule(Rule.Rule):
 
         if self.config.PROCESS_MODE in ["B2","B4","NUT8","ALIAS"]:
             SLIDE_10_PERCENT_MIN = 0.10
-            # PS: 不要調整太高 SLIDE_10_PERCENT_MAX, 會造成內凹，例如：uni9EBC，麼的幺的左側.
 
         spline_dict = stroke_dict[key]
 
@@ -57,6 +56,9 @@ class Rule(Rule.Rule):
                 #is_debug_mode = True
 
                 detect_code = format_dict_array[(idx+0)%nodes_length]['code']
+                if is_debug_mode:
+                    print("current deubg code:", detect_code)
+                    pass
                 if detect_code in apply_rule_log:
                     if is_debug_mode:
                         print("match skip apply_rule_log +0:",detect_code)
@@ -68,6 +70,7 @@ class Rule(Rule.Rule):
                 if detect_code in generate_rule_log:
                     if is_debug_mode:
                         print("match skip generate_rule_log +2:",detect_code)
+                        print("current code:",format_dict_array[(idx+0)%nodes_length]['code'])
                         pass
                     continue
 
@@ -79,15 +82,18 @@ class Rule(Rule.Rule):
                 # ex: uni5E3D 帽的最右上角。
                 # PS: 這一個 check_idx_1_code 目前可能非必需，
                 #      因為 ver 2.120 code在 Rule.py 裡修改，造成交互影響。
-                if self.config.PROCESS_MODE in ["NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
-                    check_idx_1_code = False
-                    pass
-                if check_idx_1_code:
-                    if format_dict_array[(idx+1)%nodes_length]['code'] in apply_rule_log:
-                        if is_debug_mode:
-                            print("match skip apply_rule_log +1:",format_dict_array[(idx+1)%nodes_length]['code'])
-                            pass
-                        continue
+                check_idx_1_code = False
+                if False:
+                    # PS: 檢查 idx+1 會造成「口」字的最後一個節點，無法被套用。
+                    if self.config.PROCESS_MODE in ["NUT8","TOOTHPASTE","ALIAS","SPIKE"]:
+                        check_idx_1_code = False
+                        pass
+                    if check_idx_1_code:
+                        if format_dict_array[(idx+1)%nodes_length]['code'] in apply_rule_log:
+                            if is_debug_mode:
+                                print("match skip apply_rule_log +1:",format_dict_array[(idx+1)%nodes_length]['code'])
+                                pass
+                            continue
 
 
                 is_debug_mode = False
@@ -469,7 +475,7 @@ class Rule(Rule.Rule):
                     # to avoid same code apply twice.
                     nodes_length = len(format_dict_array)
                     generated_code = format_dict_array[(idx+0)%nodes_length]['code']
-                    #print("generated_code to rule:", generated_code)
+                    #print("apply_rule_log:", generated_code)
                     apply_rule_log.append(generated_code)
 
                     # make coner curve
@@ -502,7 +508,6 @@ class Rule(Rule.Rule):
 
                     check_first_point = True
                     redo_travel=True
-
                     # current version is not stable!, redo will cuase strange curves.
                     # [BUT], if not use -1, some case will be lost if dot near the first dot.
                     resume_idx = -1
@@ -515,6 +520,5 @@ class Rule(Rule.Rule):
         if check_first_point:
             # check close path.
             self.reset_first_point(format_dict_array, spline_dict)
-
 
         return redo_travel, resume_idx, inside_stroke_dict, apply_rule_log, generate_rule_log

@@ -33,29 +33,72 @@ class Spline():
     def detect_bmp_data_top(self, bmp_image):
         threshold=0
         data_top=0
+
+        debug_bmp_info = False
+        #debug_bmp_info = True
+
         #print("bmp_image.shape:", bmp_image.shape)
         if not bmp_image is None:
             # for PIL
             h,w = bmp_image.height,bmp_image.width
+            if debug_bmp_info:
+                print("bmp width/height:",w,h)
 
+            cache_pixel={}
             is_match_data = False
             if h > 5 and w > 5:
+                # [IMPORTANT]: MUST scan X before Y, if want to get TOP value!
+                #            : want to get LEFT, must scan Y before X.
+                #            : first scan value is second loop!
                 for y in range(h-2):
-                    if y==0:
+                    if y<=2:
                         continue
                     if y>=h-3:
                         continue
 
                     for x in range(w):
-                        center_pixel = bmp_image.getpixel((x, y))
-                        if center_pixel == threshold:
-                            next_pixel = bmp_image.getpixel((x, y+1))
+                        if x<=2:
+                            continue
+                        if x>=w-3:
+                            continue
+
+                        cache_key = "%d,%d" % (x, y)
+                        cache_key_top = "%d,%d" % (x, y-1)
+                        cache_key_buttom = "%d,%d" % (x, y+1)
+                        cache_key_left = "%d,%d" % (x-1, y)
+                        cache_key_right = "%d,%d" % (x+1, y)
+
+                        data_pixel = None
+                        if cache_key in cache_pixel:
+                            data_pixel = cache_pixel[cache_key]
+                        else:
+                            data_pixel = bmp_image.getpixel((x, y))
+                            cache_pixel[cache_key]=data_pixel
+
+                        if data_pixel == threshold:
+                            # check next pixel.
+                            cache_key = cache_key_buttom
+                            next_pixel = None
+                            if cache_key in cache_pixel:
+                                next_pixel = cache_pixel[cache_key]
+                            else:
+                                next_pixel = bmp_image.getpixel((x, y+1))
+                                cache_pixel[cache_key]=data_pixel
+
                             if next_pixel == threshold:
-                                previous_pixel = bmp_image.getpixel((x, y-1))
+                                cache_key = cache_key_top
+                                next_pixel = None
+                                if cache_key in cache_pixel:
+                                    previous_pixel = cache_pixel[cache_key]
+                                else:
+                                    previous_pixel = bmp_image.getpixel((x, y-1))
+                                    cache_pixel[cache_key]=previous_pixel
+                                    
                                 if previous_pixel == threshold:
                                     # only this condiftion to break.
 
-                                    #print("bingo:", x, y-1, bmp_image[x, y])
+                                    if debug_bmp_info:
+                                        print("bingo:", x, y)
                                     is_match_data = True
                                     data_top=y-1
                                     break
@@ -136,9 +179,22 @@ class Spline():
                 BMP_TOP=self.detect_bmp_data_top(bmp_image)
                 y_offset = (900 - FF_TOP) - BMP_TOP
             
-            #print("FF_TOP=",FF_TOP)
-            #print("bmp_top=",BMP_TOP)
-            #print("y_offset=",y_offset)
+            debug_bmp_info = False
+            #debug_bmp_info = True
+
+            # for some special case, 
+            # we must assign corrent y_offset, 
+            # because we delete the most top spline in .glyph for debug Rules.
+            is_debug_spcial_case = False
+            is_debug_spcial_case = True
+            if is_debug_spcial_case:
+                y_offset = 19
+                print("Running in special case!")
+
+            if debug_bmp_info:
+                print("FF_TOP=",FF_TOP)
+                print("bmp_top=",BMP_TOP)
+                print("y_offset=",y_offset)
 
         preprocess_result = self.preprocess(stroke_dict, unicode_int)
         if preprocess_result:
