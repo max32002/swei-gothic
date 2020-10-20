@@ -2,6 +2,7 @@
 #encoding=utf-8
 
 from . import spline_util
+import numpy
 
 class Spline():
     config = None
@@ -52,7 +53,9 @@ class Spline():
         print("world")
 
     def detect_bmp_data_top(self, bmp_image):
-        threshold=0
+        #threshold=0
+        threshold=False
+
         data_top=0
 
         debug_bmp_info = False
@@ -65,56 +68,32 @@ class Spline():
             if debug_bmp_info:
                 print("bmp width/height:",w,h)
 
-            cache_pixel={}
+            pixel_data = numpy.asarray(bmp_image)
+
             is_match_data = False
             if h > 5 and w > 5:
                 # [IMPORTANT]: MUST scan X before Y, if want to get TOP value!
                 #            : want to get LEFT, must scan Y before X.
                 #            : first scan value is second loop!
-                for y in range(h-2):
+                for y in range(1,h-2,2):
                     if y<=2:
                         continue
                     if y>=h-3:
                         continue
 
-                    for x in range(w):
+                    for x in range(1,w-2,2):
                         if x<=2:
                             continue
                         if x>=w-3:
                             continue
 
-                        cache_key = "%d,%d" % (x, y)
-                        cache_key_top = "%d,%d" % (x, y-1)
-                        cache_key_buttom = "%d,%d" % (x, y+1)
-                        cache_key_left = "%d,%d" % (x-1, y)
-                        cache_key_right = "%d,%d" % (x+1, y)
-
-                        data_pixel = None
-                        if cache_key in cache_pixel:
-                            data_pixel = cache_pixel[cache_key]
-                        else:
-                            data_pixel = bmp_image.getpixel((x, y))
-                            cache_pixel[cache_key]=data_pixel
+                        data_pixel = pixel_data[y, x]
 
                         if data_pixel == threshold:
                             # check next pixel.
-                            cache_key = cache_key_buttom
-                            next_pixel = None
-                            if cache_key in cache_pixel:
-                                next_pixel = cache_pixel[cache_key]
-                            else:
-                                next_pixel = bmp_image.getpixel((x, y+1))
-                                cache_pixel[cache_key]=data_pixel
-
+                            next_pixel = pixel_data[y+1, x]
                             if next_pixel == threshold:
-                                cache_key = cache_key_top
-                                next_pixel = None
-                                if cache_key in cache_pixel:
-                                    previous_pixel = cache_pixel[cache_key]
-                                else:
-                                    previous_pixel = bmp_image.getpixel((x, y-1))
-                                    cache_pixel[cache_key]=previous_pixel
-                                    
+                                previous_pixel = pixel_data[y-1, x]
                                 if previous_pixel == threshold:
                                     # only this condiftion to break.
 

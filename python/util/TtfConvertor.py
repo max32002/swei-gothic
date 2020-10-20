@@ -391,6 +391,8 @@ class Convertor():
             #break
             if idx % 1000 == 0:
                 print("Processing:", idx)
+
+            if idx % 4000 == 0:
                 self.save_cache_bmp_json()
 
         # cache bmp info.
