@@ -5,6 +5,7 @@ from . import spline_util
 
 class Spline():
     config = None
+    cache_bmp_info_json = {}
 
     def __init__(self):
         pass
@@ -26,6 +27,26 @@ class Spline():
 
     def assign_config(self, config):
         self.config = config
+
+    def assign_cache_bmp_info(self, dict_obj):
+        self.cache_bmp_info_json = dict_obj
+
+    def get_cache_bmp_info(self):
+        return self.cache_bmp_info_json
+
+    def query_cache_bmp_info(self,unicode_int,key):
+        ret = None
+        unicode_string = str(unicode_int)
+        if unicode_string in self.cache_bmp_info_json:
+            if key in self.cache_bmp_info_json[unicode_string]:
+                ret = self.cache_bmp_info_json[unicode_string][key]
+        return ret
+
+    def update_cache_bmp_info(self,unicode_int,key,data):
+        unicode_string = str(unicode_int)
+        if not unicode_string in self.cache_bmp_info_json:
+            self.cache_bmp_info_json[unicode_string]={}
+        self.cache_bmp_info_json[unicode_string][key]=data
 
     def hello(self):
         print("world")
@@ -176,7 +197,19 @@ class Spline():
             
             BMP_TOP=None
             if not FF_TOP is None:
-                BMP_TOP=self.detect_bmp_data_top(bmp_image)
+                BMP_TOP = None
+
+                # load from cache.
+                tmp_BMP_TOP = self.query_cache_bmp_info(unicode_int,'BMP_TOP')
+                #print("tmp_BMP_TOP, unicode_int:",tmp_BMP_TOP,unicode_int)
+                if not tmp_BMP_TOP is None:
+                    #print("load cache BMP_TOP:", tmp_BMP_TOP)
+                    BMP_TOP = tmp_BMP_TOP
+                else:
+                    BMP_TOP=self.detect_bmp_data_top(bmp_image)
+                    #print("parse new BMP_TOP:", BMP_TOP)
+                    self.update_cache_bmp_info(unicode_int,'BMP_TOP',BMP_TOP)
+                
                 y_offset = (900 - FF_TOP) - BMP_TOP
             
             debug_bmp_info = False
@@ -186,7 +219,7 @@ class Spline():
             # we must assign corrent y_offset, 
             # because we delete the most top spline in .glyph for debug Rules.
             is_debug_spcial_case = False
-            is_debug_spcial_case = True
+            #is_debug_spcial_case = True
             if is_debug_spcial_case:
                 y_offset = 19
                 print("Running in special case!")

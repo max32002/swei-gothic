@@ -2,6 +2,7 @@
 #encoding=utf-8
 
 import os
+import json
 import glob
 
 from . import Spline
@@ -14,8 +15,49 @@ class Convertor():
     sp = Spline.Spline()
     config = None
 
+    cache_bmp_info_filename = "cache_bmp_info.json"
+    cache_bmp_info_filepath = None
+    cache_bmp_info_json = {}
+
     def __init__(self):
         pass
+
+    def get_cache_bmp_filepath(self):
+        if self.cache_bmp_info_filepath is None:
+            filepath = None
+            bmp_path = self.config.BMP_PATH
+            if not bmp_path is None:
+                if len(bmp_path) > 0:
+                    filepath = os.path.join(bmp_path,self.cache_bmp_info_filename)
+                    self.cache_bmp_info_filepath = filepath
+        return self.cache_bmp_info_filepath
+
+    def open_cache_bmp_json(self):
+        filepath = self.get_cache_bmp_filepath()
+        #print("open json filepath:", filepath)
+        if not filepath is None:
+            if os.path.exists(filepath):
+                self.cache_bmp_info_json = self.open_json(filepath)
+
+    def open_json(self,filepath):
+        dict_data = {}
+        with open(filepath, 'r') as read_file:
+            dict_data = json.load(read_file)
+            read_file.close()
+        return dict_data
+
+    def save_cache_bmp_json(self):
+        filepath = self.get_cache_bmp_filepath()
+        if not filepath is None:
+            self.save_json(filepath,self.cache_bmp_info_json)
+            #print("save cached result to filepath:", filepath)
+
+    def save_json(self, filepath,json_obj):
+        # save to disk.
+        json_string = json.dumps(json_obj)
+        with open(filepath, 'w') as outfile:
+            outfile.write(json_string)
+            outfile.close()
 
     def load_to_memory(self, filename_input):
         # return field.
@@ -213,7 +255,7 @@ class Convertor():
 
         return stroke_dict
 
-    def convet_font(self, filename_input, bmp_path, readonly=False):
+    def convet_font(self, filename_input, final_bmp_path, readonly=False):
         ret = False
 
         unicode_int = 0
@@ -223,11 +265,6 @@ class Convertor():
         encoding_string = None
         stroke_dict, encoding_string, width_string = self.load_to_memory(filename_input)
         
-        final_bmp_path = self.config.BMP_PATH
-        # overwrite bmp path by command line.
-        if len(bmp_path) > 0:
-            final_bmp_path = bmp_path
-
         unicode_int = -1
         if not encoding_string is None:
             if ' ' in encoding_string:
@@ -301,7 +338,6 @@ class Convertor():
 
         is_modified = False
         if unicode_int > 0: 
-            self.sp.assign_config(self.config)
             is_modified, stroke_dict = self.sp.trace(stroke_dict, unicode_int, bmp_image)
 
         if is_modified:
@@ -321,6 +357,20 @@ class Convertor():
         idx=0
         convert_count=0
 
+
+        final_bmp_path = self.config.BMP_PATH
+        # overwrite bmp path by command line.
+        if len(bmp_path) > 0:
+            final_bmp_path = bmp_path
+            # overwrite setting from command line.
+            self.config.BMP_PATH = final_bmp_path
+
+        # cache bmp info.
+        self.open_cache_bmp_json()
+
+        self.sp.assign_config(self.config)
+        self.sp.assign_cache_bmp_info(self.cache_bmp_info_json)
+
         filename_pattern = path + "/*.glyph"
         for name in glob.glob(filename_pattern):
             idx+=1
@@ -334,12 +384,16 @@ class Convertor():
                 #continue
 
             is_convert = False
-            is_convert = self.convet_font(name,bmp_path,readonly)
+            is_convert = self.convet_font(name,final_bmp_path,readonly)
             if is_convert:
                 convert_count+=1
                 #print("convert list:", name)
             #break
             if idx % 1000 == 0:
                 print("Processing:", idx)
+                self.save_cache_bmp_json()
+
+        # cache bmp info.
+        self.save_cache_bmp_json()
 
         return idx
