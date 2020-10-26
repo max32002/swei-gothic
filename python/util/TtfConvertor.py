@@ -10,6 +10,7 @@ from . import Spline
 # for read bmp.
 from PIL import Image
 #import cv2
+import numpy
 
 class Convertor():
     sp = Spline.Spline()
@@ -293,10 +294,13 @@ class Convertor():
                     bmp_path = os.path.join(target_folder, filename)
                     #print("bmp:", bmp_path, ", current gylph:", filename_input)
                     if os.path.exists(bmp_path):
-                        #PIL
-                        bmp_image = Image.open(bmp_path)
+                        # PIL
+                        #bmp_image = Image.open(bmp_path)
+                        im = Image.open(bmp_path)
+                        # numpy
+                        bmp_image = numpy.asarray(im)
                         
-                        #OpenCV
+                        # OpenCV
                         #bmp_image = cv2.imread(bmp_path)
                     else:
                         print("exported image not exist:", bmp_path)

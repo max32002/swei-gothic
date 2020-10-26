@@ -52,7 +52,7 @@ class Spline():
     def hello(self):
         print("world")
 
-    def detect_bmp_data_top(self, bmp_image):
+    def detect_bmp_data_top(self, bmp_array):
         #threshold=0
         threshold=False
 
@@ -61,14 +61,17 @@ class Spline():
         debug_bmp_info = False
         #debug_bmp_info = True
 
-        #print("bmp_image.shape:", bmp_image.shape)
-        if not bmp_image is None:
+        if not bmp_array is None:
             # for PIL
-            h,w = bmp_image.height,bmp_image.width
+            #h,w = bmp_image.height,bmp_image.width
+            #bmp_array = numpy.asarray(bmp_image)
+
+            # for numpy
+            #print("bmp_array.shape:", bmp_array.shape)
+            h,w = bmp_array.shape
+
             if debug_bmp_info:
                 print("bmp width/height:",w,h)
-
-            pixel_data = numpy.asarray(bmp_image)
 
             is_match_data = False
             if h > 5 and w > 5:
@@ -87,13 +90,13 @@ class Spline():
                         if x>=w-3:
                             continue
 
-                        data_pixel = pixel_data[y, x]
+                        data_pixel = bmp_array[y, x]
 
                         if data_pixel == threshold:
                             # check next pixel.
-                            next_pixel = pixel_data[y+1, x]
+                            next_pixel = bmp_array[y+1, x]
                             if next_pixel == threshold:
-                                previous_pixel = pixel_data[y-1, x]
+                                previous_pixel = bmp_array[y-1, x]
                                 if previous_pixel == threshold:
                                     # only this condiftion to break.
 

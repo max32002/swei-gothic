@@ -118,11 +118,15 @@ class Rule():
             inside_stroke_flag = inside_stroke_dict[inside_stroke_key]
         else:
             # start to parse.
-            inside_stroke_flag = self.is_inside_triangle(previous_x,previous_y,x2,y2,next_x,next_y, debug_mode=debug_mode)
+            inside_stroke_flag = not self.is_inside_triangle(previous_x,previous_y,x2,y2,next_x,next_y, debug_mode=debug_mode)
+            inside_stroke_dict[inside_stroke_key] = inside_stroke_flag
         return inside_stroke_flag,inside_stroke_dict
 
     # for triangle
     # only test center point.
+    # return:
+    #   True: white dot.
+    #   False: black dot.
     def is_inside_triangle(self, x1, y1, x2, y2, x3, y3, debug_mode=False):
         ret = True
 
@@ -132,7 +136,10 @@ class Rule():
             print("test FF dots:", x1, y1, x2, y2, x3, y3)
 
         if not self.bmp_image is None:
-            h,w = self.bmp_image.height,self.bmp_image.width
+            # for PIL
+            #h,w = self.bmp_image.height,self.bmp_image.width
+            h,w = self.bmp_image.shape
+
             margin=5
             left=0+margin
             top=0
@@ -154,17 +161,22 @@ class Rule():
             if bmp_y >= bottom:
                 bmp_y = bottom
 
-            data=self.bmp_image.getpixel((bmp_x, bmp_y))
+            #for PIL
+            #data=self.bmp_image.getpixel((bmp_x, bmp_y))
+            
+            # for 8bit
+            #if data>=128:
+                #ret=False
+
+            ret = self.bmp_image[bmp_y, bmp_x]
 
             if debug_mode:
                 print("center_x,y:",center_x,center_y)
                 print("bmp_x,y:",bmp_x,bmp_y)
                 print("bmp x_offset:", self.bmp_x_offset)
                 print("bmp y_offset:", self.bmp_y_offset)
-                print("data:", data)
+                #print("data:", data)
 
-            if data>=128:
-                ret=False
         else:
             #print("bmp is None!")
             pass
@@ -314,7 +326,11 @@ class Rule():
 
 
             # test range margin.
-            h,w = self.bmp_image.height,self.bmp_image.width
+            # for PIL
+            #h,w = self.bmp_image.height,self.bmp_image.width
+            # for numpy
+            h,w = self.bmp_image.shape
+
             margin=5
             left=0+margin
             top=0
@@ -359,11 +375,17 @@ class Rule():
                     print("test_x,y:", test_x, test_y)
                     print("bmp_x,y:",bmp_x,bmp_y)
                     pass
-                data=self.bmp_image.getpixel((bmp_x, bmp_y))
+                
+                # for PIL.
+                #data=self.bmp_image.getpixel((bmp_x, bmp_y))
+                data=self.bmp_image[bmp_y,bmp_x]
+
                 if debug_mode:
                     print("data:", data)
                     pass
-                if data >=128:
+                
+                #if data >=128:
+                if data:
                     if debug_mode:
                         print("found white dot.")
                         pass
@@ -384,7 +406,11 @@ class Rule():
         stroke_width=0
 
         if not self.bmp_image is None:
-            h,w = self.bmp_image.height, self.bmp_image.width
+            # for PIL
+            #h,w = self.bmp_image.height, self.bmp_image.width
+            # for numpy
+            h,w = self.bmp_image.shape
+
             margin=5
             left=0+margin
             top=0
@@ -419,13 +445,18 @@ class Rule():
                 if bmp_y >= bottom:
                     break
 
-                data=self.bmp_image.getpixel((bmp_x, bmp_y))
+                # for PIL
+                #data=self.bmp_image.getpixel((bmp_x, bmp_y))
+                data=self.bmp_image[bmp_y,bmp_x]
+
                 #print("data:", data)
-                if data <=128:
+                #if data <=128:
+                if not data:
                     black_dot_count +=1
 
                 # 功成身退了，感謝你的努力。
-                if black_dot_count >= STROKE_MATCH_MIN and data >=128:
+                #if black_dot_count >= STROKE_MATCH_MIN and data >=128:
+                if black_dot_count >= STROKE_MATCH_MIN and data:
                     break
 
                 # 試了一半，還是沒資料，就放棄吧。
