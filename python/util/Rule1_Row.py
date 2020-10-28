@@ -389,6 +389,12 @@ class Rule(Rule.Rule):
                         if self.config.PROCESS_MODE in ["GOSPEL","SHEAR"]:
                             is_special_round_format = True
                             center_x,center_y = self.apply_gospel_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
+                        if self.config.PROCESS_MODE in ["FIST"]:
+                            is_special_round_format = True
+                            center_x,center_y = self.apply_fist_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
+                        if self.config.PROCESS_MODE in ["MARKER"]:
+                            is_special_round_format = True
+                            center_x,center_y = self.apply_marker_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
  
                         # default use round.                       
                         if not is_special_round_format:
