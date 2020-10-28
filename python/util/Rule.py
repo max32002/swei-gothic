@@ -2120,7 +2120,7 @@ class Rule():
 
     def apply_marker_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
-        marker_border_default = int(self.config.INSIDE_ROUND_OFFSET * 0.5)
+        marker_border_default = int(self.config.INSIDE_ROUND_OFFSET * 0.8)
 
         center_x,center_y = 0,0
 
