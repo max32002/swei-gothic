@@ -395,6 +395,9 @@ class Rule(Rule.Rule):
                         if self.config.PROCESS_MODE in ["MARKER"]:
                             is_special_round_format = True
                             center_x,center_y = self.apply_marker_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
+                        if self.config.PROCESS_MODE in ["DEVIL"]:
+                            is_special_round_format = True
+                            center_x,center_y = self.apply_devil_transform(format_dict_array,idx,apply_rule_log,generate_rule_log)
  
                         # default use round.                       
                         if not is_special_round_format:
