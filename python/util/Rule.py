@@ -2344,10 +2344,15 @@ class Rule():
         orig_y3 = y3
 
         # 使用較短的邊。
-        round_length_1 = self.config.ROUND_OFFSET
+        round_length_1 = self.config.ROUND_OFFSET * 1.5
+        if self.config.PROCESS_MODE in ["DEVIL"]:
+            round_length_1 = self.config.ROUND_OFFSET
         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_length_1:
             round_length_1 = format_dict_array[(idx+0)%nodes_length]['distance']
-        round_length_2 = self.config.ROUND_OFFSET
+        
+        round_length_2 = self.config.ROUND_OFFSET * 1.5
+        if self.config.PROCESS_MODE in ["DEVIL"]:
+            round_length_2 = self.config.ROUND_OFFSET
         if format_dict_array[(idx+2)%nodes_length]['distance'] < round_length_2:
             round_length_2 = format_dict_array[(idx+2)%nodes_length]['distance']
 
@@ -2362,9 +2367,21 @@ class Rule():
         is_apply_inside_direction = True
 
         # use more close coordinate.
-        new_x1, new_y1 = 0,0
-        fist_idx_1_center_x,fist_idx_1_center_y = 0,0
-        fist_idx_1_end_x,fist_idx_1_end_y = 0,0
+        new_x1, new_y1 = x1,y1
+        fist_idx_1_center_x,fist_idx_1_center_y = x1,y1
+        fist_idx_1_end_x, fist_idx_1_end_y = x1,y1
+
+        middle_offset_rate = 0.5
+        # for AX mode.
+        share_offset_rate = 0
+        if self.config.PROCESS_MODE in ["DEVIL"]:
+            share_offset_rate = 0.85
+
+        middle_offset_1_length = int(round_length_1 * middle_offset_rate)
+        share_offset_1_length = int(round_length_1 * share_offset_rate)
+
+        middle_offset_2_length = int(round_length_2 * middle_offset_rate)
+        share_offset_2_length = int(round_length_2 * share_offset_rate)
 
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
             x_from = x1
@@ -2377,8 +2394,9 @@ class Rule():
                 # 應該是可以直接使用 x0,y0才對。
                 new_x1, new_y1 = x0, y0
                 
-                fist_idx_1_center_x, fist_idx_1_center_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,int(round_length_1 * 0.5))
-                fist_idx_1_end_x, fist_idx_1_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,int(round_length_1 * 0.85))
+                fist_idx_1_center_x, fist_idx_1_center_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,middle_offset_1_length)
+                if share_offset_1_length > 0:
+                    fist_idx_1_end_x, fist_idx_1_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,share_offset_1_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x1, new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1, round_length_1)
@@ -2386,15 +2404,16 @@ class Rule():
             if is_apply_inside_direction:
                 new_x1, new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * round_length_1)
                 
-                fist_idx_1_center_x, fist_idx_1_center_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * int(round_length_1 * 0.5))
-                fist_idx_1_end_x, fist_idx_1_end_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * int(round_length_1 * 0.85))
+                fist_idx_1_center_x, fist_idx_1_center_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * middle_offset_1_length)
+                if share_offset_1_length > 0:
+                    fist_idx_1_end_x, fist_idx_1_end_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * share_offset_1_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x1, new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1, round_length_1)
 
-        new_x2, new_y2 = 0,0
-        fist_idx_3_center_x,fist_idx_3_center_y = 0,0
-        fist_idx_3_end_x,fist_idx_3_end_y = 0,0
+        new_x2, new_y2 = x2,y2
+        fist_idx_3_center_x,fist_idx_3_center_y = x2,y2
+        fist_idx_3_end_x,fist_idx_3_end_y = x2,y2
 
         if format_dict_array[(idx+3)%nodes_length]['t']=='c':
             x_from = x2
@@ -2407,8 +2426,9 @@ class Rule():
                 # 應該是可以直接使用 x3,y3才對。
                 new_x2, new_y2 = x3, y3
 
-                fist_idx_3_center_x, fist_idx_3_center_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,int(round_length_2 * 0.5))
-                fist_idx_3_end_x, fist_idx_3_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,int(round_length_2 * 0.85))
+                fist_idx_3_center_x, fist_idx_3_center_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,middle_offset_2_length)
+                if share_offset_2_length > 0:
+                    fist_idx_3_end_x, fist_idx_3_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,share_offset_2_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x2, new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2, round_length_2)
@@ -2416,8 +2436,9 @@ class Rule():
             if is_apply_inside_direction:
                 new_x2, new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * round_length_2)
 
-                fist_idx_3_center_x, fist_idx_3_center_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * int(round_length_2 * 0.5))
-                fist_idx_3_end_x, fist_idx_3_end_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * int(round_length_2 * 0.85))
+                fist_idx_3_center_x, fist_idx_3_center_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * middle_offset_2_length)
+                if share_offset_2_length > 0:
+                    fist_idx_3_end_x, fist_idx_3_end_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * share_offset_2_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x2, new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2, round_length_2)
@@ -2433,27 +2454,34 @@ class Rule():
             # PS: 目前 round idx+3 和 idx+1 的處理方式不太一樣，但理論上應該要一樣。
             self.adjust_round_idx_3_curve(new_x2,new_y2,x2_offset,y2_offset,orig_x3,orig_y3,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
-        # PS: 由於 halfmoon + toothpaste 沒有動 idx+1 curver.
         self.move_round_idx_1_position(is_apply_inside_direction,new_x1,new_y1,x1_offset,y1_offset,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
-        gospel_1_x, gospel_1_y = spline_util.two_point_extend(x2,y2,x1,y1, self.config.INSIDE_ROUND_OFFSET)
+        gospel_offset_length = int(format_dict_array[(idx+1)%nodes_length]['distance'] * 0.15)
+        if self.config.PROCESS_MODE in ["DEVIL"]:
+            gospel_offset_length = self.config.INSIDE_ROUND_OFFSET
+
+        gospel_1_x, gospel_1_y = spline_util.two_point_extend(x2,y2,x1,y1, gospel_offset_length)
         fist_1_end_x_offset = fist_idx_1_end_x - x1
         fist_1_end_y_offset = fist_idx_1_end_y - y1
         fist_1_x = gospel_1_x +fist_1_end_x_offset
         fist_1_y = gospel_1_y +fist_1_end_y_offset
 
-        gospel_3_x, gospel_3_y = spline_util.two_point_extend(x1,y1,x2,y2, self.config.INSIDE_ROUND_OFFSET)
+        gospel_3_x, gospel_3_y = spline_util.two_point_extend(x1,y1,x2,y2, gospel_offset_length)
         fist_3_end_x_offset = fist_idx_3_end_x - x2
         fist_3_end_y_offset = fist_idx_3_end_y - y2
         fist_3_x = gospel_3_x +fist_3_end_x_offset
         fist_3_y = gospel_3_y +fist_3_end_y_offset
 
         # update #2
+        # curve mode for AX mode.
         tail_short_mode = "CURVE"
-        tail_short_mode = "LINE"
+        if self.config.PROCESS_MODE in ["DEVIL"]:
+            tail_short_mode = "LINE"
         
+        # curve mode for AX mode.
         tail_long_mode = "CURVE"
-        tail_long_mode = "LINE"
+        if self.config.PROCESS_MODE in ["DEVIL"]:
+            tail_long_mode = "LINE"
 
         # round mode.
         new_code = ' %d %d %d %d %d %d c 1\n' % (fist_idx_1_center_x, fist_idx_1_center_y, fist_idx_1_center_x, fist_idx_1_center_y, fist_1_x, fist_1_y)
@@ -2483,7 +2511,8 @@ class Rule():
         self.apply_code(format_dict_array,target_index)
         
         apply_rule_log.append(new_code)
-        generate_rule_log.append(new_code)
+        # PS: TODO: uni970B 的妻，還有一個地方沒套到效果。
+        #generate_rule_log.append(new_code)
 
         # insert #3
         # round
