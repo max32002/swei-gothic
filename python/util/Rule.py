@@ -2322,6 +2322,7 @@ class Rule():
         return center_x,center_y
 
     # for devil transform
+    # for mode: "DEVIL","BELL","AX"
     def apply_devil_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
 
@@ -2344,13 +2345,14 @@ class Rule():
         orig_y3 = y3
 
         # 使用較短的邊。
-        round_length_1 = self.config.ROUND_OFFSET * 1.5
+        # PS:在BELL mode,「湖」字的第一點的曲線，會造成S型，所以不能設太長。
+        round_length_1 = self.config.ROUND_OFFSET * 1.1
         if self.config.PROCESS_MODE in ["DEVIL"]:
             round_length_1 = self.config.ROUND_OFFSET
         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_length_1:
             round_length_1 = format_dict_array[(idx+0)%nodes_length]['distance']
         
-        round_length_2 = self.config.ROUND_OFFSET * 1.5
+        round_length_2 = self.config.ROUND_OFFSET * 1.1
         if self.config.PROCESS_MODE in ["DEVIL"]:
             round_length_2 = self.config.ROUND_OFFSET
         if format_dict_array[(idx+2)%nodes_length]['distance'] < round_length_2:
@@ -2376,6 +2378,9 @@ class Rule():
         share_offset_rate = 0
         if self.config.PROCESS_MODE in ["DEVIL"]:
             share_offset_rate = 0.85
+        if self.config.PROCESS_MODE in ["AX"]:
+            middle_offset_rate = 0.666
+            share_offset_rate = 0.333
 
         middle_offset_1_length = int(round_length_1 * middle_offset_rate)
         share_offset_1_length = int(round_length_1 * share_offset_rate)
@@ -2456,8 +2461,10 @@ class Rule():
 
         self.move_round_idx_1_position(is_apply_inside_direction,new_x1,new_y1,x1_offset,y1_offset,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
-        gospel_offset_length = int(format_dict_array[(idx+1)%nodes_length]['distance'] * 0.15)
-        if self.config.PROCESS_MODE in ["DEVIL"]:
+        # PS:「湖」字的第一點的曲線，會造成S型，所以不能設太長。
+        # PS: 低於或等於 1.0 效果不太顯著，會無感。
+        gospel_offset_length = int(format_dict_array[(idx+1)%nodes_length]['distance'] * 0.12)
+        if self.config.PROCESS_MODE in ["DEVIL","AX"]:
             gospel_offset_length = self.config.INSIDE_ROUND_OFFSET
 
         gospel_1_x, gospel_1_y = spline_util.two_point_extend(x2,y2,x1,y1, gospel_offset_length)
