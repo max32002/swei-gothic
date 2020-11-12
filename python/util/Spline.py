@@ -497,6 +497,11 @@ class Spline():
         #print("Rule#2 redo_count:", redo_count)
         ru2 = None
 
+        if False:
+        #if is_modified:
+            print("after #2, apply_rule_log lenth:", len(apply_rule_log))
+            print("after #2, apply_rule_log full data:", apply_rule_log)
+
         # start to travel nodes for [RULE #3]
         # 
         if DEBUG_CRASH_RULE:
@@ -519,6 +524,11 @@ class Spline():
         #print("Rule#3 redo_count:", redo_count)
         ru3 = None
 
+        if False:
+        #if is_modified:
+            print("after #3, apply_rule_log lenth:", len(apply_rule_log))
+            print("after #3, apply_rule_log full data:", apply_rule_log)
+
         # start to travel nodes for [RULE #1]
         # 
         if DEBUG_CRASH_RULE:
@@ -540,6 +550,11 @@ class Spline():
         #print("Rule#1 is_modified:", is_modified)
         #print("Rule#1 redo_count:", redo_count)
         ru1 = None
+
+        if False:
+        #if is_modified:
+            print("after #1, apply_rule_log lenth:", len(apply_rule_log))
+            print("after #1, apply_rule_log full data:", apply_rule_log)
 
         return is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log
 
@@ -734,13 +749,13 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL"]:
+        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL","AX"]:
             is_common_enable = False
 
         if is_common_enable:
             is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
         else:
-            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL"]:
+            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL","AX"]:
                 base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
                 if base_is_modified:
                     is_modified = True
@@ -836,17 +851,18 @@ class Spline():
         # PS: trace_basic() is included in trace_common()
         is_common_enable = True
 
-        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL"]:
+        if self.config.PROCESS_MODE in ["B2","B4","D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL","AX"]:
             is_common_enable = False
 
         if is_common_enable:
             is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_common(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
         else:
-            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL"]:
+            if self.config.PROCESS_MODE in ["D","XD","DEL","RAINBOW","BOW","HALFMOON","NUT8","3TSANS","TOOTHPASTE","CURVE","GOSPEL","SHEAR","ALIAS","SPIKE","BELL","AX"]:
                 base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_basic(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)
                 if base_is_modified:
                     is_modified = True
 
+        #is_postprocess_enable = False
         is_postprocess_enable = True
         if is_postprocess_enable:
             base_is_modified, inside_stroke_dict, apply_rule_log, generate_rule_log = self.trace_postprocess(stroke_dict, key, unicode_int, bmp_image, y_offset, inside_stroke_dict, apply_rule_log, generate_rule_log)

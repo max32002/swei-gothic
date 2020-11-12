@@ -1354,6 +1354,7 @@ class Rule():
             if new_distance <= 35:
                 is_convert_to_l = True
 
+            #print("is_convert_to_l:", is_convert_to_l)
             if is_convert_to_l:
                 format_dict_array[(idx+1)%nodes_length]['t']="l"
                 tmp_code_string = ' %d %d l 1\n' % (new_x1,new_y1)
@@ -1407,6 +1408,7 @@ class Rule():
 
         # 增加內縮後的點，為不處理的項目。
         apply_rule_log.append(new_code)
+        #print("append code to apply_rule_log:",new_code)
         
         # PS: 千萬不可以把這個 idx+1 內縮後的點列為 generate rule log 裡，會造成 rule#5 fail.
         #generate_rule_log.append(new_code)
@@ -1471,9 +1473,6 @@ class Rule():
     def apply_round_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
 
-        center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
-        center_y = int((format_dict_array[(idx+1)%nodes_length]['y']+format_dict_array[(idx+2)%nodes_length]['y'])/2)
-
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
         y0 = format_dict_array[(idx+0)%nodes_length]['y']
         x1 = format_dict_array[(idx+1)%nodes_length]['x']
@@ -1482,6 +1481,9 @@ class Rule():
         y2 = format_dict_array[(idx+2)%nodes_length]['y']
         x3 = format_dict_array[(idx+3)%nodes_length]['x']
         y3 = format_dict_array[(idx+3)%nodes_length]['y']
+
+        center_x = int((x1+x2)/2)
+        center_y = int((y1+y2)/2)
 
         # keep original value.
         orig_x0 = x0
@@ -1709,9 +1711,6 @@ class Rule():
     def apply_3t_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
 
-        center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
-        center_y = int((format_dict_array[(idx+1)%nodes_length]['y']+format_dict_array[(idx+2)%nodes_length]['y'])/2)
-
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
         y0 = format_dict_array[(idx+0)%nodes_length]['y']
 
@@ -1723,6 +1722,9 @@ class Rule():
 
         x3 = format_dict_array[(idx+3)%nodes_length]['x']
         y3 = format_dict_array[(idx+3)%nodes_length]['y']
+
+        center_x = int((x1+x2)/2)
+        center_y = int((y1+y2)/2)
 
         # keep original value.
         orig_x0 = x0
@@ -1825,9 +1827,6 @@ class Rule():
 
         nodes_length = len(format_dict_array)
 
-        center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
-        center_y = int((format_dict_array[(idx+1)%nodes_length]['y']+format_dict_array[(idx+2)%nodes_length]['y'])/2)
-
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
         y0 = format_dict_array[(idx+0)%nodes_length]['y']
 
@@ -1839,6 +1838,9 @@ class Rule():
 
         x3 = format_dict_array[(idx+3)%nodes_length]['x']
         y3 = format_dict_array[(idx+3)%nodes_length]['y']
+
+        center_x = int((x1+x2)/2)
+        center_y = int((y1+y2)/2)
 
         # keep original value.
         orig_x0 = x0
@@ -1939,9 +1941,6 @@ class Rule():
     def apply_fist_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
 
-        center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
-        center_y = int((format_dict_array[(idx+1)%nodes_length]['y']+format_dict_array[(idx+2)%nodes_length]['y'])/2)
-
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
         y0 = format_dict_array[(idx+0)%nodes_length]['y']
         x1 = format_dict_array[(idx+1)%nodes_length]['x']
@@ -1950,6 +1949,9 @@ class Rule():
         y2 = format_dict_array[(idx+2)%nodes_length]['y']
         x3 = format_dict_array[(idx+3)%nodes_length]['x']
         y3 = format_dict_array[(idx+3)%nodes_length]['y']
+
+        center_x = int((x1+x2)/2)
+        center_y = int((y1+y2)/2)
 
         # keep original value.
         orig_x0 = x0
@@ -2326,9 +2328,6 @@ class Rule():
     def apply_devil_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
         nodes_length = len(format_dict_array)
 
-        center_x = int((format_dict_array[(idx+1)%nodes_length]['x']+format_dict_array[(idx+2)%nodes_length]['x'])/2)
-        center_y = int((format_dict_array[(idx+1)%nodes_length]['y']+format_dict_array[(idx+2)%nodes_length]['y'])/2)
-
         x0 = format_dict_array[(idx+0)%nodes_length]['x']
         y0 = format_dict_array[(idx+0)%nodes_length]['y']
         x1 = format_dict_array[(idx+1)%nodes_length]['x']
@@ -2337,6 +2336,9 @@ class Rule():
         y2 = format_dict_array[(idx+2)%nodes_length]['y']
         x3 = format_dict_array[(idx+3)%nodes_length]['x']
         y3 = format_dict_array[(idx+3)%nodes_length]['y']
+
+        center_x = int((x1+x2)/2)
+        center_y = int((y1+y2)/2)
 
         # keep original value.
         orig_x0 = x0
@@ -2360,10 +2362,14 @@ class Rule():
 
         # 理論上應該不會遇到.
         # avoid error.
-        if round_length_1 <2:
-            round_length_1 =2
-        if round_length_2 <2:
-            round_length_2 =2
+        is_error_occure = False
+        if round_length_1 <= 5:
+            is_error_occure = True
+        if round_length_2 <= 5:
+            is_error_occure = True
+        if is_error_occure:
+            # directly exit function.
+            return center_x,center_y
 
         # default apply inside direction.
         is_apply_inside_direction = True
@@ -2374,7 +2380,6 @@ class Rule():
         fist_idx_1_end_x, fist_idx_1_end_y = x1,y1
 
         middle_offset_rate = 0.5
-        # for AX mode.
         share_offset_rate = 0
         if self.config.PROCESS_MODE in ["DEVIL"]:
             share_offset_rate = 0.85
@@ -2459,6 +2464,7 @@ class Rule():
             # PS: 目前 round idx+3 和 idx+1 的處理方式不太一樣，但理論上應該要一樣。
             self.adjust_round_idx_3_curve(new_x2,new_y2,x2_offset,y2_offset,orig_x3,orig_y3,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
+        # 下面的副程式會順便加入 idx+1 進 apply_rule_log.
         self.move_round_idx_1_position(is_apply_inside_direction,new_x1,new_y1,x1_offset,y1_offset,format_dict_array,idx,apply_rule_log,generate_rule_log)
 
         # PS:「湖」字的第一點的曲線，會造成S型，所以不能設太長。
@@ -2480,14 +2486,16 @@ class Rule():
         fist_3_y = gospel_3_y +fist_3_end_y_offset
 
         # update #2
-        # curve mode for AX mode.
+        # curve mode for AX,BELL mode.
         tail_short_mode = "CURVE"
         if self.config.PROCESS_MODE in ["DEVIL"]:
             tail_short_mode = "LINE"
         
-        # curve mode for AX mode.
+        # curve mode for AX,BELL mode.
         tail_long_mode = "CURVE"
         if self.config.PROCESS_MODE in ["DEVIL"]:
+            tail_long_mode = "LINE"
+        if self.config.PROCESS_MODE in ["BELL"]:
             tail_long_mode = "LINE"
 
         # round mode.
@@ -2495,20 +2503,22 @@ class Rule():
         dot_dict={}
         dot_dict['x']=fist_1_x
         dot_dict['y']=fist_1_y
-        dot_dict['t']='c'
 
         if tail_short_mode == "LINE":
             # line mode.
             new_code = ' %d %d l 1\n' % (fist_1_x, fist_1_y)
             dot_dict['t']='l'
+        else:
+            # round
+            dot_dict['t']='c'
 
-        # extra attrib for curve.
-        #dot_dict['x1']=new_x1
-        #dot_dict['y1']=new_y1
-        dot_dict['x1']=fist_idx_1_center_x
-        dot_dict['y1']=fist_idx_1_center_y
-        dot_dict['x2']=fist_idx_1_center_x
-        dot_dict['y2']=fist_idx_1_center_y
+            # extra attrib for curve.
+            #dot_dict['x1']=new_x1
+            #dot_dict['y1']=new_y1
+            dot_dict['x1']=fist_idx_1_center_x
+            dot_dict['y1']=fist_idx_1_center_y
+            dot_dict['x2']=fist_idx_1_center_x
+            dot_dict['y2']=fist_idx_1_center_y
 
         dot_dict['code']=new_code
 
@@ -2516,10 +2526,14 @@ class Rule():
         old_code = format_dict_array[target_index]['code']
         format_dict_array[target_index]=dot_dict
         self.apply_code(format_dict_array,target_index)
+
+        #print("view idx+1 new code:", format_dict_array[(idx+1)%nodes_length]['code'])
+        #print("assign idx+2 new code:", new_code)
         
         apply_rule_log.append(new_code)
         # PS: TODO: uni970B 的妻，還有一個地方沒套到效果。
-        #generate_rule_log.append(new_code)
+        #   : 似乎與下一行無關。
+        generate_rule_log.append(new_code)
 
         # insert #3
         # round
@@ -2528,21 +2542,22 @@ class Rule():
         dot_dict={}
         dot_dict['x']=center_x
         dot_dict['y']=center_y
-        # round
-        dot_dict['t']='c'
         
         if tail_long_mode == "LINE":
             # line
             new_code = ' %d %d l 1\n' % (center_x, center_y)
             dot_dict['t']='l'
+        else:
+            # round
+            dot_dict['t']='c'
 
-        # extra attrib for curve.
-        #dot_dict['x1']=new_x1
-        #dot_dict['y1']=new_y1
-        dot_dict['x1']=x1
-        dot_dict['y1']=y1
-        dot_dict['x2']=x1
-        dot_dict['y2']=y1
+            # extra attrib for curve.
+            #dot_dict['x1']=new_x1
+            #dot_dict['y1']=new_y1
+            dot_dict['x1']=x1
+            dot_dict['y1']=y1
+            dot_dict['x2']=x1
+            dot_dict['y2']=y1
 
         dot_dict['code']=new_code
 
@@ -2567,17 +2582,19 @@ class Rule():
         dot_dict={}
         dot_dict['x']=fist_3_x
         dot_dict['y']=fist_3_y
-        dot_dict['t']='c'
 
         if tail_long_mode == "LINE":
             # line
             new_code = ' %d %d l 1\n' % (fist_3_x, fist_3_y)
             dot_dict['t']='l'
+        else:
+            # round
+            dot_dict['t']='c'
 
-        dot_dict['x1']=x2
-        dot_dict['y1']=y2
-        dot_dict['x2']=x2
-        dot_dict['y2']=y2
+            dot_dict['x1']=x2
+            dot_dict['y1']=y2
+            dot_dict['x2']=x2
+            dot_dict['y2']=y2
 
         dot_dict['code']=new_code
         target_index = (idx+4)%nodes_length
@@ -2600,20 +2617,21 @@ class Rule():
         dot_dict={}
         dot_dict['x']=new_x2
         dot_dict['y']=new_y2
-        dot_dict['t']='c'
 
         if tail_short_mode == "LINE":
             # line mode.
             new_code = ' %d %d l 1\n' % (new_x2, new_y2)
             dot_dict['t']='l'
+        else:
+            dot_dict['t']='c'
 
-        # extra attrib for curve.
-        #dot_dict['x1']=new_x1
-        #dot_dict['y1']=new_y1
-        dot_dict['x1']=fist_idx_3_center_x
-        dot_dict['y1']=fist_idx_3_center_y
-        dot_dict['x2']=fist_idx_3_center_x
-        dot_dict['y2']=fist_idx_3_center_y
+            # extra attrib for curve.
+            #dot_dict['x1']=new_x1
+            #dot_dict['y1']=new_y1
+            dot_dict['x1']=fist_idx_3_center_x
+            dot_dict['y1']=fist_idx_3_center_y
+            dot_dict['x2']=fist_idx_3_center_x
+            dot_dict['y2']=fist_idx_3_center_y
 
         dot_dict['code']=new_code
         target_index = (idx+5)%nodes_length

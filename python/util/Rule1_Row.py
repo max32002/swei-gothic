@@ -131,11 +131,18 @@ class Rule(Rule.Rule):
                                     format_dict_array[(idx+2)%nodes_length]['x']=x2
                                     format_dict_array[(idx+2)%nodes_length]['y']=y2
                                     format_dict_array[(idx+2)%nodes_length]['t']='l'
+                                    
+                                    before_update_code = format_dict_array[(idx+2)%nodes_length]['code']
                                     new_code = ' %d %d l 1\n' % (x2, y2)
                                     format_dict_array[(idx+2)%nodes_length]['code'] = new_code
+                                    #print('Rule#1 convert to l code:', new_code)
 
                                     # [IMPORTANT] if change code, must triger check_first_point=True
                                     check_first_point=True
+
+                                    # [IMPORTANT] if change code, need update before old_code in log.
+                                    if before_update_code in apply_rule_log:
+                                        apply_rule_log.append(new_code)
 
                                     is_match_pattern = True
 
