@@ -2380,18 +2380,21 @@ class Rule():
         fist_idx_1_end_x, fist_idx_1_end_y = x1,y1
 
         middle_offset_rate = 0.5
-        share_offset_rate = 0
+        sharp_offset_rate = 0
         if self.config.PROCESS_MODE in ["DEVIL"]:
-            share_offset_rate = 0.85
+            sharp_offset_rate = 0.85
         if self.config.PROCESS_MODE in ["AX"]:
             middle_offset_rate = 0.666
-            share_offset_rate = 0.333
+            sharp_offset_rate = 0.333
+        if self.config.PROCESS_MODE in ["BONE"]:
+            middle_offset_rate = 0.5
+            #sharp_offset_rate = 0.2
 
         middle_offset_1_length = int(round_length_1 * middle_offset_rate)
-        share_offset_1_length = int(round_length_1 * share_offset_rate)
+        sharp_offset_1_length = int(round_length_1 * sharp_offset_rate)
 
         middle_offset_2_length = int(round_length_2 * middle_offset_rate)
-        share_offset_2_length = int(round_length_2 * share_offset_rate)
+        sharp_offset_2_length = int(round_length_2 * sharp_offset_rate)
 
         if format_dict_array[(idx+1)%nodes_length]['t']=='c':
             x_from = x1
@@ -2405,8 +2408,8 @@ class Rule():
                 new_x1, new_y1 = x0, y0
                 
                 fist_idx_1_center_x, fist_idx_1_center_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,middle_offset_1_length)
-                if share_offset_1_length > 0:
-                    fist_idx_1_end_x, fist_idx_1_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,share_offset_1_length)
+                if sharp_offset_1_length > 0:
+                    fist_idx_1_end_x, fist_idx_1_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x0,orig_y0,sharp_offset_1_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x1, new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1, round_length_1)
@@ -2415,8 +2418,8 @@ class Rule():
                 new_x1, new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * round_length_1)
                 
                 fist_idx_1_center_x, fist_idx_1_center_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * middle_offset_1_length)
-                if share_offset_1_length > 0:
-                    fist_idx_1_end_x, fist_idx_1_end_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * share_offset_1_length)
+                if sharp_offset_1_length > 0:
+                    fist_idx_1_end_x, fist_idx_1_end_y = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1,-1 * sharp_offset_1_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x1, new_y1 = spline_util.two_point_extend(orig_x0,orig_y0,x1,y1, round_length_1)
@@ -2437,8 +2440,8 @@ class Rule():
                 new_x2, new_y2 = x3, y3
 
                 fist_idx_3_center_x, fist_idx_3_center_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,middle_offset_2_length)
-                if share_offset_2_length > 0:
-                    fist_idx_3_end_x, fist_idx_3_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,share_offset_2_length)
+                if sharp_offset_2_length > 0:
+                    fist_idx_3_end_x, fist_idx_3_end_y = self.compute_curve_new_xy(x_from,y_from,x_center,y_center,orig_x3,orig_y3,sharp_offset_2_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x2, new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2, round_length_2)
@@ -2447,8 +2450,8 @@ class Rule():
                 new_x2, new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * round_length_2)
 
                 fist_idx_3_center_x, fist_idx_3_center_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * middle_offset_2_length)
-                if share_offset_2_length > 0:
-                    fist_idx_3_end_x, fist_idx_3_end_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * share_offset_2_length)
+                if sharp_offset_2_length > 0:
+                    fist_idx_3_end_x, fist_idx_3_end_y = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2,-1 * sharp_offset_2_length)
             else:
                 # PS: 目前還沒有實作這個情況。
                 new_x2, new_y2 = spline_util.two_point_extend(orig_x3,orig_y3,x2,y2, round_length_2)
@@ -2470,20 +2473,76 @@ class Rule():
         # PS:「湖」字的第一點的曲線，會造成S型，所以不能設太長。
         # PS: 低於或等於 1.0 效果不太顯著，會無感。
         gospel_offset_length = int(format_dict_array[(idx+1)%nodes_length]['distance'] * 0.12)
-        if self.config.PROCESS_MODE in ["DEVIL","AX"]:
+        if self.config.PROCESS_MODE in ["DEVIL","AX","BONE"]:
             gospel_offset_length = self.config.INSIDE_ROUND_OFFSET
 
         gospel_1_x, gospel_1_y = spline_util.two_point_extend(x2,y2,x1,y1, gospel_offset_length)
         fist_1_end_x_offset = fist_idx_1_end_x - x1
         fist_1_end_y_offset = fist_idx_1_end_y - y1
-        fist_1_x = gospel_1_x +fist_1_end_x_offset
-        fist_1_y = gospel_1_y +fist_1_end_y_offset
+        fist_1_x = gospel_1_x + fist_1_end_x_offset
+        fist_1_y = gospel_1_y + fist_1_end_y_offset
 
         gospel_3_x, gospel_3_y = spline_util.two_point_extend(x1,y1,x2,y2, gospel_offset_length)
         fist_3_end_x_offset = fist_idx_3_end_x - x2
         fist_3_end_y_offset = fist_idx_3_end_y - y2
-        fist_3_x = gospel_3_x +fist_3_end_x_offset
-        fist_3_y = gospel_3_y +fist_3_end_y_offset
+        fist_3_x = gospel_3_x + fist_3_end_x_offset
+        fist_3_y = gospel_3_y + fist_3_end_y_offset
+
+        # for bone.
+        gospel_1_x_offset = gospel_1_x - x1
+        gospel_1_y_offset = gospel_1_y - y1
+        gospel_3_x_offset = gospel_3_x - x2
+        gospel_3_y_offset = gospel_3_y - y2
+
+        bone_ass_1_inside_x = int((x1+center_x)/2)
+        bone_ass_1_inside_y = int((y1+center_y)/2)
+
+        bone_ass_1_outside_x = int((x1+gospel_1_x)/2)
+        bone_ass_1_outside_y = int((y1+gospel_1_y)/2)
+
+        bone_ass_2_inside_x = int((x2+center_x)/2)
+        bone_ass_2_inside_y = int((y2+center_y)/2)
+
+        bone_ass_2_outside_x = int((x2+gospel_3_x)/2)
+        bone_ass_2_outside_y = int((y2+gospel_3_y)/2)
+
+        #bone_ass_1_x1 = bone_ass_1_inside_x - fist_1_end_x_offset
+        #bone_ass_1_x1 = x1 - fist_1_end_x_offset
+        bone_ass_1_x1 = x1 - int(x1_offset/2)
+        bone_ass_1_x2 = bone_ass_1_x1
+
+        #bone_ass_1_y1 = bone_ass_1_inside_y - fist_1_end_y_offset
+        #bone_ass_1_y1 = y1 - fist_1_end_y_offset
+        bone_ass_1_y1 = y1 - int(y1_offset/2)
+        bone_ass_1_y2 = bone_ass_1_y1
+
+        #bone_ass_2_x1 = bone_ass_2_inside_x - fist_3_end_x_offset
+        #bone_ass_2_x1 = x2 - fist_3_end_x_offset
+        bone_ass_2_x1 = x2 - int(x2_offset/2)
+        bone_ass_2_x2 = bone_ass_2_x1
+
+        #bone_ass_2_y1 = bone_ass_2_inside_y - fist_3_end_y_offset
+        #bone_ass_2_y1 = y2 - fist_3_end_y_offset
+        bone_ass_2_y1 = y2 - int(y2_offset/2)
+        bone_ass_2_y2 = bone_ass_2_y1
+
+        # for BONE mode.
+        bone_extra_node_1_x = fist_idx_1_center_x + gospel_1_x_offset
+        bone_extra_node_1_y = fist_idx_1_center_y + gospel_1_y_offset
+        if self.config.PROCESS_MODE in ["BONE"]:
+            # shift fist_idx_1_center_x/fist_idx_1_center_y
+            orig_fist_idx_1_center_x = (fist_idx_1_center_x + new_x1)/2
+            orig_fist_idx_1_center_y = (fist_idx_1_center_y + new_y1)/2
+
+            new_fist_idx_1_center_x = (fist_idx_1_center_x + bone_extra_node_1_x)/2
+            new_fist_idx_1_center_y = (fist_idx_1_center_y + bone_extra_node_1_y)/2
+
+            new_fist_idx_1_center_x = (new_fist_idx_1_center_x + orig_fist_idx_1_center_x)/2
+            new_fist_idx_1_center_y = (new_fist_idx_1_center_y + orig_fist_idx_1_center_y)/2
+
+            fist_idx_1_center_x = int(new_fist_idx_1_center_x)
+            fist_idx_1_center_y = int(new_fist_idx_1_center_y)
+
 
         # update #2
         # curve mode for AX,BELL mode.
@@ -2493,9 +2552,7 @@ class Rule():
         
         # curve mode for AX,BELL mode.
         tail_long_mode = "CURVE"
-        if self.config.PROCESS_MODE in ["DEVIL"]:
-            tail_long_mode = "LINE"
-        if self.config.PROCESS_MODE in ["BELL"]:
+        if self.config.PROCESS_MODE in ["DEVIL","BELL"]:
             tail_long_mode = "LINE"
 
         # round mode.
@@ -2503,6 +2560,12 @@ class Rule():
         dot_dict={}
         dot_dict['x']=fist_1_x
         dot_dict['y']=fist_1_y
+
+        # insert new internal node.
+        if self.config.PROCESS_MODE in ["BONE"]:
+            new_code = ' %d %d %d %d %d %d c 1\n' % (fist_idx_1_center_x, fist_idx_1_center_y, fist_idx_1_center_x, fist_idx_1_center_y, bone_extra_node_1_x, bone_extra_node_1_y)
+            dot_dict['x']=bone_extra_node_1_x
+            dot_dict['y']=bone_extra_node_1_y
 
         if tail_short_mode == "LINE":
             # line mode.
@@ -2535,10 +2598,52 @@ class Rule():
         #   : 似乎與下一行無關。
         generate_rule_log.append(new_code)
 
+
+        # for BONE mode. #2.5
+        # extra #2.5 for BONE mode.
+        if self.config.PROCESS_MODE in ["BONE"]:
+            bone_fat_center_x = int((fist_1_x + bone_extra_node_1_x)/2)
+            bone_fat_center_y = int((fist_1_y + bone_extra_node_1_y)/2)
+
+            bone_fat_outside_x = bone_fat_center_x + int(gospel_1_x_offset/2)
+            bone_fat_outside_y = bone_fat_center_y + int(gospel_1_y_offset/2)
+
+            new_code = ' %d %d %d %d %d %d c 1\n' % (bone_fat_outside_x, bone_fat_outside_y, bone_fat_outside_x, bone_fat_outside_y, fist_1_x, fist_1_y)
+            dot_dict={}
+            dot_dict['x']=fist_1_x
+            dot_dict['y']=fist_1_y
+            
+            dot_dict['t']='c'
+
+            # extra attrib for curve.
+            #dot_dict['x1']=new_x1
+            #dot_dict['y1']=new_y1
+            dot_dict['x1']=bone_fat_outside_x
+            dot_dict['y1']=bone_fat_outside_y
+            dot_dict['x2']=bone_fat_outside_x
+            dot_dict['y2']=bone_fat_outside_y
+
+            dot_dict['code']=new_code
+            target_index = (idx+3)%nodes_length
+            format_dict_array.insert(target_index,dot_dict)
+
+            apply_rule_log.append(new_code)
+            generate_rule_log.append(new_code)
+
+            nodes_length = len(format_dict_array)
+            if idx >= target_index:
+                idx += 1
+
+            target_index = (idx+3)%nodes_length
+            self.apply_code(format_dict_array,target_index)
+
         # insert #3
         # round
         new_code = ' %d %d %d %d %d %d c 1\n' % (x1, y1, x1, y1, center_x, center_y)
         
+        if self.config.PROCESS_MODE in ["BONE"]:
+            new_code = ' %d %d %d %d %d %d c 1\n' % (bone_ass_1_x1, bone_ass_1_y1, bone_ass_1_x2, bone_ass_1_y2, center_x, center_y)
+
         dot_dict={}
         dot_dict['x']=center_x
         dot_dict['y']=center_y
@@ -2558,10 +2663,17 @@ class Rule():
             dot_dict['y1']=y1
             dot_dict['x2']=x1
             dot_dict['y2']=y1
+            if self.config.PROCESS_MODE in ["BONE"]:
+                dot_dict['x1']=bone_ass_1_x1
+                dot_dict['y1']=bone_ass_1_y1
+                dot_dict['x2']=bone_ass_1_x2
+                dot_dict['y2']=bone_ass_1_y2
 
         dot_dict['code']=new_code
 
         target_index = (idx+3)%nodes_length
+        if self.config.PROCESS_MODE in ["BONE"]:
+            target_index = (idx+4)%nodes_length
         format_dict_array.insert(target_index,dot_dict)
 
         nodes_length = len(format_dict_array)
@@ -2569,6 +2681,8 @@ class Rule():
             idx += 1
 
         target_index = (idx+3)%nodes_length
+        if self.config.PROCESS_MODE in ["BONE"]:
+            target_index = (idx+4)%nodes_length
         self.apply_code(format_dict_array,target_index)
 
         #print("update +2 old_code:", old_code)
@@ -2579,6 +2693,10 @@ class Rule():
         # append new #4
         # round
         new_code = ' %d %d %d %d %d %d c 1\n' % (x2, y2, x2, y2, fist_3_x, fist_3_y)
+
+        if self.config.PROCESS_MODE in ["BONE"]:
+            new_code = ' %d %d %d %d %d %d c 1\n' % (bone_ass_2_x1, bone_ass_2_y1, bone_ass_2_x2, bone_ass_2_y2, fist_3_x, fist_3_y)
+
         dot_dict={}
         dot_dict['x']=fist_3_x
         dot_dict['y']=fist_3_y
@@ -2595,9 +2713,16 @@ class Rule():
             dot_dict['y1']=y2
             dot_dict['x2']=x2
             dot_dict['y2']=y2
+            if self.config.PROCESS_MODE in ["BONE"]:
+                dot_dict['x1']=bone_ass_2_x1
+                dot_dict['y1']=bone_ass_2_y1
+                dot_dict['x2']=bone_ass_2_x2
+                dot_dict['y2']=bone_ass_2_y2
 
         dot_dict['code']=new_code
         target_index = (idx+4)%nodes_length
+        if self.config.PROCESS_MODE in ["BONE"]:
+            target_index = (idx+5)%nodes_length
         format_dict_array.insert(target_index,dot_dict)
 
         apply_rule_log.append(new_code)
@@ -2608,11 +2733,66 @@ class Rule():
             idx += 1
 
         target_index = (idx+4)%nodes_length
+        if self.config.PROCESS_MODE in ["BONE"]:
+            target_index = (idx+5)%nodes_length
         self.apply_code(format_dict_array,target_index)
+
+        
+        # extra #4.5 for BONE mode.
+        if self.config.PROCESS_MODE in ["BONE"]:
+            bone_extra_node_3_x = fist_idx_3_center_x + gospel_3_x_offset
+            bone_extra_node_3_y = fist_idx_3_center_y + gospel_3_y_offset
+
+            bone_fat_center_x = int((fist_3_x + bone_extra_node_3_x)/2)
+            bone_fat_center_y = int((fist_3_y + bone_extra_node_3_y)/2)
+
+            bone_fat_outside_x = bone_fat_center_x + int(gospel_3_x_offset/2)
+            bone_fat_outside_y = bone_fat_center_y + int(gospel_3_y_offset/2)
+
+            new_code = ' %d %d %d %d %d %d c 1\n' % (bone_fat_outside_x, bone_fat_outside_y, bone_fat_outside_x, bone_fat_outside_y, bone_extra_node_3_x, bone_extra_node_3_y)
+            dot_dict={}
+            dot_dict['x']=bone_extra_node_3_x
+            dot_dict['y']=bone_extra_node_3_y
+            
+            dot_dict['t']='c'
+
+            # extra attrib for curve.
+            #dot_dict['x1']=new_x1
+            #dot_dict['y1']=new_y1
+            dot_dict['x1']=bone_fat_outside_x
+            dot_dict['y1']=bone_fat_outside_y
+            dot_dict['x2']=bone_fat_outside_x
+            dot_dict['y2']=bone_fat_outside_y
+
+            dot_dict['code']=new_code
+            target_index = (idx+6)%nodes_length
+            format_dict_array.insert(target_index,dot_dict)
+
+            apply_rule_log.append(new_code)
+            generate_rule_log.append(new_code)
+
+            nodes_length = len(format_dict_array)
+            if idx >= target_index:
+                idx += 1
+
+            target_index = (idx+6)%nodes_length
+            self.apply_code(format_dict_array,target_index)
+
+            # shift fist_idx_3_center_x/fist_idx_3_center_y
+            orig_fist_idx_3_center_x = (fist_idx_3_center_x + new_x2)/2
+            orig_fist_idx_3_center_y = (fist_idx_3_center_y + new_y2)/2
+
+            new_fist_idx_3_center_x = (fist_idx_3_center_x + bone_extra_node_3_x)/2
+            new_fist_idx_3_center_y = (fist_idx_3_center_y + bone_extra_node_3_y)/2
+
+            new_fist_idx_3_center_x = (new_fist_idx_3_center_x + orig_fist_idx_3_center_x)/2
+            new_fist_idx_3_center_y = (new_fist_idx_3_center_y + orig_fist_idx_3_center_y)/2
+
+            fist_idx_3_center_x = int(new_fist_idx_3_center_x)
+            fist_idx_3_center_y = int(new_fist_idx_3_center_y)
 
         # append new #5
         # round
-
         new_code = ' %d %d %d %d %d %d c 1\n' % (fist_idx_3_center_x, fist_idx_3_center_y, fist_idx_3_center_x, fist_idx_3_center_y, new_x2, new_y2)
         dot_dict={}
         dot_dict['x']=new_x2
@@ -2635,6 +2815,8 @@ class Rule():
 
         dot_dict['code']=new_code
         target_index = (idx+5)%nodes_length
+        if self.config.PROCESS_MODE in ["BONE"]:
+            target_index = (idx+7)%nodes_length
         format_dict_array.insert(target_index,dot_dict)
 
         # PS: (idx+5) don't add to rule_log, it cause next dot lose change to transform.
