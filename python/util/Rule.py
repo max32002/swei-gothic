@@ -2849,14 +2849,18 @@ class Rule():
 
         # 使用較短的邊。
         # PS:在BELL mode,「湖」字的第一點的曲線，會造成S型，所以不能設太長。
-        round_length_1 = self.config.ROUND_OFFSET * 1.5
+        # PS:在MATCH mode,「南」字的羊上的點，round_length_1 設太大會產生出新的side effect.
+        # PS:在MATCH mode,「國」字的裡的一，有問題尚未解決.
+        round_length_1 = self.config.ROUND_OFFSET * 1.2
+        #round_length_1 = self.config.ROUND_OFFSET
         if self.config.PROCESS_MODE in [""]:
             #round_length_1 = self.config.ROUND_OFFSET
             pass
         if format_dict_array[(idx+0)%nodes_length]['distance'] < round_length_1:
             round_length_1 = format_dict_array[(idx+0)%nodes_length]['distance']
         
-        round_length_2 = self.config.ROUND_OFFSET * 1.5
+        round_length_2 = self.config.ROUND_OFFSET * 1.2
+        #round_length_2 = self.config.ROUND_OFFSET
         if self.config.PROCESS_MODE in [""]:
             #round_length_2 = self.config.ROUND_OFFSET
             pass
