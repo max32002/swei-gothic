@@ -25,6 +25,7 @@ class TtfConfig():
     #PROCESS_MODE = "BELL"
     #PROCESS_MODE = "BONE"
     #PROCESS_MODE = "MATCH"
+    #PROCESS_MODE = "DART"
 
     STYLE_INDEX = 5
     STYLE_ARRAY = ["Black","Bold","Medium","Regular","DemiLight","Light","Thin"]

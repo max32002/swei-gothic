@@ -3132,6 +3132,48 @@ class Rule():
         #generate_rule_log.append(new_code)
 
         return center_x,center_y
+
+    # for dart transform
+    # TODO: uni97B7.glyph 的鬲，會出錯，需再檢查是否有 counter-clockwise inside.
+    def apply_dart_transform(self,format_dict_array,idx,apply_rule_log,generate_rule_log):
+        nodes_length = len(format_dict_array)
+
+        x0 = format_dict_array[(idx+0)%nodes_length]['x']
+        y0 = format_dict_array[(idx+0)%nodes_length]['y']
+        x1 = format_dict_array[(idx+1)%nodes_length]['x']
+        y1 = format_dict_array[(idx+1)%nodes_length]['y']
+        x2 = format_dict_array[(idx+2)%nodes_length]['x']
+        y2 = format_dict_array[(idx+2)%nodes_length]['y']
+        x3 = format_dict_array[(idx+3)%nodes_length]['x']
+        y3 = format_dict_array[(idx+3)%nodes_length]['y']
+
+        center_x = int((x1+x2)/2)
+        center_y = int((y1+y2)/2)
+
+        old_code = format_dict_array[(idx+1)%nodes_length]['code']
+        old_code_array = old_code.split(' ')
+        if ' c ' in old_code:
+            old_code_array[5]=str(center_x)
+            old_code_array[6]=str(center_y)
+        else:
+            old_code_array[1]=str(center_x)
+            old_code_array[2]=str(center_y)
+        new_code = ' '.join(old_code_array)
+
+        format_dict_array[(idx+1)%nodes_length]['code'] = new_code
+        target_index = (idx+1)%nodes_length
+        self.apply_code(format_dict_array,target_index)
+
+        #print("view idx+1 new code:", format_dict_array[(idx+1)%nodes_length]['code'])
+        #print("assign idx+2 new code:", new_code)
+        
+        apply_rule_log.append(new_code)
+        generate_rule_log.append(new_code)
+
+        del format_dict_array[(idx+2)%nodes_length]
+
+        return center_x,center_y
+
     # PS: 數學沒學好，所以開始亂寫，這應該是用函數來處理的。
     # PS: 這個目前已經改用貝茲函數，特別感謝第三方package 的作者。
     def compute_curve_with_bonus(self, x_from, y_from, x_end, y_end, round_offset, x_center,y_center):
