@@ -3298,7 +3298,7 @@ class Rule():
             # | sharp.
             if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
                 if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
-                    fail_code = 2202
+                    fail_code = 2211
                     is_match_pattern = True
                     going_right = False
 
@@ -3306,12 +3306,64 @@ class Rule():
             # \ sharp. go up.
             # / sharp. go down.
             if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
-                fail_code = 2203
+                fail_code = 2221
                 is_match_pattern = True
                 going_right = False
 
 
         return going_right, fail_code
+
+    # purpose: check for RightBottom base rule.
+    # return:
+    #   True: match, path going RightBottom.
+    #   False: not match.
+    def going_rightbottom_direction(self, format_dict_array, idx):
+        going_direction = True
+        is_match_pattern = False
+        fail_code = 0
+
+        nodes_length = len(format_dict_array)
+
+        if not is_match_pattern:
+            # - sharp.
+            if format_dict_array[(idx+0)%nodes_length]['y_equal_fuzzy']:
+                if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                    fail_code = 2201
+                    is_match_pattern = True
+                    going_direction = False
+                else:
+                    if format_dict_array[(idx+1)%nodes_length]['y_direction'] < 0:
+                            fail_code = 2202
+                            is_match_pattern = True
+                            going_direction = False
+
+        if not is_match_pattern:
+            # | sharp.
+            if format_dict_array[(idx+0)%nodes_length]['x_equal_fuzzy']:
+                if format_dict_array[(idx+1)%nodes_length]['x_direction'] > 0:
+                    fail_code = 2211
+                    is_match_pattern = True
+                    going_direction = False
+                else:
+                    if format_dict_array[(idx+0)%nodes_length]['y_direction'] > 0:
+                        fail_code = 2212
+                        is_match_pattern = True
+                        going_direction = False
+
+        if not is_match_pattern:
+            # \ sharp. go up.
+            # / sharp. go down.
+            if format_dict_array[(idx+0)%nodes_length]['x_direction'] < 0:
+                fail_code = 2221
+                is_match_pattern = True
+                going_direction = False
+
+            if format_dict_array[(idx+0)%nodes_length]['y_direction'] > 0:
+                fail_code = 2222
+                is_match_pattern = True
+                going_direction = False
+
+        return going_direction, fail_code
 
 
     # purpose: check for XD base rule.
@@ -3361,7 +3413,7 @@ class Rule():
 
             # for < sharp. "女" 的左半邊。
             if format_dict_array[(idx+1)%nodes_length]['y_direction'] > 0:
-                fail_code = 2204
+                fail_code = 2211
                 is_match_pattern = True
                 going_down = True
 
@@ -3417,7 +3469,7 @@ class Rule():
 
             # for > sharp.
             if format_dict_array[(idx+1)%nodes_length]['y_direction'] < 0:
-                fail_code = 2204
+                fail_code = 2211
                 is_match_pattern = True
                 going_up = True
 

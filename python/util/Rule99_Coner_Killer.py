@@ -237,6 +237,13 @@ class Rule(Rule.Rule):
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
                         is_match_pattern = is_match_d_base_rule
 
+                # for RightBottom
+                # only apply RightBottom part.
+                if self.config.PROCESS_MODE in ["RIGHTBOTTOM"]:
+                    if is_match_pattern:
+                        is_match_d_base_rule, fail_code = self.going_rightbottom_direction(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
+
                 # for XD
                 if self.config.PROCESS_MODE in ["XD"]:
                     if is_match_pattern:

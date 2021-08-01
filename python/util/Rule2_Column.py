@@ -342,7 +342,7 @@ class Rule(Rule.Rule):
                         is_goto_apply_round = is_match_d_base_rule
 
                     # for BOW
-                    if self.config.PROCESS_MODE in ["BOW","CURVE","DEL"]:
+                    if self.config.PROCESS_MODE in ["BOW","CURVE","DEL","RIGHTBOTTOM"]:
                         generated_code = format_dict_array[(idx+1)%nodes_length]['code']
                         apply_rule_log.append(generated_code)
                         is_goto_apply_round = False

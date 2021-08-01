@@ -362,16 +362,23 @@ class Rule(Rule.Rule):
                         is_match_d_base_rule, fail_code = self.going_d_right(format_dict_array,idx)
                         is_match_pattern = is_match_d_base_rule
 
+                # for RightBottom
+                if self.config.PROCESS_MODE in ["RIGHTBOTTOM"]:
+                    fail_code = 132
+                    if is_match_pattern:
+                        is_match_d_base_rule, fail_code = self.going_rightbottom_direction(format_dict_array,idx)
+                        is_match_pattern = is_match_d_base_rule
+
                 # for XD
                 if self.config.PROCESS_MODE in ["XD"]:
-                    fail_code = 132
+                    fail_code = 133
                     if is_match_pattern:
                         is_match_d_base_rule, fail_code = self.going_xd_down(format_dict_array,idx)
                         is_match_pattern = is_match_d_base_rule
 
                 # for RAINBOW
                 if self.config.PROCESS_MODE in ["RAINBOW","BOW"]:
-                    fail_code = 133
+                    fail_code = 134
                     #print("before is_match_pattern:", is_match_pattern)
                     if is_match_pattern:
                         is_match_d_base_rule, fail_code = self.going_rainbow_up(format_dict_array,idx)
