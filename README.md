@@ -54,7 +54,7 @@
 ```
 @font-face {
   font-family: SweiGothicCJKtc-Regular;
-  src: url(https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.141/WebFont/CJK%20TC/SweiGothicCJKtc-Regular.woff2) format("woff2");
+  src: url(https://cdn.jsdelivr.net/gh/max32002/swei-gothic@2.142/WebFont/CJK%20TC/SweiGothicCJKtc-Regular.woff2) format("woff2");
 }
 ```
 
